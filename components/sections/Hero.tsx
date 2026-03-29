@@ -34,7 +34,7 @@ export default function Hero() {
             <span className="inline-block ml-2 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
           <Link
-            href="#contact?intent=Free+Mockup+Request"
+            href="/?intent=Free+Mockup+Request#contact"
             className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-base px-8 py-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all font-inter shadow-sm"
           >
             Get a Free Mockup

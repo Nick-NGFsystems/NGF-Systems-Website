@@ -24,17 +24,53 @@ export default function CTA() {
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    function readIntent() {
+    const readIntent = () => {
+      const searchParams = new URLSearchParams(window.location.search)
+      const rawFromSearch = searchParams.get('intent')
+      if (rawFromSearch) {
+        setIntent(rawFromSearch)
+        return
+      }
+
+      // Backward compatibility with previous hash query format: #contact?intent=...
       const hash = window.location.hash
       const queryStart = hash.indexOf('?')
-      if (queryStart === -1) return
-      const params = new URLSearchParams(hash.slice(queryStart + 1))
-      const raw = params.get('intent')
-      if (raw) setIntent(decodeURIComponent(raw))
+      if (queryStart !== -1) {
+        const hashParams = new URLSearchParams(hash.slice(queryStart + 1))
+        const rawFromHash = hashParams.get('intent')
+        if (rawFromHash) {
+          setIntent(decodeURIComponent(rawFromHash))
+          return
+        }
+      }
+
+      setIntent('')
     }
+
+    const onLocationChange = () => readIntent()
+    const originalPushState = window.history.pushState
+    const originalReplaceState = window.history.replaceState
+
+    window.history.pushState = function (...args) {
+      originalPushState.apply(this, args)
+      onLocationChange()
+    }
+
+    window.history.replaceState = function (...args) {
+      originalReplaceState.apply(this, args)
+      onLocationChange()
+    }
+
     readIntent()
-    window.addEventListener('hashchange', readIntent)
-    return () => window.removeEventListener('hashchange', readIntent)
+    window.addEventListener('hashchange', onLocationChange)
+    window.addEventListener('popstate', onLocationChange)
+
+    return () => {
+      window.history.pushState = originalPushState
+      window.history.replaceState = originalReplaceState
+      window.removeEventListener('hashchange', onLocationChange)
+      window.removeEventListener('popstate', onLocationChange)
+    }
   }, [])
 
   async function handleSubmit() {

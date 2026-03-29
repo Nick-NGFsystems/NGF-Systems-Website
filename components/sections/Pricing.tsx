@@ -167,7 +167,7 @@ const onetimePlans: Plan[] = [
 
 function buildContactHref(planName: string, billingType: string): string {
   const intent = encodeURIComponent(`${planName} — ${billingType}`)
-  return `#contact?intent=${intent}`
+  return `/?intent=${intent}#contact`
 }
 
 export default function Pricing() {
@@ -188,7 +188,7 @@ export default function Pricing() {
           </p>
           <p className="text-sm text-blue-600 dark:text-blue-400 font-inter font-medium mb-8">
             Not sure what you need? We offer free mockups before you commit. →{' '}
-            <Link href="#contact?intent=Free+Mockup+Request" className="underline underline-offset-2">Get yours</Link>
+            <Link href="/?intent=Free+Mockup+Request#contact" className="underline underline-offset-2">Get yours</Link>
           </p>
 
           <div className="inline-flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
@@ -330,7 +330,7 @@ export default function Pricing() {
 
         <p className="text-center text-sm text-slate-400 dark:text-slate-500 font-inter mt-8">
           All prices are estimates. Final pricing may vary based on project scope.{' '}
-          <Link href="#contact?intent=Free+Quote+Request" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+          <Link href="/?intent=Free+Quote+Request#contact" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
             Get a free quote →
           </Link>
         </p>
