@@ -177,21 +177,22 @@ export default function Pricing() {
   const plans = tab === 'monthly' ? monthlyPlans : onetimePlans
 
   return (
-    <section id="pricing" className="py-28 bg-white dark:bg-slate-950 px-5">
+    <section id="pricing" className="py-20 sm:py-24 lg:py-28 bg-white dark:bg-slate-950 px-4 sm:px-5">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 sm:mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3 font-inter">Pricing</p>
-          <h2 className="font-sora font-bold text-4xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
+          <h2 className="font-sora font-bold text-3xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight mb-5 text-balance">
             Simple, transparent pricing
           </h2>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-inter max-w-xl mx-auto leading-relaxed mb-8">
+          <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 font-inter max-w-xl mx-auto leading-relaxed mb-8">
             Choose a fully managed monthly plan with hosting included, or a one-time build you own outright. No hidden fees.
           </p>
 
-          <div className="inline-flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
+          <div className="flex justify-center">
+            <div className="glass-panel inline-flex rounded-xl p-1 gap-1 overflow-x-auto max-w-full">
             <button
               onClick={() => setTab('monthly')}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold font-inter transition-all ${
+              className={`px-4 sm:px-6 py-2.5 rounded-lg text-sm font-semibold font-inter transition-all whitespace-nowrap min-h-[44px] ${
                 tab === 'monthly'
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -201,7 +202,7 @@ export default function Pricing() {
             </button>
             <button
               onClick={() => setTab('onetime')}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold font-inter transition-all ${
+              className={`px-4 sm:px-6 py-2.5 rounded-lg text-sm font-semibold font-inter transition-all whitespace-nowrap min-h-[44px] ${
                 tab === 'onetime'
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
@@ -209,24 +210,25 @@ export default function Pricing() {
             >
               One-Time Build
             </button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 items-start">
           {plans.map((plan) => (
             <div
               key={plan.name}
               className={`relative rounded-2xl flex flex-col transition-all duration-200 overflow-hidden ${
                 plan.highlighted
-                  ? 'bg-blue-600 text-white shadow-2xl shadow-blue-500/25 scale-[1.02]'
-                  : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50'
+                  ? 'bg-blue-600 text-white shadow-2xl shadow-blue-500/25 md:scale-[1.02]'
+                  : 'glass-panel hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-slate-900/50'
               }`}
             >
               {plan.badge && (
                 <div className={`absolute -top-px left-0 right-0 h-1 ${plan.highlighted ? 'bg-white/30' : 'bg-blue-600'}`} />
               )}
 
-              <div className="p-7">
+              <div className="p-6 sm:p-7">
                 {plan.badge && (
                   <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold font-inter mb-3 ${
                     plan.highlighted ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
@@ -316,7 +318,7 @@ export default function Pricing() {
 
                 <Link
                   href={plan.ctaHref}
-                  className={`w-full py-3.5 rounded-xl text-sm font-bold font-inter text-center block transition-all ${
+                  className={`w-full py-3.5 rounded-xl text-sm font-bold font-inter text-center block transition-all min-h-[44px] ${
                     plan.highlighted
                       ? 'bg-white text-blue-600 hover:bg-blue-50 shadow-lg shadow-blue-700/20'
                       : 'bg-blue-600 dark:bg-blue-600 text-white hover:bg-blue-700 dark:hover:bg-blue-500 shadow-md shadow-blue-500/20'

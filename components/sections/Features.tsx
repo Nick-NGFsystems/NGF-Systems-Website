@@ -53,23 +53,23 @@ const tagColors: Record<string, string> = {
 
 export default function Features() {
   return (
-    <section id="features" className="py-28 bg-slate-50/50 dark:bg-slate-900/50 px-5">
+    <section id="features" className="py-20 sm:py-24 lg:py-28 bg-slate-50/50 dark:bg-slate-900/50 px-4 sm:px-5">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3 font-inter">What we do</p>
-          <h2 className="font-sora font-bold text-4xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
+          <h2 className="font-sora font-bold text-3xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight mb-5 text-balance">
             Everything your website needs,<br className="hidden sm:block" /> handled for you
           </h2>
-          <p className="text-lg text-slate-500 dark:text-slate-400 font-inter max-w-xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 font-inter max-w-xl mx-auto leading-relaxed">
             Built for small businesses and realtors who want a professional online presence without dealing with the tech.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 hover:border-blue-100 dark:hover:border-blue-900 hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-200"
+              className="group glass-panel rounded-2xl p-5 sm:p-6 hover:border-blue-100 dark:hover:border-blue-900 hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-200"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 group-hover:border-blue-100 dark:group-hover:border-blue-900 transition-colors">
