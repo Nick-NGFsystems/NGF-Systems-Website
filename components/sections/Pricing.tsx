@@ -22,7 +22,6 @@ interface Plan {
   hostingCallout?: string
   features: PlanFeature[]
   cta: string
-  ctaHref: string
   highlighted: boolean
 }
 
@@ -47,7 +46,6 @@ const monthlyPlans: Plan[] = [
       { text: '$100 referral bonus', bold: true },
     ],
     cta: 'Get Started',
-    ctaHref: '#contact',
     highlighted: false,
   },
   {
@@ -72,7 +70,6 @@ const monthlyPlans: Plan[] = [
       { text: '$250 referral bonus', bold: true },
     ],
     cta: 'Get Started',
-    ctaHref: '#contact',
     highlighted: true,
   },
   {
@@ -97,7 +94,6 @@ const monthlyPlans: Plan[] = [
       { text: '$400 referral bonus', bold: true },
     ],
     cta: 'Get Started',
-    ctaHref: '#contact',
     highlighted: false,
   },
 ]
@@ -122,7 +118,6 @@ const onetimePlans: Plan[] = [
       { text: '$100 referral bonus', bold: true },
     ],
     cta: 'Get Started',
-    ctaHref: '#contact',
     highlighted: false,
   },
   {
@@ -145,7 +140,6 @@ const onetimePlans: Plan[] = [
       { text: '$250 referral bonus', bold: true },
     ],
     cta: 'Get Started',
-    ctaHref: '#contact',
     highlighted: true,
   },
   {
@@ -167,14 +161,19 @@ const onetimePlans: Plan[] = [
       { text: '$500 referral bonus', bold: true },
     ],
     cta: 'Contact Us',
-    ctaHref: '#contact',
     highlighted: false,
   },
 ]
 
+function buildContactHref(planName: string, billingType: string): string {
+  const intent = encodeURIComponent(`${planName} — ${billingType}`)
+  return `#contact?intent=${intent}`
+}
+
 export default function Pricing() {
   const [tab, setTab] = useState<BillingTab>('monthly')
   const plans = tab === 'monthly' ? monthlyPlans : onetimePlans
+  const billingLabel = tab === 'monthly' ? 'Monthly Managed' : 'One-Time Build'
 
   return (
     <section id="pricing" className="py-28 bg-white dark:bg-slate-950 px-5">
@@ -189,7 +188,7 @@ export default function Pricing() {
           </p>
           <p className="text-sm text-blue-600 dark:text-blue-400 font-inter font-medium mb-8">
             Not sure what you need? We offer free mockups before you commit. →{' '}
-            <Link href="#contact" className="underline underline-offset-2">Get yours</Link>
+            <Link href="#contact?intent=Free+Mockup+Request" className="underline underline-offset-2">Get yours</Link>
           </p>
 
           <div className="inline-flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
@@ -315,7 +314,7 @@ export default function Pricing() {
                 </ul>
 
                 <Link
-                  href={plan.ctaHref}
+                  href={buildContactHref(plan.name, billingLabel)}
                   className={`w-full py-3.5 rounded-xl text-sm font-bold font-inter text-center block transition-all ${
                     plan.highlighted
                       ? 'bg-white text-blue-600 hover:bg-blue-50 shadow-lg shadow-blue-700/20'
@@ -331,7 +330,7 @@ export default function Pricing() {
 
         <p className="text-center text-sm text-slate-400 dark:text-slate-500 font-inter mt-8">
           All prices are estimates. Final pricing may vary based on project scope.{' '}
-          <Link href="#contact" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+          <Link href="#contact?intent=Free+Quote+Request" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
             Get a free quote →
           </Link>
         </p>

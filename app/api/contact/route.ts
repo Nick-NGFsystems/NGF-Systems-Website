@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, business } = body
+    const { name, email, business, intent } = body
 
     if (!name || !email) {
       return NextResponse.json(
@@ -19,13 +19,22 @@ export async function POST(req: NextRequest) {
       from: 'NGFsystems <noreply@ngfsystems.com>',
       to: 'nick@ngfsystems.com',
       replyTo: email,
-      subject: `New inquiry from ${name}`,
+      subject: intent
+        ? `New inquiry — ${intent} — from ${name}`
+        : `New inquiry from ${name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; background: #f8fafc; border-radius: 12px;">
           <div style="background: #2563eb; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
             <h1 style="color: white; margin: 0; font-size: 20px;">New Website Inquiry</h1>
             <p style="color: #bfdbfe; margin: 4px 0 0; font-size: 14px;">via ngfsystems.com</p>
           </div>
+
+          ${intent ? `
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;">
+            <p style="margin: 0; font-size: 13px; color: #1d4ed8; font-weight: 600;">Interested in: ${intent}</p>
+          </div>
+          ` : ''}
+
           <div style="background: white; border-radius: 8px; padding: 24px; border: 1px solid #e2e8f0;">
             <table style="width: 100%; border-collapse: collapse;">
               <tr style="border-bottom: 1px solid #f1f5f9;">

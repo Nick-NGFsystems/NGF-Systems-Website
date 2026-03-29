@@ -1,15 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type FormState = 'idle' | 'loading' | 'success' | 'error'
+
+const intentLabels: Record<string, string> = {
+  'Free Mockup Request': '🎨 Free Mockup Request',
+  'Free Quote Request': '💬 Free Quote Request',
+  'Starter — Monthly Managed': '📦 Starter Plan — Monthly Managed',
+  'Professional — Monthly Managed': '⭐ Professional Plan — Monthly Managed',
+  'Premium — Monthly Managed': '🚀 Premium Plan — Monthly Managed',
+  'Essential — One-Time Build': '📦 Essential Build — One-Time',
+  'Business — One-Time Build': '⭐ Business Build — One-Time',
+  'Enterprise — One-Time Build': '🏢 Enterprise Build — One-Time',
+}
 
 export default function CTA() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [business, setBusiness] = useState('')
+  const [intent, setIntent] = useState('')
   const [state, setState] = useState<FormState>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+
+  useEffect(() => {
+    function readIntent() {
+      const hash = window.location.hash
+      const queryStart = hash.indexOf('?')
+      if (queryStart === -1) return
+      const params = new URLSearchParams(hash.slice(queryStart + 1))
+      const raw = params.get('intent')
+      if (raw) setIntent(decodeURIComponent(raw))
+    }
+    readIntent()
+    window.addEventListener('hashchange', readIntent)
+    return () => window.removeEventListener('hashchange', readIntent)
+  }, [])
 
   async function handleSubmit() {
     if (!name || !email) {
@@ -23,7 +49,7 @@ export default function CTA() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, business }),
+        body: JSON.stringify({ name, email, business, intent }),
       })
       const data = await res.json()
 
@@ -39,30 +65,47 @@ export default function CTA() {
     }
   }
 
+  const intentDisplay = intentLabels[intent] || (intent ? `📋 ${intent}` : '')
+
   return (
-    <section id="contact" className="relative py-20 sm:py-24 px-4 sm:px-5 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 dark:from-slate-950 dark:via-blue-950/50 dark:to-slate-950">
+    <section id="contact" className="relative py-24 px-5 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 dark:from-slate-950 dark:via-blue-950/50 dark:to-slate-950">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.03)_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
 
       <div className="relative z-10 max-w-2xl mx-auto">
-        <div className="text-center mb-8 sm:mb-10">
+        <div className="text-center mb-10">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-400 mb-3 font-inter">Get in touch</p>
-          <h2 className="font-sora font-bold text-3xl sm:text-5xl text-white tracking-tight leading-tight mb-4 text-balance">
+          <h2 className="font-sora font-bold text-4xl sm:text-5xl text-white tracking-tight leading-tight mb-4">
             Ready to get started?
           </h2>
-          <p className="text-base sm:text-lg text-slate-400 font-inter leading-relaxed">
+          <p className="text-lg text-slate-400 font-inter leading-relaxed">
             Tell us about your business and we will reach out with a free quote. No pressure, no commitment.
           </p>
         </div>
 
         {state === 'success' ? (
-          <div className="glass-panel rounded-2xl px-6 sm:px-8 py-10 sm:py-12 text-center">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-8 py-12 text-center">
             <div className="w-14 h-14 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">✅</div>
             <p className="font-sora font-bold text-white text-xl mb-2">We will be in touch soon!</p>
             <p className="text-slate-400 font-inter text-sm">We typically respond within 1 business day.</p>
           </div>
         ) : (
-          <div className="glass-panel rounded-2xl p-5 sm:p-8 flex flex-col gap-4">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-7 sm:p-8 flex flex-col gap-4">
+
+            {/* Intent tag */}
+            {intentDisplay && (
+              <div className="flex items-center gap-2 bg-blue-500/15 border border-blue-400/25 rounded-xl px-4 py-3">
+                <span className="text-sm font-semibold text-blue-300 font-inter">{intentDisplay}</span>
+                <button
+                  onClick={() => setIntent('')}
+                  className="ml-auto text-blue-400/60 hover:text-blue-300 text-xs font-inter transition-colors"
+                  aria-label="Clear selection"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-slate-400 font-inter">Your name</label>
@@ -87,6 +130,7 @@ export default function CTA() {
                 />
               </div>
             </div>
+
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-400 font-inter">Tell us about your business</label>
               <textarea
