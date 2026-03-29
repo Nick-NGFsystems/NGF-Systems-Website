@@ -3,6 +3,30 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+async function ingestLead(data: {
+  name: string
+  email: string
+  business?: string
+  intent?: string
+}) {
+  try {
+    const res = await fetch('https://app.ngfsystems.com/api/leads/ingest', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.LEADS_API_SECRET ?? '',
+      },
+      body: JSON.stringify(data),
+    })
+    const result = await res.json()
+    if (!result.success) {
+      console.error('Lead ingest returned failure:', result.error)
+    }
+  } catch (err) {
+    console.error('Lead ingest fetch failed:', err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -65,6 +89,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Non-blocking lead ingest — fires after email succeeds
+    // If this fails the user still gets a success response
+    ingestLead({ name, email, business, intent })
 
     return NextResponse.json({ success: true })
   } catch (err) {
