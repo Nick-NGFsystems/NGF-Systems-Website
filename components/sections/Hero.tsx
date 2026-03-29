@@ -41,19 +41,19 @@ export default function Hero() {
           </Link>
         </div>
 
-        <div className="inline-flex flex-wrap items-center justify-center gap-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 rounded-2xl px-8 py-5 shadow-sm">
+        <div className="inline-flex flex-wrap items-center justify-center gap-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200/80 dark:border-slate-700/80 rounded-2xl px-8 py-5 shadow-sm">
           {[
-            { num: '100%', label: 'Uptime SLA' },
-            { num: '48hr', label: 'Avg. turnaround' },
-            { num: '$100+', label: 'Referral bonus' },
-            { num: 'MI', label: 'Local team' },
-          ].map((stat, i, arr) => (
-            <div key={stat.label} className="flex items-center gap-8">
-              <div className="text-center">
-                <div className="font-sora font-bold text-xl text-slate-900 dark:text-white">{stat.num}</div>
-                <div className="text-xs text-slate-400 dark:text-slate-500 font-inter mt-0.5">{stat.label}</div>
+            { icon: '📍', label: 'Michigan-based' },
+            { icon: '📋', label: 'No contracts' },
+            { icon: '💬', label: 'Free quote' },
+            { icon: '🤝', label: 'Local support' },
+          ].map((item, i, arr) => (
+            <div key={item.label} className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{item.icon}</span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 font-inter">{item.label}</span>
               </div>
-              {i < arr.length - 1 && <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-slate-700" />}
+              {i < arr.length - 1 && <div className="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-700" />}
             </div>
           ))}
         </div>
