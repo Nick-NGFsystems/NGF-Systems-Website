@@ -14,7 +14,7 @@ export default function CTA() {
   }
 
   return (
-    <section id="contact" className="relative py-24 px-5 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+    <section id="contact" className="relative py-24 px-5 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 dark:from-slate-950 dark:via-blue-950/50 dark:to-slate-950">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.03)_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
 
@@ -45,7 +45,7 @@ export default function CTA() {
                   placeholder="Nick"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 focus:bg-white/12 transition-all min-h-[44px]"
+                  className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 transition-all min-h-[44px]"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -55,7 +55,7 @@ export default function CTA() {
                   placeholder="nick@yourbusiness.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 focus:bg-white/12 transition-all min-h-[44px]"
+                  className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 transition-all min-h-[44px]"
                 />
               </div>
             </div>
@@ -66,7 +66,7 @@ export default function CTA() {
                 value={business}
                 onChange={(e) => setBusiness(e.target.value)}
                 rows={3}
-                className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 focus:bg-white/12 transition-all resize-none"
+                className="bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm font-inter focus:outline-none focus:border-blue-500/50 transition-all resize-none"
               />
             </div>
             <button

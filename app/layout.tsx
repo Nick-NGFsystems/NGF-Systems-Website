@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Sora, Inter } from 'next/font/google'
+import { ThemeProvider } from 'next-themes'
 import './globals.css'
 
 const sora = Sora({
@@ -16,7 +17,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'NGFsystems — Web Management for Small Business',
-  description: 'NGFsystems gives small businesses and realtors a powerful platform to manage, update, and grow their web presence.',
+  description: 'NGFsystems builds and manages websites for small businesses and realtors across Michigan.',
 }
 
 export default function RootLayout({
@@ -25,9 +26,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${sora.variable} ${inter.variable} antialiased`}>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

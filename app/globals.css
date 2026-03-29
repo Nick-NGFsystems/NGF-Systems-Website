@@ -7,18 +7,12 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply antialiased;
+    @apply antialiased bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200;
   }
 }
 
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
-  }
-  .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/60;
-  }
-  .glass-dark {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20;
   }
 }
