@@ -2,66 +2,86 @@ interface Feature {
   icon: string
   title: string
   description: string
+  tag?: string
 }
 
 const features: Feature[] = [
   {
     icon: '🖥️',
     title: 'Custom Website Builds',
-    description: 'We design and develop fast, beautiful websites tailored to your business — mobile-first and built to convert visitors into customers.',
+    description: 'Beautiful, fast websites built specifically for your business — mobile-first, conversion-focused, and ready to impress.',
+    tag: 'Core',
   },
   {
     icon: '🔄',
     title: 'Ongoing Management',
-    description: 'Submit change requests anytime through your dashboard. We handle updates, content changes, and technical maintenance so you don\'t have to.',
+    description: 'Submit change requests any time through your client portal. We handle updates so you never have to touch the code.',
+    tag: 'Core',
   },
   {
     icon: '🏠',
     title: 'Realtor Integrations',
-    description: 'MLS and RealScout integration built-in. Showcase active listings, search, and lead capture — all synced automatically to your site.',
+    description: 'MLS and RealScout integration built-in. Active listings, search, and lead capture — synced automatically.',
+    tag: 'Realtor',
   },
   {
     icon: '📊',
     title: 'Client Dashboard',
-    description: 'A clean, intuitive portal to view your site status, submit requests, track progress, and communicate with our team in real time.',
+    description: 'A clean portal to view your site status, submit requests, track changes, and communicate with our team.',
+    tag: 'Included',
   },
   {
     icon: '🔒',
     title: 'Hosting & Security',
-    description: 'Enterprise-grade hosting on Vercel with SSL, backups, and 99.9% uptime. Your site is fast, secure, and always available.',
+    description: 'Enterprise-grade hosting with SSL, backups, and 99.9% uptime. Your site is fast, secure, and always on.',
+    tag: 'Included',
   },
   {
     icon: '📍',
     title: 'Local Michigan Team',
-    description: 'We\'re based in Michigan and work with local businesses directly. Real people, real support — no overseas outsourcing or chatbots.',
+    description: 'We work directly with Michigan businesses. Real people, real support — no outsourcing, no chatbots.',
+    tag: 'Local',
   },
 ]
 
+const tagColors: Record<string, string> = {
+  Core: 'bg-blue-50 text-blue-600 border-blue-100',
+  Realtor: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+  Included: 'bg-violet-50 text-violet-600 border-violet-100',
+  Local: 'bg-amber-50 text-amber-600 border-amber-100',
+}
+
 export default function Features() {
   return (
-    <section id="features" className="py-24 bg-white px-4">
+    <section id="features" className="py-28 bg-slate-50/50 px-5">
       <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-3 font-inter">What we do</p>
+          <h2 className="font-sora font-bold text-4xl sm:text-5xl text-slate-900 tracking-tight leading-tight mb-5">
+            Everything your website needs,<br className="hidden sm:block" /> handled for you
+          </h2>
+          <p className="text-lg text-slate-500 font-inter max-w-xl mx-auto leading-relaxed">
+            Built for small businesses and realtors who want a professional online presence without dealing with the tech.
+          </p>
+        </div>
 
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3 font-inter">
-          What we do
-        </p>
-        <h2 className="font-sora font-bold text-4xl sm:text-5xl text-slate-900 text-center tracking-tight leading-tight mb-4">
-          Everything your business<br className="hidden sm:block" /> website needs in one place
-        </h2>
-        <p className="text-center text-lg text-slate-500 font-inter max-w-xl mx-auto mb-14 leading-relaxed">
-          Built for small businesses, realtors, and local service companies who want a professional online presence without the tech headache.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="relative bg-gradient-to-br from-white to-slate-50/80 border border-slate-100 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8 transition-all duration-200 group"
+              className="group bg-white border border-slate-100 rounded-2xl p-6 hover:border-blue-100 hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-600/8 border border-blue-600/12 flex items-center justify-center text-2xl mb-4">
-                {feature.icon}
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
+                  {feature.icon}
+                </div>
+                {feature.tag && (
+                  <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border font-inter ${tagColors[feature.tag]}`}>
+                    {feature.tag}
+                  </span>
+                )}
               </div>
-              <h3 className="font-sora font-semibold text-lg text-slate-900 mb-2">
+              <h3 className="font-sora font-semibold text-base text-slate-900 mb-2">
                 {feature.title}
               </h3>
               <p className="text-sm text-slate-500 font-inter leading-relaxed">
@@ -70,7 +90,6 @@ export default function Features() {
             </div>
           ))}
         </div>
-
       </div>
     </section>
   )
