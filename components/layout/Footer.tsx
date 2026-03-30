@@ -19,7 +19,7 @@ export default function Footer() {
           ))}
         </div>
         <p className="text-xs text-slate-600 font-inter">
-          © {new Date().getFullYear()} NGFsystems
+          © {new Date().getFullYear()} NGF Systems
         </p>
       </div>
     </footer>

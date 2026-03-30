@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { error } = await resend.emails.send({
-      from: 'NGFsystems <noreply@ngfsystems.com>',
+      from: 'NGF Systems <noreply@ngfsystems.com>',
       to: 'nick@ngfsystems.com',
       replyTo: email,
       subject: intent

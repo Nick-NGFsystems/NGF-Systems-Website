@@ -22,7 +22,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
-          NGFsystems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.
+          NGF Systems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16">
