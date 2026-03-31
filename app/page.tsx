@@ -3,6 +3,7 @@ import Hero from '@/components/sections/Hero'
 import Features from '@/components/sections/Features'
 import Pricing from '@/components/sections/Pricing'
 import CTA from '@/components/sections/CTA'
+import ClientBanner from '@/components/sections/ClientBanner'
 import Footer from '@/components/layout/Footer'
 
 export default function HomePage() {
@@ -13,6 +14,7 @@ export default function HomePage() {
       <Features />
       <Pricing />
       <CTA />
+      <ClientBanner />
       <Footer />
     </main>
   )
