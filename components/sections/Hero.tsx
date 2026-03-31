@@ -17,7 +17,7 @@ export default function Hero() {
         <h1 className="font-sora font-bold text-5xl sm:text-6xl lg:text-[72px] tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-6">
           Your website,{' '}
           <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
-            finally handled.
+            made for you.
           </span>
         </h1>
 
