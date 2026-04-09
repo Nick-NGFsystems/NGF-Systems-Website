@@ -86,9 +86,10 @@ const jsonLd = {
   url: 'https://ngfsystems.com',
   logo: 'https://ngfsystems.com/api/og',
   image: 'https://ngfsystems.com/api/og',
-  telephone: '',
+  telephone: '+1-906-448-9989',
   address: {
     '@type': 'PostalAddress',
+    addressCity: 'Hudsonville',
     addressRegion: 'MI',
     addressCountry: 'US',
   },
