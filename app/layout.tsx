@@ -16,9 +16,24 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'NGF Systems — Web Design & Management',
-  description: 'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
-  keywords: ['web design', 'web development', 'Michigan', 'website management', 'small business websites', 'realtor websites', 'NGF Systems'],
+  title: {
+    default: 'NGF Systems — Web Design & Management',
+    template: '%s | NGF Systems',
+  },
+  description:
+    'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
+  keywords: [
+    'web design',
+    'web development',
+    'Michigan',
+    'website management',
+    'small business websites',
+    'realtor websites',
+    'NGF Systems',
+    'web design Michigan',
+    'website builder Michigan',
+    'affordable web design',
+  ],
   authors: [{ name: 'NGF Systems', url: 'https://ngfsystems.com' }],
   creator: 'NGF Systems',
   metadataBase: new URL('https://ngfsystems.com'),
@@ -31,7 +46,8 @@ export const metadata: Metadata = {
     url: 'https://ngfsystems.com',
     siteName: 'NGF Systems',
     title: 'NGF Systems — Web Design & Management',
-    description: 'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
+    description:
+      'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
     images: [
       {
         url: '/api/og',
@@ -44,7 +60,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'NGF Systems — Web Design & Management',
-    description: 'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes.',
+    description:
+      'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes.',
     images: ['/api/og'],
   },
   robots: {
@@ -60,6 +77,30 @@ export const metadata: Metadata = {
   },
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'NGF Systems',
+  description:
+    'Michigan-based web development company building and managing professional websites for small businesses and realtors.',
+  url: 'https://ngfsystems.com',
+  logo: 'https://ngfsystems.com/api/og',
+  image: 'https://ngfsystems.com/api/og',
+  telephone: '',
+  address: {
+    '@type': 'PostalAddress',
+    addressRegion: 'MI',
+    addressCountry: 'US',
+  },
+  areaServed: {
+    '@type': 'State',
+    name: 'Michigan',
+  },
+  priceRange: '$$',
+  sameAs: [],
+  serviceType: ['Web Design', 'Web Development', 'Website Management'],
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -67,6 +108,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${sora.variable} ${inter.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
