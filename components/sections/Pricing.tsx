@@ -170,7 +170,9 @@ function buildContactHref(planName: string, billingType: string): string {
   return `/?intent=${intent}#contact`
 }
 
-export default function Pricing() {
+export default function Pricing({ ngf }: { ngf?: NgfSiteContent }) {
+  const pricingTitle = ngf?.pricing?.title || '{pricingTitle}'
+  const pricingSubtitle = ngf?.pricing?.subtitle || '{pricingSubtitle}'
   const [tab, setTab] = useState<BillingTab>('monthly')
   const plans = tab === 'monthly' ? monthlyPlans : onetimePlans
   const billingLabel = tab === 'monthly' ? 'Monthly Managed' : 'One-Time Build'
@@ -181,10 +183,10 @@ export default function Pricing() {
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3 font-inter">Pricing</p>
           <h2 data-ngf-field="pricing.title" className="font-sora font-bold text-4xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
-            Simple, transparent pricing
+            {pricingTitle}
           </h2>
           <p data-ngf-field="pricing.subtitle" className="text-lg text-slate-500 dark:text-slate-400 font-inter max-w-xl mx-auto leading-relaxed mb-3">
-            Choose a fully managed monthly plan with hosting included, or a one-time build you own outright. No hidden fees, no surprises.
+            {pricingSubtitle}
           </p>
           <p className="text-sm text-blue-600 dark:text-blue-400 font-inter font-medium mb-8">
             Not sure what you need? We offer free mockups before you commit. →{' '}

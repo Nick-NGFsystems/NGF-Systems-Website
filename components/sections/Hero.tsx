@@ -1,6 +1,11 @@
 import Link from 'next/link'
+import type { NgfSiteContent } from '@/lib/ngf'
 
-export default function Hero() {
+export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
+  const subheadline = ngf?.hero?.subheadline || 'NGF Systems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.'
+  const ctaText = ngf?.hero?.ctaText || 'Get a Free Mockup'
+  const ctaLink = ngf?.hero?.ctaLink || '/?intent=Free+Mockup+Request#contact'
+ {
   return (
     <section className="relative min-h-screen flex items-center justify-center text-center px-5 pt-24 pb-20 overflow-hidden bg-white dark:bg-slate-950">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-slate-950 dark:to-slate-950"/>
@@ -22,7 +27,7 @@ export default function Hero() {
         </h1>
 
         <p data-ngf-field="hero.subheadline" className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
-          NGF Systems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.
+          {subheadline}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16">
@@ -33,10 +38,10 @@ export default function Hero() {
             See Pricing
           </Link>
           <Link
-            href="/?intent=Free+Mockup+Request#contact"
+            href={ctaLink}
             className="group bg-white dark:bg-slate-900 border border-slate-900/10 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-sm dark:shadow-none dark:hover:border-slate-600 font-inter"
           >
-            <span data-ngf-field="hero.ctaText">Get a Free Mockup</span>
+            <span data-ngf-field="hero.ctaText">{ctaText}</span>
             <span className="inline-block ml-2 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>

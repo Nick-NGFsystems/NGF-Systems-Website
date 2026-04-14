@@ -1,5 +1,7 @@
 import type { NgfService } from '@/lib/ngf'
 
+import type { NgfSiteContent } from '@/lib/ngf'
+
 interface Feature {
   icon: string
   title: string
@@ -19,9 +21,7 @@ const defaultFeatures: Feature[] = [
   { icon: '🎬', title: 'Video Hosting', description: 'Host your videos directly on your website. No buffering, no ads, no sending people to YouTube.', tag: 'Premium' },
 ]
 
-interface FeaturesProps {
-  services?: NgfService[]
-}
+interface FeaturesProps { ngf?: NgfSiteContent }
 
 export default function Features({ services }: FeaturesProps) {
   const features: Feature[] = services && services.length > 0
@@ -33,10 +33,10 @@ export default function Features({ services }: FeaturesProps) {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center mb-16">
           <h2 data-ngf-field="features.title" className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl mb-4">
-            Everything You Need
+            {featuresTitle}
           </h2>
           <p data-ngf-field="features.subtitle" className="text-lg text-slate-600 dark:text-slate-400">
-            Built-in features that would cost thousands in separate tools.
+            {featuresSubtitle}
           </p>
         </div>
 
