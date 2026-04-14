@@ -111,10 +111,10 @@ export default function CTA() {
       <div className="relative z-10 max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-400 mb-3 font-inter">Get in touch</p>
-          <h2 className="font-sora font-bold text-4xl sm:text-5xl text-white tracking-tight leading-tight mb-4">
+          <h2 data-ngf-field="cta.headline" className="font-sora font-bold text-4xl sm:text-5xl text-white tracking-tight leading-tight mb-4">
             Ready to get started?
           </h2>
-          <p className="text-lg text-slate-400 font-inter leading-relaxed">
+          <p data-ngf-field="cta.subheadline" className="text-lg text-slate-400 font-inter leading-relaxed">
             Tell us about your business and we will reach out with a free quote. No pressure, no commitment.
           </p>
         </div>

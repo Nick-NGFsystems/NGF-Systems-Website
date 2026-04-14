@@ -5,10 +5,10 @@ export default function ClientBanner() {
     <section className="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 py-12 px-5">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         <div>
-          <p className="font-sora font-semibold text-lg text-slate-900 dark:text-white mb-1">
+          <p data-ngf-field="clientbanner.headline" className="font-sora font-semibold text-lg text-slate-900 dark:text-white mb-1">
             Already an NGF Systems client?
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-inter">
+          <p data-ngf-field="clientbanner.subheadline" className="text-sm text-slate-500 dark:text-slate-400 font-inter">
             Access your client portal to manage your website, submit requests, and view invoices.
           </p>
         </div>

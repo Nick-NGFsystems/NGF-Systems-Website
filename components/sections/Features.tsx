@@ -32,10 +32,10 @@ export default function Features({ services }: FeaturesProps) {
     <section id="features" className="py-24 bg-white dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center mb-16">
-          <h2 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl mb-4">
+          <h2 data-ngf-field="features.title" className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl mb-4">
             Everything You Need
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400">
+          <p data-ngf-field="features.subtitle" className="text-lg text-slate-600 dark:text-slate-400">
             Built-in features that would cost thousands in separate tools.
           </p>
         </div>
@@ -49,10 +49,10 @@ export default function Features({ services }: FeaturesProps) {
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="font-sora font-semibold text-base text-slate-900 dark:text-white mb-2">
+                <h3 data-ngf-field={`feature${features.indexOf(feature)}.title`} className="font-sora font-semibold text-base text-slate-900 dark:text-white mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-inter leading-relaxed">
+                <p data-ngf-field={`feature${features.indexOf(feature)}.description`} className="text-sm text-slate-500 dark:text-slate-400 font-inter leading-relaxed">
                   {feature.description}
                 </p>
               </div>

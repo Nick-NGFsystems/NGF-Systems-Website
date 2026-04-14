@@ -9,7 +9,7 @@ export default function Footer() {
             <span className="text-blue-400">NGF</span>
             <span className="text-white/90">systems</span>
           </div>
-          <p className="text-xs text-slate-500 font-inter">Hudsonville, Michigan</p>
+          <p data-ngf-field="footer.location" className="text-xs text-slate-500 font-inter">Hudsonville, Michigan</p>
         </div>
         <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-3">
           {[['#features', 'Features'], ['#pricing', 'Pricing'], ['#contact', 'Contact']].map(([href, label]) => (
