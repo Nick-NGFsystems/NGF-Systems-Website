@@ -19,11 +19,7 @@ export async function getNgfContent(): Promise<NgfSiteContent> {
     )
     if (!res.ok) return {}
     const data = await res.json() as { content?: NgfSiteContent }
-    const c = data.content ?? {}
-    // Skip if still the auto-seeded placeholder defaults
-    const heroSub = (c as { hero?: { subheadline?: string } }).hero?.subheadline
-    if (heroSub === 'We provide excellent services' || heroSub === 'We provide quality services') return {}
-    return c
+    return data.content ?? {}
   } catch {
     return {}
   }
