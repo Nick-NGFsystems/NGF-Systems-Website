@@ -5,13 +5,15 @@ import Pricing from '@/components/sections/Pricing'
 import CTA from '@/components/sections/CTA'
 import ClientBanner from '@/components/sections/ClientBanner'
 import Footer from '@/components/layout/Footer'
+import { getNgfContent } from '@/lib/ngf'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await getNgfContent()
   return (
     <main>
       <Navbar />
-      <Hero />
-      <Features />
+      <Hero content={content.hero} />
+      <Features services={content.services} />
       <Pricing />
       <CTA />
       <ClientBanner />

@@ -37,6 +37,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'NGF Systems', url: 'https://ngfsystems.com' }],
   creator: 'NGF Systems',
   metadataBase: new URL('https://ngfsystems.com'),
+  other: { 'ngf-public-api': 'https://app.ngfsystems.com/api/public/website/cmnxxexlo00018q1up7l3jf3m' },
   alternates: {
     canonical: '/',
   },
