@@ -1,4 +1,5 @@
 'use client'
+import type { NgfSiteContent } from '@/lib/ngf'
 
 import { useState, useEffect } from 'react'
 
@@ -16,8 +17,8 @@ const intentLabels: Record<string, string> = {
 }
 
 export default function CTA({ ngf }: { ngf?: NgfSiteContent }) {
-  const ctaHeadline = ngf?.cta?.headline || '{ctaHeadline}'
-  const ctaSubheadline = ngf?.cta?.subheadline || '{ctaSubheadline}'
+  const ctaHeadline = ngf?.cta?.headline || 'Ready to get started?'
+  const ctaSubheadline = ngf?.cta?.subheadline || 'Tell us about your business and we will reach out with a free quote. No pressure, no commitment.'
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [business, setBusiness] = useState('')

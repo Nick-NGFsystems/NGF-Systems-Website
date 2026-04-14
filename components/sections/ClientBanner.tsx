@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { NgfSiteContent } from '@/lib/ngf'
 
 export default function ClientBanner({ ngf }: { ngf?: NgfSiteContent }) {
-  const bannerHeadline = ngf?.clientbanner?.headline || '{bannerHeadline}'
-  const bannerSubheadline = ngf?.clientbanner?.subheadline || '{bannerSubheadline}'
+  const bannerHeadline = ngf?.clientbanner?.headline || 'Already an NGF Systems client?'
+  const bannerSubheadline = ngf?.clientbanner?.subheadline || 'Access your client portal to manage your website, submit requests, and view invoices.'
   return (
     <section className="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 py-12 px-5">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">

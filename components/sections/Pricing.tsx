@@ -1,4 +1,5 @@
 'use client'
+import type { NgfSiteContent } from '@/lib/ngf'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -171,8 +172,8 @@ function buildContactHref(planName: string, billingType: string): string {
 }
 
 export default function Pricing({ ngf }: { ngf?: NgfSiteContent }) {
-  const pricingTitle = ngf?.pricing?.title || '{pricingTitle}'
-  const pricingSubtitle = ngf?.pricing?.subtitle || '{pricingSubtitle}'
+  const pricingTitle = ngf?.pricing?.title || 'Simple, transparent pricing'
+  const pricingSubtitle = ngf?.pricing?.subtitle || 'Choose a fully managed monthly plan with hosting included, or a one-time build you own outright. No hidden fees, no surprises.'
   const [tab, setTab] = useState<BillingTab>('monthly')
   const plans = tab === 'monthly' ? monthlyPlans : onetimePlans
   const billingLabel = tab === 'monthly' ? 'Monthly Managed' : 'One-Time Build'
