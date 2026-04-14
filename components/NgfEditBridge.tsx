@@ -26,6 +26,9 @@ export default function NgfEditBridge() {
     `
     document.head.appendChild(style)
 
+    // Signal parent that bridge is ready — parent will respond with setEditMode
+    window.parent.postMessage({ type: 'ngfReady' }, '*')
+
     const messageHandler = (e: MessageEvent) => {
       if (e.data?.type === 'setEditMode') {
         editMode = !!e.data.enabled
@@ -47,15 +50,12 @@ export default function NgfEditBridge() {
       }
     }
 
-    // Capture phase so we intercept before any link/button default handlers
+    // Capture phase — intercepts before any link/button default handlers
     const clickHandler = (e: MouseEvent) => {
       if (!editMode) return
-
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
-
-      // Walk up the DOM to find the nearest element tagged as a field
       let target = e.target as HTMLElement | null
       while (target && target !== document.documentElement) {
         const attr = target.getAttribute('data-ngf-field')
@@ -76,11 +76,10 @@ export default function NgfEditBridge() {
         }
         target = target.parentElement
       }
-      // Non-editable area — click is swallowed, no navigation
     }
 
     window.addEventListener('message', messageHandler)
-    document.addEventListener('click', clickHandler, true) // true = capture phase
+    document.addEventListener('click', clickHandler, true)
 
     return () => {
       window.removeEventListener('message', messageHandler)
