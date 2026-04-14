@@ -1,4 +1,3 @@
-import type { NgfService } from '@/lib/ngf'
 
 import type { NgfSiteContent } from '@/lib/ngf'
 
@@ -23,10 +22,14 @@ const defaultFeatures: Feature[] = [
 
 interface FeaturesProps { ngf?: NgfSiteContent }
 
-export default function Features({ services }: FeaturesProps) {
-  const features: Feature[] = services && services.length > 0
-    ? services.map((s) => ({ icon: '✦', title: s.title, description: s.description }))
-    : defaultFeatures
+export default function Features({ ngf }: FeaturesProps) {
+  const featuresTitle = ngf?.features?.title || 'Everything You Need'
+  const featuresSubtitle = ngf?.features?.subtitle || 'Built-in features that would cost thousands in separate tools.'
+  const features: Feature[] = defaultFeatures.map((f, i) => ({
+    ...f,
+    title: (ngf as Record<string, Record<string, string>>)?.[`feature${i}`]?.title || f.title,
+    description: (ngf as Record<string, Record<string, string>>)?.[`feature${i}`]?.description || f.description,
+  }))
 
   return (
     <section id="features" className="py-24 bg-white dark:bg-slate-950">
