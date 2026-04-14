@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import NgfEditBridge from '@/components/NgfEditBridge'
 import { Sora, Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import './globals.css'
@@ -117,6 +118,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${sora.variable} ${inter.variable} antialiased`}>
+        <NgfEditBridge />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
