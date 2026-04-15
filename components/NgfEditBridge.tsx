@@ -5,16 +5,19 @@ export default function NgfEditBridge() {
   useEffect(() => {
     let editMode = false
 
-    // Inject styles - always-visible edit indicators + active edit mode styles
+    // Inject styles - only visible when edit mode is active (data-ngf-edit="true" on <html>)
     const style = document.createElement('style')
     style.id = 'ngf-edit-styles'
     style.textContent = `
-      [data-ngf-field] {
-        outline: 1.5px dashed rgba(59,130,246,0.3) !important;
+      /* Edit indicators - only shown while in portal editor */
+      [data-ngf-edit="true"] [data-ngf-field] {
+        outline: 1.5px dashed rgba(59,130,246,0.45) !important;
         border-radius: 3px;
         position: relative;
+        cursor: pointer !important;
       }
-      [data-ngf-field]::after {
+
+      [data-ngf-edit="true"] [data-ngf-field]::after {
         content: '\\2702';
         position: absolute;
         top: -8px;
@@ -30,19 +33,22 @@ export default function NgfEditBridge() {
         justify-content: center;
         line-height: 18px;
         text-align: center;
-        opacity: 0.45;
+        opacity: 0.5;
         pointer-events: none;
         z-index: 9999;
         transition: opacity 0.15s;
       }
+
       [data-ngf-edit="true"] [data-ngf-field]:hover {
         outline-color: #3b82f6 !important;
         background-color: rgba(59,130,246,0.06) !important;
-        cursor: pointer !important;
       }
+
       [data-ngf-edit="true"] [data-ngf-field]:hover::after {
         opacity: 1;
       }
+
+      /* Block link/button navigation while editing */
       [data-ngf-edit="true"] a,
       [data-ngf-edit="true"] button {
         pointer-events: none;
@@ -50,6 +56,7 @@ export default function NgfEditBridge() {
     `
     document.head.appendChild(style)
 
+    // Signal parent that bridge is ready - parent will respond with setEditMode
     window.parent.postMessage({ type: 'ngfReady' }, '*')
 
     const messageHandler = (e: MessageEvent) => {
@@ -57,6 +64,7 @@ export default function NgfEditBridge() {
         editMode = !!e.data.enabled
         document.documentElement.setAttribute('data-ngf-edit', editMode ? 'true' : 'false')
       }
+
       if (e.data?.type === 'contentUpdate' && e.data.content) {
         const content = e.data.content as Record<string, Record<string, string>>
         Object.entries(content).forEach(([section, fields]) => {
@@ -72,11 +80,13 @@ export default function NgfEditBridge() {
       }
     }
 
+    // Capture phase - intercepts before any link/button default handlers
     const clickHandler = (e: MouseEvent) => {
       if (!editMode) return
       e.preventDefault()
       e.stopPropagation()
       e.stopImmediatePropagation()
+
       let target = e.target as HTMLElement | null
       while (target && target !== document.documentElement) {
         const attr = target.getAttribute('data-ngf-field')
