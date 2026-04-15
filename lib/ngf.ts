@@ -15,7 +15,7 @@ export async function getNgfContent(): Promise<NgfSiteContent> {
   try {
     const res = await fetch(
       `${NGF_API}/api/public/website/${NGF_CLIENT_ID}`,
-      { next: { tags: ['ngf-content'], revalidate: false } }
+      { cache: 'no-store' }
     )
     if (!res.ok) return {}
     const data = await res.json() as { content?: NgfSiteContent }
