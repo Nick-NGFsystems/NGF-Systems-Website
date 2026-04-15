@@ -13,39 +13,12 @@ export default function NgfEditBridge() {
       [data-ngf-edit="true"] [data-ngf-field] {
         outline: 1.5px dashed rgba(59,130,246,0.45) !important;
         border-radius: 3px;
-        position: relative;
         cursor: pointer !important;
-      }
-
-      [data-ngf-edit="true"] [data-ngf-field]::after {
-        content: '\\2702';
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        width: 18px;
-        height: 18px;
-        background: #3b82f6;
-        color: white;
-        font-size: 9px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 18px;
-        text-align: center;
-        opacity: 0.5;
-        pointer-events: none;
-        z-index: 9999;
-        transition: opacity 0.15s;
       }
 
       [data-ngf-edit="true"] [data-ngf-field]:hover {
         outline-color: #3b82f6 !important;
         background-color: rgba(59,130,246,0.06) !important;
-      }
-
-      [data-ngf-edit="true"] [data-ngf-field]:hover::after {
-        opacity: 1;
       }
 
       /* Block link/button navigation while editing */
