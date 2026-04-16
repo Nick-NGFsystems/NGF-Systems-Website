@@ -27,24 +27,55 @@ Central SaaS platform with two sides:
 - **Client Portal** (`/portal`) — each client manages their website, views invoices, submits requests
 
 ### Client Websites
-Each client has their own separate Next.js website in its own GitHub repo, deployed to Vercel, on its own custom domain, with its own dedicated Neon database.
+Each client has their own Next.js website deployed to Vercel on a custom domain. Client websites do **NOT** have their own Neon database — they fetch content from the central NGF app API.
 
 ### How They Connect
 ```
-NGFsystems App (app.ngfsystems.com)
-        ↕ reads/writes via Prisma using client's database_url
-Client's Own Neon Database
-        ↕ reads via Prisma
-Client's Website (client-domain.com)
+Client edits in portal → "Save Draft" → saves to draft_content (NOT live)
+Client clicks "Publish" → draft_content promoted to content → website updates
+Client website → fetches published content via NGF public API on every page load
 ```
 
-- Every client has their **own dedicated Neon database** — completely separate from the NGFsystems app database and from every other client
-- The NGFsystems app connects to a client's database using that client's `database_url` stored in `client_configs`
-- The client's website connects to that same database to display content
-- The portal writes content → the website reads it → visitors see it live
-- **Never share databases between clients**
-- **The app database and client databases are always separate**
+- **No separate database per client** — all content lives in the NGF app's central database
+- **Auto-detection by domain** — no NGF_CLIENT_ID env var needed. Uses VERCEL_PROJECT_PRODUCTION_URL to auto-detect, matched against site_url in client_configs
+- Client edits saved as drafts only go live when they click Publish
+- The public API always returns `content` (published) — never `draft_content`
 
+---
+
+## NGF CONTENT EDITOR — REQUIRED IN EVERY CLIENT WEBSITE
+
+Every client website needs these 4 things for the portal editor to work:
+
+**1. `lib/ngf.ts`** — Fetches content from NGF app API. Uses VERCEL_PROJECT_PRODUCTION_URL to auto-detect domain. Copy from NGF-Systems-Website.
+
+**2. `components/NgfEditBridge.tsx`** — postMessage bridge for the portal iframe editor. Copy from NGF-Systems-Website. Add `<NgfEditBridge />` to root layout.
+
+**3. `data-ngf-field` attributes** on editable elements:
+```tsx
+<p data-ngf-field="hero.subheadline">{subheadline}</p>
+<h2 data-ngf-field="features.title">{featuresTitle}</h2>
+<span data-ngf-field="hero.ctaText">{ctaText}</span>
+```
+Format: `"section.fieldName"` matching the keys in NgfSiteContent. Always include a `|| 'default'` fallback.
+
+**4. CSP in `next.config.js`** to allow portal iframing:
+```javascript
+async headers() {
+  return [{ source: '/(.*)', headers: [{ key: 'Content-Security-Policy',
+      value: "frame-ancestors 'self' https://app.ngfsystems.com https://*.vercel.app" }] }]
+      }
+      ```
+
+      **Setup checklist for new client website:**
+      1. Copy `lib/ngf.ts` from NGF-Systems-Website
+      2. Copy `components/NgfEditBridge.tsx` from NGF-Systems-Website
+      3. Add `<NgfEditBridge />` to root layout (client component)
+      4. Add `data-ngf-field="section.field"` to every editable element
+      5. Add CSP headers in `next.config.js`
+      6. Add `REVALIDATION_SECRET` env var in Vercel
+      7. DO NOT set NGF_CLIENT_ID — auto-detects by domain
+      8. In NGF admin portal: set `site_url` to the production domain, toggle on Website Page
 ---
 
 ## STACK — ALWAYS USE THESE EXACT VERSIONS
