@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import NgfEditBridge from '@/components/NgfEditBridge'
 import { Sora, Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import Script from 'next/script'
+import { GA_MEASUREMENT_ID } from '@/lib/analytics'
 import './globals.css'
 
 const sora = Sora({
@@ -118,6 +120,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${sora.variable} ${inter.variable} antialiased`}>
+        <Script
+          src={\}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {\}
+        </Script>
         <NgfEditBridge />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
