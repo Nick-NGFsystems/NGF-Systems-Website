@@ -40,7 +40,9 @@ function getSiteDomain(): string {
                                                                                                         url = `${NGF_API}/api/public/website/by-domain/${encodeURIComponent(domain)}`
                                                                                                             }
 
-                                                                                                                const res = await fetch(url, { cache: 'no-store' })
+                                                                                                                // Time-based ISR + instant cache-bust on publish via /api/revalidate.
+    // NEVER cache:'no-store' - that hits the database on every pageview.
+    const res = await fetch(url, { next: { revalidate: 60, tags: ['ngf-content'] } })
                                                                                                                     if (!res.ok) return {}
                                                                                                                         const data = await res.json() as { content?: NgfSiteContent }
                                                                                                                             return data.content ?? {}
