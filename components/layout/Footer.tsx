@@ -11,7 +11,7 @@ export default function Footer({ ngf }: { ngf?: NgfSiteContent }) {
             <span className="text-blue-400">NGF</span>
             <span className="text-white/90">systems</span>
           </div>
-          <p data-ngf-field="footer.location" className="text-xs text-slate-500 font-inter">{location}</p>
+          <p data-ngf-field="footer.location" data-ngf-label="Location" data-ngf-type="text" data-ngf-section="Footer" className="text-xs text-slate-500 font-inter">{location}</p>
         </div>
         <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-3">
           {[['#features', 'Features'], ['#pricing', 'Pricing'], ['#contact', 'Contact']].map(([href, label]) => (

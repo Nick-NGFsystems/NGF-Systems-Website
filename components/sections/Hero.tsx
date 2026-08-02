@@ -26,7 +26,7 @@ export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
           </span>
         </h1>
 
-        <p data-ngf-field="hero.subheadline" className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
+        <p data-ngf-field="hero.subheadline" data-ngf-label="Subheadline" data-ngf-type="textarea" data-ngf-section="Hero" className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
           {subheadline}
         </p>
 
@@ -41,7 +41,7 @@ export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
             href={ctaLink}
             className="group bg-white dark:bg-slate-900 border border-slate-900/10 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-sm dark:shadow-none dark:hover:border-slate-600 font-inter"
           >
-            <span data-ngf-field="hero.ctaText">{ctaText}</span>
+            <span data-ngf-field="hero.ctaText" data-ngf-label="Cta Text" data-ngf-type="text" data-ngf-section="Hero">{ctaText}</span>
             <span className="inline-block ml-2 group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>
