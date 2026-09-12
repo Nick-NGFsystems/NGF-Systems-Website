@@ -73,7 +73,8 @@ async headers() {
       3. Add `<NgfEditBridge />` to root layout (client component)
       4. Add `data-ngf-field="section.field"` to every editable element
       5. Add CSP headers in `next.config.js`
-      6. Add `REVALIDATION_SECRET` env var in Vercel
+      6. Add `WEBSITE_REVALIDATION_SECRET` env var in Vercel, on production AND
+         preview. That exact name — the portal cannot satisfy any other.
       7. DO NOT set NGF_CLIENT_ID — auto-detects by domain
       8. In NGF admin portal: set `site_url` to the production domain, toggle on Website Page
 ---

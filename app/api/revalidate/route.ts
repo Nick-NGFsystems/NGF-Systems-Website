@@ -14,13 +14,23 @@ import { revalidateTag } from 'next/cache'
  * being set on the Vercel project. Drop the REVALIDATION_SECRET fallback once
  * the canonical var is set on production AND preview.
  *
- * Fail-closed behaviour is deliberately unchanged: with neither var set every
- * request is still rejected 401, exactly as before.
+ * Still fail-closed, but it now distinguishes the two ways of failing, matching
+ * ngf-client-starter and the other ten site repos: 503 when NO secret is
+ * configured here at all, 401 when one is and the caller got it wrong. The
+ * portal treats both as a failed publish (`revalidated = res.ok`), but the
+ * health check reads them very differently — 503 is proof instant publish is
+ * broken for this site, whereas 401 only proves some secret exists.
  */
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get('secret')
   const expected = process.env.WEBSITE_REVALIDATION_SECRET || process.env.REVALIDATION_SECRET
-  if (!expected || secret !== expected) {
+  if (!expected) {
+    return NextResponse.json(
+      { ok: false, error: 'WEBSITE_REVALIDATION_SECRET is not set on this site' },
+      { status: 503 },
+    )
+  }
+  if (secret !== expected) {
     return NextResponse.json({ ok: false, error: 'Invalid secret' }, { status: 401 })
   }
   revalidateTag('ngf-content')
