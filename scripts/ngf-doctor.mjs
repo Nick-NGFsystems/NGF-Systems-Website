@@ -16,7 +16,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
-import { join, relative, extname } from 'node:path'
+import { join, relative, extname, dirname } from 'node:path'
 
 const ROOT = process.cwd()
 const STRICT = process.argv.includes('--strict')
@@ -90,6 +90,46 @@ for (const f of FILES) {
   }
 }
 
+// ── 1b. Next.js is a patched release ───────────────────────────────────────
+// CVE-2026-44575 (GHSA-267c-6grr-h53f) is a middleware/proxy bypass in every
+// App Router release before 15.5.16 and 16.2.5. A site pinned to an older
+// minor is not "stable", it is unpatched: upstream fixes only the newest minor
+// of each supported major, so 15.3.x and 16.1.x never received it. On
+// 2026-09-13 ten of eleven NGF sites were on one of those. The floors below are
+// the first patched release of each line — raise them when the next advisory
+// lands, never lower them.
+{
+  const NEXT_PATCHED_FLOOR = { 15: [15, 5, 16], 16: [16, 2, 5] }
+  const parse = (raw) => {
+    try { return JSON.parse(raw ?? '{}') } catch { return {} }
+  }
+  const declared = (parse(read('package.json')).dependencies ?? {}).next ?? ''
+  // Prefer what is actually locked: a caret range in package.json says
+  // nothing about what npm ci installs.
+  const locked = ((parse(read('package-lock.json')).packages ?? {})['node_modules/next'] ?? {}).version ?? ''
+  const raw = locked || declared
+  const m = /(\d+)\.(\d+)\.(\d+)/.exec(raw)
+  if (!m) {
+    warn('Next.js is a patched release', 'Could not read a Next.js version from package.json or package-lock.json.')
+  } else {
+    const v = [Number(m[1]), Number(m[2]), Number(m[3])]
+    const shown = `next ${v.join('.')} (${locked ? 'locked' : 'declared'})`
+    const floor = NEXT_PATCHED_FLOOR[v[0]]
+    const below = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]
+    if (!floor) {
+      fail('Next.js is a patched release', `${shown} — only Next 15 and 16 are on the standards list; ${v[0] < 15 ? 'this major no longer receives security fixes.' : 'add this major to the doctor before adopting it.'}`)
+    } else if (below(v, floor) < 0) {
+      fail(
+        'Next.js is a patched release',
+        `${shown} is below ${floor.join('.')}, the first release of the ${v[0]}.x line with the fix for CVE-2026-44575 ` +
+          `(middleware bypass). Bump to the latest patch of ${floor[0]}.${floor[1]}.x or newer, regenerate the lockfile, redeploy.`,
+      )
+    } else {
+      ok('Next.js is a patched release', shown)
+    }
+  }
+}
+
 // ── 2. Instant publish (/api/revalidate) ─────────────────────────────────────
 const revPath = ['app/api/revalidate/route.ts', 'app/api/revalidate/route.js'].find(has)
 if (!revPath) {
@@ -108,6 +148,73 @@ if (!revPath) {
   } else {
     ok('/api/revalidate fails closed')
   }
+  // The portal sends the secret it minted for THIS client and the site compares
+  // it against its own env var. The two only meet if the name matches exactly.
+  // A site reading REVALIDATION_SECRET (no WEBSITE_ prefix) answers every
+  // publish with 401 and the client waits out the 60s ISR window instead —
+  // which looks like "the editor is a bit slow", not like a broken integration,
+  // so it survives for months. One live site was found doing this.
+  const secretVars = [...rev.matchAll(/process\.env\.([A-Z0-9_]+)/g)].map((m) => m[1])
+  const revalidationVars = [...new Set(secretVars.filter((v) => /REVALIDAT/.test(v)))]
+  if (revalidationVars.length === 0) {
+    warn(
+      '/api/revalidate secret name',
+      `${revPath} reads no REVALIDATION env var — the portal cannot authenticate a cache-bust against this site.`,
+    )
+  } else if (!revalidationVars.includes('WEBSITE_REVALIDATION_SECRET')) {
+    fail(
+      '/api/revalidate secret name',
+      `${revPath} gates on ${revalidationVars.join(', ')}, but the portal sends the secret for WEBSITE_REVALIDATION_SECRET. Every instant publish 401s silently and the client waits out the 60s ISR window. Rename the env var on the site AND in Vercel.`,
+    )
+  } else {
+    ok('/api/revalidate secret name')
+  }
+}
+
+// ── 2b. Lead capture reaches the central store ───────────────────────────────
+// Every enquiry must be PERSISTED before it is emailed. Email-only routes lose
+// the lead outright when a send fails, and they never appear in the client's
+// portal. Two conformant shapes: <LeadForm> (posts straight to the store, no
+// site route at all), or relayLeadToNgf() called inside an existing route.
+{
+  const API_ROUTES = FILES.filter((f) => /app[\\/]api[\\/].*route\.tsx?$/.test(f.path))
+  const MAILERS = /resend|Resend|sendMail|nodemailer|sendContactNotification|sendNotificationEmail/
+  // A lead route either mails someone OR just stores contact details. Catch
+  // BOTH: a route that persists an enquiry and notifies nobody is the worse
+  // failure — the business never learns a customer got in touch at all.
+  const looksLikeLead = (src) =>
+    /export\s+async\s+function\s+POST/.test(src) &&
+    (MAILERS.test(src) || (/\bemail\b/i.test(src) && /\b(name|phone)\b/i.test(src)))
+  // A route "reaches the portal" if it relays to the central lead store, OR if
+  // it posts to /api/leads/ingest — the prospect-signup path used by NGF's own
+  // marketing site, where an enquiry is a lead for the AGENCY rather than a
+  // customer of a client. Both persist; only email-only routes lose the lead.
+    // reportOrderToNgf was added after this rule was written, and a checkout
+    // route trips looksLikeLead for perfectly good reasons: it POSTs, it takes
+    // a name and an email, and it sends a receipt. But an order IS the
+    // persisted record — exactly what this rule asks for. Without it a
+    // compliant storefront fails a rule it satisfies, and the fix somebody
+    // reaches for is bolting a lead relay onto a payment route.
+  const REACHES = /relayLeadToNgf|api\/leads\/ingest|reportOrderToNgf/
+  const mailing = API_ROUTES.filter((f) => looksLikeLead(f.src) && !/revalidate|\bngf-lead\b/.test(f.path))
+  const relayed = mailing.filter((f) => REACHES.test(f.src))
+  const orphaned = mailing.filter((f) => !REACHES.test(f.src))
+  const usesLeadForm = FILES.some((f) => /<LeadForm[\s/>]/.test(f.src))
+
+  if (orphaned.length) {
+    fail(
+      'Lead capture reaches the portal',
+      `${orphaned.map((f) => f.path).join(', ')} send email but never call relayLeadToNgf(). ` +
+        `A failed send loses the enquiry with no record anywhere, and nothing shows in the client's ` +
+        `Form Submissions inbox. Call relayLeadToNgf() before the send, or replace the form with <LeadForm>.`,
+    )
+  } else if (mailing.length || usesLeadForm) {
+    ok('Lead capture reaches the portal', usesLeadForm && !mailing.length
+      ? '<LeadForm> posts directly to the central store.'
+      : `${relayed.length} form route${relayed.length === 1 ? '' : 's'} relay to the central store.`)
+  } else {
+    warn('Lead capture reaches the portal', 'No form route and no <LeadForm> found — this site captures no enquiries.')
+  }
 }
 
 // ── 3. Editor bridge ─────────────────────────────────────────────────────────
@@ -119,6 +226,198 @@ if (!has('components/NgfEditBridge.tsx')) {
   mounted
     ? ok('NgfEditBridge mounted')
     : fail('NgfEditBridge mounted', 'Not rendered in app/layout.tsx — the bridge only works when mounted in the root layout.')
+
+  // Presence + mounting are not enough: a hand-written STUB passes both and then
+  // silently does nothing. The sidebar still populates (the portal scrapes raw
+  // HTML, not the running bridge), so the site looks fully wired while every
+  // click is dead. Check the bridge actually implements the protocol.
+  const bridge = read('components/NgfEditBridge.tsx') ?? ''
+  const BRIDGE_MIN_BYTES = 20000 // canonical is ~43 KB; the smallest real one shipped is ~24 KB
+  const required = ['ngfReady', 'setEditMode', 'contentUpdate', 'fieldClick', 'ngfDefault']
+  const missingHandlers = required.filter((h) => !bridge.includes(h))
+  const versionMatch = bridge.match(/NGF_BRIDGE_VERSION\s*=\s*['"]([^'"]+)['"]/)
+
+  if (missingHandlers.length) {
+    fail(
+      'NgfEditBridge is the real bridge',
+      `Missing protocol handler(s): ${missingHandlers.join(', ')}. This looks like a stub or a ` +
+        `hand-written reimplementation. Run 'npm run sync-ngf' — a partial bridge fails SILENTLY ` +
+        `(sidebar populates, clicking does nothing), which is worse than none.`,
+    )
+  } else if (bridge.length < BRIDGE_MIN_BYTES) {
+    fail(
+      'NgfEditBridge is the real bridge',
+      `Only ${bridge.length} bytes — the canonical bridge is ~43 KB. This is a truncated or partial copy. ` +
+        `Run 'npm run sync-ngf'.`,
+    )
+  } else if (!versionMatch) {
+    // Every synced bridge exports NGF_BRIDGE_VERSION. Its absence means this copy
+    // predates versioning, i.e. it was copied before drift was detectable at all.
+    warn(
+      'NgfEditBridge is the real bridge',
+      `${(bridge.length / 1024).toFixed(0)} KB and structurally complete, but it exports no ` +
+        `NGF_BRIDGE_VERSION — so it predates version tracking and cannot be checked for drift. ` +
+        `Run 'npm run sync-ngf' to pull the current canonical copy.`,
+    )
+  } else {
+    ok('NgfEditBridge is the real bridge', `v${versionMatch[1]}, ${(bridge.length / 1024).toFixed(0)} KB, all protocol handlers present.`)
+  }
+}
+
+// ── 2b2. Cookie consent wiring ───────────────────────────────────────────────
+// GA4 sets cookies, so it must be gated behind hasCookieConsent(). But the banner
+// only renders when NEXT_PUBLIC_COOKIE_ANALYTICS === '1' — so a site that gates
+// analytics WITHOUT setting that var can never obtain consent, and analytics
+// silently never load. The two settings are a pair; neither works alone.
+{
+  const envExample = read('.env.local.example') ?? ''
+  // The canonical CookieConsent component itself contains every string below —
+  // hasCookieConsent, resetCookieConsent, NEXT_PUBLIC_COOKIE_ANALYTICS — in its
+  // definitions and its own doc comments. Scanning it would make every check
+  // self-satisfying and pass a site that wires up none of it. Exclude it and look
+  // only at how the REST of the site uses the API.
+  const CONSENT_SRC = /components[\\/]CookieConsent\.tsx?$/
+  const consumers = FILES.filter((f) => !CONSENT_SRC.test(f.path))
+
+  const usesGa = consumers.some((f) => /NEXT_PUBLIC_GA_ID|googletagmanager/.test(f.src))
+  const hasBanner = has('components/CookieConsent.tsx')
+
+  // Accept ANY consent implementation, not just the starter's. A site may ship a
+  // better one — cookie-backed, with a change event and active cookie clearing on
+  // decline — and gate on its own helper. Requiring the literal name
+  // `hasCookieConsent` flagged a correct site as broken, which is worse than no
+  // check: it invites someone to "fix" working code down to a weaker pattern.
+  // The real defect is analytics loaded by a file with NO consent awareness at all.
+  const gaFiles = consumers.filter((f) => /NEXT_PUBLIC_GA_ID|googletagmanager|clarity\.ms/.test(f.src))
+  const gatesConsent = gaFiles.some((f) => /consent/i.test(f.src))
+
+  // Only the STARTER's CookieConsent needs this env var to render its banner. A
+  // site with its own implementation manages its own gating and must not be
+  // failed for not declaring a variable it never reads.
+  const usesStarterConsent = consumers.some((f) => /hasCookieConsent/.test(f.src))
+  const declaresVar = /NEXT_PUBLIC_COOKIE_ANALYTICS/.test(envExample) ||
+    consumers.some((f) => /NEXT_PUBLIC_COOKIE_ANALYTICS/.test(f.src))
+
+  // Consent must be as easy to withdraw as to give. The banner only shows when no
+  // choice is stored, so without a reset control the first click is permanent.
+  if (usesGa && gatesConsent) {
+    // Accept the starter's resetCookieConsent OR any site-specific equivalent
+    // (a clear/revoke/preferences control), for the same reason as above.
+    const canWithdraw = consumers.some((f) =>
+      /resetCookieConsent|clearConsent|CookiePreferences|revokeConsent/.test(f.src))
+    canWithdraw
+      ? ok('Consent can be withdrawn')
+      : warn(
+          'Consent can be withdrawn',
+          'Nothing calls resetCookieConsent(). Once a visitor accepts or declines, the banner never ' +
+            'returns and they can never change their mind. Add a "Cookie settings" control in the footer ' +
+            'or privacy page.',
+        )
+  }
+}
+
+// ── 2c. Honeypot naming ──────────────────────────────────────────────────────
+// A honeypot must be NON-SEMANTIC. Browsers and password managers autofill by
+// field name, so a hidden input called "company" / "website" / "address2" gets
+// populated for real users — and the form then discards their enquiry as spam.
+// Silent, and it looks like the form simply doesn't work.
+{
+  const SEMANTIC = ['company', 'website', 'url', 'address2', 'phone2', 'fax', 'organization', 'business']
+  const offenders = []
+  for (const f of FILES) {
+    if (!/\.(tsx?|jsx?)$/.test(f.path)) continue
+    // Only consider inputs that look deliberately hidden (i.e. a honeypot).
+    if (!/honeypot|sr-only|display:\s*none|hidden|left-\[-9999px\]|opacity-0/i.test(f.src)) continue
+    for (const name of SEMANTIC) {
+      const re = new RegExp(`name=["'\`]${name}["'\`]`, 'i')
+      if (re.test(f.src)) offenders.push(`${f.path} (name="${name}")`)
+    }
+  }
+  if (offenders.length) {
+    warn(
+      'Honeypot is non-semantic',
+      `Possible honeypot using an autofill-able name: ${offenders.join(', ')}. Browsers and password ` +
+        `managers fill by field name, so real users populate it and their enquiry is silently discarded ` +
+        `as spam. Rename to a non-semantic value — the standard is "_gotcha". (If this is a REAL visible ` +
+        `field rather than a honeypot, ignore this.)`,
+    )
+  } else {
+    ok('Honeypot is non-semantic')
+  }
+}
+
+// ── 3bb. No local copy of the standards doc ──────────────────────────────────
+// The canonical doc lives in ngf-client-starter and is fetched over a raw URL.
+// A fork inherits the file, and from that moment it is a stale snapshot that a
+// future session will read INSTEAD of the canonical one. That is exactly how
+// three client repos ended up carrying a 604-line copy whose only unique content
+// was the withdrawn "copy the bridge from a reference site" instruction.
+// The starter itself is the one legitimate holder, so exempt it.
+{
+  const isStarter = (() => {
+    try { return read('.git/config')?.includes('ngf-client-starter') ?? false } catch { return false }
+  })()
+  if (has('NGF-STANDARDS.md') && !isStarter) {
+    const local = read('NGF-STANDARDS.md') ?? ''
+    // A short pointer stub is fine — it exists to redirect, not to be read as the standard.
+    const isStub = local.length < 3000 && /raw\.githubusercontent\.com/.test(local)
+    if (isStub) {
+      ok('No local standards copy', 'Pointer stub only.')
+    } else {
+      fail(
+        'No local standards copy',
+        `This repo carries its own NGF-STANDARDS.md (${local.split('\n').length} lines). It is stale by ` +
+          `definition — the canonical doc lives in ngf-client-starter and is fetched over a raw URL. ` +
+          `Delete it, or replace it with a short stub linking to the canonical copy.`,
+      )
+    }
+  } else if (!isStarter) {
+    ok('No local standards copy')
+  }
+}
+
+// ── 3c. Canonical files are syncable, not hand-maintained ────────────────────
+// The bridge and friends are copied per-site rather than installed, which is how
+// 7 of 9 live sites ended up on a drifted bridge. sync-ngf.mjs makes the copy
+// reproducible and 'npm run sync-ngf:check' makes drift detectable in CI.
+if (!has('scripts/sync-ngf.mjs')) {
+  warn(
+    'Canonical files are syncable',
+    "No scripts/sync-ngf.mjs — this site's bridge/LeadForm/doctor can only be updated by hand-copying, " +
+      "which is how sites drift. Copy it from ngf-client-starter and add \"sync-ngf\": \"node scripts/sync-ngf.mjs\".",
+  )
+} else {
+  ok('Canonical files are syncable', "Run 'npm run sync-ngf:check' to verify against canonical.")
+}
+
+// ── 3b. Portal binding marker (the site must be BINDABLE) ────────────────────
+// Setting client_configs.site_url is gated server-side: the admin fetches the
+// site and refuses with 422 unless the HTML carries an NGF marker. site_url is
+// the ONLY string joining a portal account to a website, so failing this means
+// the site can never be attached to a client — no content, no editor, ever.
+// Annotated fields now count as markers, so a properly annotated site passes
+// either way; the meta tag is what saves a site with no annotations yet.
+{
+  const layout = FILES.find((f) => /app[\\/]layout\.tsx?$/.test(f.path))
+  const annotated = FILES.some((f) => /data-ngf-(field|group)/.test(f.src))
+  const hasMeta = layout ? /ngf-public-api/.test(layout.src) : false
+
+  if (hasMeta) {
+    ok('Portal binding marker', "app/layout.tsx declares 'ngf-public-api'.")
+  } else if (annotated) {
+    warn(
+      'Portal binding marker',
+      "app/layout.tsx has no 'ngf-public-api' meta tag. Binding still works (data-ngf-* markup " +
+        'counts), but add it to metadata.other so the site stays bindable even before any field is annotated.',
+    )
+  } else {
+    fail(
+      'Portal binding marker',
+      "No 'ngf-public-api' meta tag in app/layout.tsx and no data-ngf-* markup anywhere. The admin " +
+        'cannot set this client\'s site_url (422), so the site can never be bound to a portal account. ' +
+        "Add to app/layout.tsx: metadata.other = { 'ngf-public-api': 'https://app.ngfsystems.com/api/public/content' }",
+    )
+  }
 }
 
 // ── 4. CSP / security headers ────────────────────────────────────────────────
@@ -129,6 +428,33 @@ if (!cfg) {
   /frame-ancestors[^;]*app\.ngfsystems\.com/.test(cfg)
     ? ok('CSP frame-ancestors', 'Portal editor can iframe this site.')
     : fail('CSP frame-ancestors', "Missing the app.ngfsystems.com allowance — the editor's live preview will be blocked by the browser.")
+
+  // Next.js assembles headers into a plain object — set-cookie is the only key
+  // that accumulates, everything else is last-write-wins across ALL rules. Two
+  // Content-Security-Policy entries therefore ship as ONE header and one policy
+  // is destroyed with no warning: either the security baseline or frame-ancestors,
+  // depending on order. Verified empirically against a real `next start`.
+  const cspEntries = (cfg.match(/['"]Content-Security-Policy['"]/g) ?? []).length
+  if (cspEntries > 1) {
+    fail(
+      'One CSP header only',
+      `${cspEntries} Content-Security-Policy entries in next.config. Next emits only the LAST one — the ` +
+        `other policy is silently dropped (baseline directives or frame-ancestors, depending on order). ` +
+        `Merge them: frame-ancestors is a DIRECTIVE inside the single policy, not a second header.`,
+    )
+  } else if (cspEntries === 1) {
+    // A lone frame-ancestors policy is a legal CSP, so nothing errors — the site
+    // just has no baseline. 5 of 9 audited sites were in exactly this state.
+    const baseline = ['default-src', 'object-src', 'base-uri', 'form-action']
+    const missing = baseline.filter((d) => !cfg.includes(d))
+    missing.length
+      ? warn(
+          'CSP baseline directives',
+          `CSP has frame-ancestors but is missing ${missing.join(', ')}. The site is iframe-protected but ` +
+            `otherwise unrestricted. Copy the full policy from NGF-STANDARDS "Security baseline".`,
+        )
+      : ok('CSP baseline directives')
+  }
 
   for (const [key, label] of [
     ['X-Content-Type-Options', 'X-Content-Type-Options'],
@@ -147,17 +473,200 @@ has('app/robots.ts') || has('app/robots.js')
   ? ok('app/robots.ts')
   : fail('app/robots.ts', 'Missing — hard blocker in the SEO launch gate.')
 
+// The host a sitemap emits must be the host the site is served on. Two live
+// sites shipped sitemaps under example.com for weeks: their sitemap.ts carried
+// its own `|| 'example.com'` fallback and NEXT_PUBLIC_SITE_URL was never set on
+// the Vercel project, so Google was told their pages lived on example.com and
+// the portal editor (which discovers pages from the sitemap) found nothing it
+// could use. lib/ngf.ts exports siteBaseUrl() — the ONE fallback chain, shared
+// with the content lookup — and sitemap.ts / robots.ts must use it.
+for (const p of ['app/sitemap.ts', 'app/sitemap.js', 'app/robots.ts', 'app/robots.js']) {
+  if (!has(p)) continue
+  const src = stripComments(read(p) ?? '')
+  if (/example\.com/.test(src)) {
+    fail(`Site host in ${p}`, `Contains a literal example.com fallback. Import siteBaseUrl() from lib/ngf.ts instead — with the env var unset this file tells search engines and the portal editor the site lives on example.com.`)
+  } else if (!/siteBaseUrl\s*\(/.test(src)) {
+    warn(`Site host in ${p}`, `Does not use siteBaseUrl() from lib/ngf.ts. A hand-rolled base drifts from the content lookup's fallback chain; run npm run sync-ngf and import it.`)
+  } else {
+    ok(`Site host in ${p}`)
+  }
+}
+
 const hasJsonLd = FILES.some((f) => /application\/ld\+json/.test(f.src))
 hasJsonLd ? ok('Structured data (JSON-LD)') : warn('Structured data (JSON-LD)', 'No LocalBusiness JSON-LD found — required by the SEO launch gate before launch.')
 
+// Dynamic routes must be enumerated in the sitemap or they are invisible to
+// Google. A static (non-async) sitemap cannot enumerate them — it has no way to
+// read published content. This has shipped: a portfolio grew nine [slug] pages
+// that never appeared in sitemap.xml, and every other SEO check still passed.
+{
+  const dynamicRoutes = FILES
+    .filter((f) => /(^|\/)app\/.*\[[^\]]+\]\/page\.(t|j)sx?$/.test(f.path))
+    .map((f) => f.path)
+
+  if (dynamicRoutes.length === 0) {
+    ok('Dynamic routes in sitemap', 'No dynamic routes to enumerate.')
+  } else {
+    const sitemapPath = ['app/sitemap.ts', 'app/sitemap.js'].find(has)
+    const sitemapSrc = sitemapPath ? stripComments(read(sitemapPath) ?? '') : ''
+    // An async sitemap is the only shape that can await published content.
+    const isAsync = /export\s+default\s+async\s+function/.test(sitemapSrc) ||
+                    /Promise<\s*MetadataRoute\.Sitemap\s*>/.test(sitemapSrc)
+
+    if (!sitemapPath) {
+      // Already failed above for the missing file; don't double-report.
+      ok('Dynamic routes in sitemap', 'Skipped — no sitemap to check.')
+    } else if (!isAsync) {
+      fail(
+        'Dynamic routes in sitemap',
+        `${dynamicRoutes.length} dynamic route(s) (${dynamicRoutes.join(', ')}) but ${sitemapPath} is a ` +
+          `static function, so it cannot emit their URLs. Those pages are invisible to search engines. ` +
+          `Make the sitemap async, read the same content source the route uses, and map over it.`,
+      )
+    } else {
+      ok('Dynamic routes in sitemap', `${dynamicRoutes.length} dynamic route(s); sitemap is async.`)
+    }
+  }
+}
+
 // ── 6. Build cost discipline ─────────────────────────────────────────────────
 const vercelJson = read('vercel.json')
+const skipScript = read('scripts/vercel-skip-docs.sh')
 if (!vercelJson) {
   warn('vercel.json ignoreCommand', 'No vercel.json — every commit (including docs-only) burns a build.')
 } else if (!/ignoreCommand/.test(vercelJson)) {
   warn('vercel.json ignoreCommand', 'No ignoreCommand — docs-only commits still trigger builds.')
+} else if (/HEAD\^/.test(vercelJson)) {
+  // The inline rule compares the LAST commit of a push to its parent. A push
+  // whose final commit is docs-only therefore cancels the WHOLE build, and the
+  // site silently keeps serving the previous deploy. It cost the main app a
+  // missing deploy on 2026-09-08.
+  warn(
+    'vercel.json ignoreCommand',
+    'Still on the inline HEAD^ rule: it sees only the last commit of a push, so a push ending in a docs-only commit skips the build and the site stays on old code. Use "bash scripts/vercel-skip-docs.sh", which diffs against the last deployment.',
+  )
+} else if (/vercel-skip-docs\.sh/.test(vercelJson) && !skipScript) {
+  // Vercel treats a non-0/1 exit from the ignore step as a FAILED deployment,
+  // so a missing script does not merely fail to skip — it breaks every deploy.
+  fail(
+    'vercel.json ignoreCommand',
+    'vercel.json runs scripts/vercel-skip-docs.sh but that file is not in the repo. Vercel reads a missing command as a failed deployment, so nothing deploys at all.',
+  )
+} else if (skipScript && !/^\s*\*\.sh\s+.*eol=lf/m.test(read('.gitattributes') || '')) {
+  // Deliberately checks .gitattributes, NOT the working copy's line endings.
+  // On Windows with core.autocrlf=true the checked-out file is CRLF even when
+  // the committed blob is LF — and it is the BLOB that Vercel gets, so failing
+  // on the working copy cries wolf in every repo on a Windows machine, which is
+  // how a launch gate gets ignored. The durable risk is the missing rule: with
+  // no '*.sh text eol=lf', a commit from Windows can persist CRLF into the blob,
+  // and then Linux bash fails on every line of the script that decides whether
+  // the site deploys at all.
+  fail(
+    'vercel.json ignoreCommand',
+    "scripts/vercel-skip-docs.sh exists but .gitattributes has no '*.sh text eol=lf' rule. Nothing stops a Windows commit storing it with CRLF, and Vercel's Linux bash then fails on every line — no deploys at all. Add the rule and re-commit the script.",
+  )
+} else if (!/rev-parse --show-toplevel/.test(vercelJson)) {
+  // Vercel runs the ignore step from the project's Root Directory, which is not
+  // always the repo root — a repo whose app sits in a subfolder runs it there.
+  // A relative `bash scripts/…` path is then simply not found, bash exits 127,
+  // and Vercel reads a non-0/1 exit as a FAILED deployment, not as "build".
+  // WrenchTime-Cycles hit exactly this on 2026-09-12.
+  fail(
+    'vercel.json ignoreCommand',
+    'ignoreCommand resolves the script relative to the working directory. Vercel runs it from the project Root Directory, which may be a subfolder, and bash then exits 127 — which Vercel treats as a failed deployment. Use: bash "$(git rev-parse --show-toplevel 2>/dev/null || echo .)/scripts/vercel-skip-docs.sh"',
+  )
+} else if (skipScript && !/rev-parse --show-toplevel/.test(skipScript)) {
+  // Worse than not finding the script: finding it and asking it the wrong
+  // question. The diff pathspec is `.`, which git reads relative to the CURRENT
+  // directory, so from a subfolder the script examines only that subtree and
+  // skips a deploy that changed anything above it — silently, as Canceled.
+  fail(
+    'vercel.json ignoreCommand',
+    'scripts/vercel-skip-docs.sh does not cd to the repo root before diffing. Run from a subfolder it would see only that subtree and skip deploys for changes above it. Re-sync the script from the starter.',
+  )
+} else if (skipScript && /\r\n/.test(skipScript)) {
+  // The rule exists, so the committed blob is LF and deploys are safe; this
+  // copy just has not been re-checked-out. Only affects running it locally.
+  warn(
+    'vercel.json ignoreCommand',
+    'Your working copy of scripts/vercel-skip-docs.sh has CRLF endings even though .gitattributes forces LF. Vercel is unaffected (it gets the LF blob), but running it locally will fail. Re-checkout the file to refresh it.',
+  )
 } else {
   ok('vercel.json ignoreCommand')
+}
+
+// ── 6a2. The repo must be connected to a remote ──────────────────────────────
+// A folder under GitHub/ is not necessarily a clone. One live client site was a
+// DETACHED snapshot: no .git at all, while a public repo of the same name existed
+// and was ahead of it. Edits there go nowhere — the live site keeps serving the
+// old code — and `git init` + push would fork or clobber the real repo. Catch it
+// before any work is done rather than after.
+{
+  // Walk UP for .git, the way git itself does. An app that lives in a
+  // subdirectory of its repo (Vercel Root Directory != '.') is still perfectly
+  // connected — failing it here reported a legitimately-cloned repo as detached.
+  let gitDir = null
+  for (let dir = ROOT, i = 0; i < 6; i++) {
+    if (existsSync(join(dir, '.git'))) { gitDir = join(dir, '.git'); break }
+    const parent = dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+
+  if (!gitDir) {
+    fail(
+      'Repo is connected to a remote',
+      'No .git in this directory or any parent — this folder is NOT a clone. Check GitHub for a repo of ' +
+        'the same name before editing anything: if one exists, this is a detached snapshot and your ' +
+        'changes will never reach the live site. Clone the real repo and work there. Do NOT `git init` ' +
+        'this folder — that forks or clobbers the remote.',
+    )
+  } else {
+    let gitCfg = ''
+    try { gitCfg = readFileSync(join(gitDir, 'config'), 'utf8') } catch { /* unreadable */ }
+    const hasRemote = /\[remote /.test(gitCfg)
+    hasRemote
+      ? ok('Repo is connected to a remote')
+      : fail(
+          'Repo is connected to a remote',
+          'This is a git repo with NO remote configured. Nothing you commit here reaches the live site. ' +
+            'Add the correct origin — do not create a new repo if one already exists on GitHub.',
+        )
+  }
+}
+
+// ── 6b. The doctor itself must live in this repo ─────────────────────────────
+// A `doctor` script pointing at ../ngf-client-starter resolves on the machine
+// that wrote it and nowhere else — not on Vercel, not in a fresh clone, not in
+// CI. The launch gate then silently cannot run in the only environment where it
+// matters. Auditing a sibling repo from the CLI is fine; leaving it in
+// package.json is not.
+{
+  const pkgRaw = read('package.json')
+  if (!pkgRaw) {
+    fail('Doctor is self-contained', 'No package.json found.')
+  } else {
+    let doctorScript = ''
+    try {
+      doctorScript = (JSON.parse(pkgRaw).scripts ?? {}).doctor ?? ''
+    } catch {
+      /* malformed package.json is reported elsewhere */
+    }
+    if (!doctorScript) {
+      warn('Doctor is self-contained', 'No "doctor" script in package.json — add "doctor": "node scripts/ngf-doctor.mjs".')
+    } else if (doctorScript.includes('..')) {
+      fail(
+        'Doctor is self-contained',
+        `"doctor": "${doctorScript}" points outside the repo. It does not resolve on Vercel or in a fresh ` +
+          `clone, so the launch gate cannot run in CI. Copy scripts/ngf-doctor.mjs into this repo and use ` +
+          `"doctor": "node scripts/ngf-doctor.mjs".`,
+      )
+    } else if (!has('scripts/ngf-doctor.mjs')) {
+      fail('Doctor is self-contained', 'scripts/ngf-doctor.mjs is missing from this repo.')
+    } else {
+      ok('Doctor is self-contained')
+    }
+  }
 }
 
 // ── 7. Content fallback correctness (?? vs ||) ───────────────────────────────
@@ -204,12 +713,22 @@ const MARKUP_FILES = FILES.filter((f) => !/NgfEditBridge\.tsx?$/.test(f.path))
 
 const groupDecls = new Map()
 const dynamicGroups = new Set()
+const dupWithinFile = new Set()
 for (const f of MARKUP_FILES) {
+  const seenHere = new Map()
   // literal:  data-ngf-group="a.b"  |  data-ngf-group={`a.${x}.b`}
   for (const m of f.src.matchAll(/data-ngf-group=(?:["']([^"']+)["']|\{`([^`]+)`\})/g)) {
     const raw = m[1] ?? m[2]
     const path = raw.replace(/\$\{[^}]*\}/g, '_')
     groupDecls.set(path, (groupDecls.get(path) ?? 0) + 1)
+    // The duplicate rule is about ONE PAGE declaring a group twice (the classic
+    // desktop + mobile layout mistake), which makes the editor show two
+    // identical sidebar sections. The SAME group legitimately appears on
+    // several pages — e.g. a team list rendered on both / and /team — and the
+    // scraper only ever reads one page, so counting across files is a false
+    // positive. Track per-file.
+    seenHere.set(path, (seenHere.get(path) ?? 0) + 1)
+    if (seenHere.get(path) === 2) dupWithinFile.add(`${f.path} → ${path}`)
   }
   // bare identifier: data-ngf-group={someVar}
   for (const m of f.src.matchAll(/data-ngf-group=\{([A-Za-z_$][\w$]*)\}/g)) {
@@ -219,9 +738,8 @@ for (const f of MARKUP_FILES) {
 if (dynamicGroups.size) {
   warn('Group path is computed at runtime', `${[...dynamicGroups].join(', ')} — cannot be checked statically. Verify by hand that the resolved value is EXACTLY two segments (section.array); if it is deeper, add/remove/reorder silently no-op.`)
 }
-const dupGroups = [...groupDecls.entries()].filter(([, n]) => n > 1).map(([p]) => p)
-dupGroups.length
-  ? fail('One data-ngf-group per list', `Declared more than once: ${dupGroups.join(', ')}. The editor sidebar will show duplicate sections (usually a desktop+mobile layout both carrying the attribute).`)
+dupWithinFile.size
+  ? fail('One data-ngf-group per list', `Declared twice in the SAME file: ${[...dupWithinFile].join(', ')}. The editor sidebar will show duplicate sections — usually a desktop and a mobile layout both carrying the attribute. Declare the group once; individual field annotations on both layouts are fine.`)
   : ok('One data-ngf-group per list')
 
 const badDepth = [...groupDecls.keys()].filter((p) => p.split('.').length !== 2)
