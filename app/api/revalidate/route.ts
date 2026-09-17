@@ -1,38 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 
 /**
- * GET /api/revalidate?secret=<secret>
+ * GET /api/revalidate
+ *   x-ngf-revalidation-secret: <WEBSITE_REVALIDATION_SECRET>   (preferred)
+ *   ?secret=<WEBSITE_REVALIDATION_SECRET>                        (also accepted)
  *
- * Called by the NGF portal's push handler after a publish. The portal sends
- * whatever secret it holds for this site and has no idea what the env var here
- * is called — and this route read REVALIDATION_SECRET, a name the portal can
- * never satisfy, so instant publish has never worked for this site.
+ * Called by the NGF portal's push handler immediately after a client publishes.
+ * Busts this site's content cache so the client sees their change right away
+ * instead of waiting out the 60s ISR window in lib/ngf.ts.
  *
- * Both names are accepted, canonical first, so there is no window in which the
- * site is broken between this change shipping and WEBSITE_REVALIDATION_SECRET
- * being set on the Vercel project. Drop the REVALIDATION_SECRET fallback once
- * the canonical var is set on production AND preview.
- *
- * Still fail-closed, but it now distinguishes the two ways of failing, matching
- * ngf-client-starter and the other ten site repos: 503 when NO secret is
- * configured here at all, 401 when one is and the caller got it wrong. The
- * portal treats both as a failed publish (`revalidated = res.ok`), but the
- * health check reads them very differently — 503 is proof instant publish is
- * broken for this site, whereas 401 only proves some secret exists.
+ * `revalidatePath('/', 'layout')` is version-agnostic (stable across Next
+ * 14/15/16) and busts every page under the root layout — i.e. every page that
+ * calls getNgfContent(). Do NOT swap this for a bare revalidateTag(): its
+ * signature has shifted across Next versions and can silently no-op.
  */
 export async function GET(req: NextRequest) {
-  const secret = req.nextUrl.searchParams.get('secret')
-  const expected = process.env.WEBSITE_REVALIDATION_SECRET || process.env.REVALIDATION_SECRET
+  // The portal sends the secret both ways. Prefer the header: a query string
+  // ends up in request logs and browser history, a header usually does not.
+  const secret = req.headers.get('x-ngf-revalidation-secret') ?? req.nextUrl.searchParams.get('secret')
+  const expected = process.env.WEBSITE_REVALIDATION_SECRET
+
+  // Fail closed: if no secret is configured on this site, refuse rather than
+  // exposing an unauthenticated cache-bust endpoint.
   if (!expected) {
     return NextResponse.json(
-      { ok: false, error: 'WEBSITE_REVALIDATION_SECRET is not set on this site' },
+      { error: 'WEBSITE_REVALIDATION_SECRET is not set on this site' },
       { status: 503 },
     )
   }
   if (secret !== expected) {
-    return NextResponse.json({ ok: false, error: 'Invalid secret' }, { status: 401 })
+    return NextResponse.json({ error: 'Invalid secret' }, { status: 401 })
   }
-  revalidateTag('ngf-content')
-  return NextResponse.json({ ok: true, revalidated: true })
+
+  revalidatePath('/', 'layout')
+  return NextResponse.json({ ok: true, revalidated: true, at: new Date().toISOString() })
 }

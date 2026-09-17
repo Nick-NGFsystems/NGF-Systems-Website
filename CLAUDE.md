@@ -660,3 +660,21 @@ EOF
 ---
 
 *This file is the single source of truth for all NGFsystems development.*
+
+## KNOWN GAP — `lib/ngf.ts` is a legacy fork; do NOT run `sync-ngf` here yet
+
+This site predates the flat-content contract. Its `lib/ngf.ts` returns a NESTED object
+(`ngf.footer.location`, `ngf.hero.headline`) and every page and layout component reads it that
+way. The canonical `lib/ngf.ts` in `ngf-client-starter` returns a flat map (`content['footer.location']`)
+and exports `getItems`, `getGallery` and `siteBaseUrl`. Swapping the file in breaks the build in
+`components/layout/Footer.tsx` and six more files (checked 2026-09-17).
+
+What IS synced from the starter (2026-09-17): `components/NgfEditBridge.tsx` (1.2.1),
+`app/api/revalidate/route.ts`, `scripts/ngf-doctor.mjs`. The doctor warns "Site host in
+app/sitemap.ts" because `siteBaseUrl()` does not exist here yet; the sitemap emits the right host
+from `NEXT_PUBLIC_SITE_URL` regardless.
+
+To close this gap: migrate the seven `@/lib/ngf` consumers to the flat map, replace `lib/ngf.ts`
+with the canonical file, add `scripts/sync-ngf.mjs` and the `sync-ngf` scripts to `package.json`,
+then run `npm run sync-ngf:check` until it is clean. Until then, running the starter's sync script
+against this repo overwrites `lib/ngf.ts` and takes the site down.
