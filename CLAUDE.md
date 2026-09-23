@@ -83,7 +83,7 @@ async headers() {
 
 | Layer | Tool | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 15.3.8 exactly |
+| Framework | Next.js (App Router) | latest patched 15.5.x |
 | Runtime | React | 18.x |
 | Language | TypeScript | always, never plain JS |
 | Styling | Tailwind CSS | 3.x |
@@ -96,7 +96,11 @@ async headers() {
 
 ### Critical Version Rules
 - **Never install Next.js 16+** — breaks route groups and has incompatibilities with React 18
-- **Always use Next.js 15.3.8 specifically** — earlier 15.x versions have a security vulnerability (CVE-2025-66478)
+- **Stay on the latest patched 15.5.x.** This rule previously said "15.3.8 exactly". That is wrong and
+  was actively unsafe: upstream only patches the NEWEST minor of a supported major, so 15.3.x is
+  unpatched — it is the version that sat in range for the middleware-bypass advisory, which is why
+  `NGF-Systems-app/CLAUDE.md` names it directly. `scripts/ngf-doctor.mjs` enforces the correct rule
+  and FAILS on 15.3.8. This repo is on 15.5.25.
 - **Never install React 19+** — incompatible with Next.js 15
 - **Never install Prisma 6+** — breaking changes in schema syntax
 - **Turbopack must always be disabled** — never use `--turbopack` flag or enable it in config
@@ -539,7 +543,7 @@ return NextResponse.json({ success: false, error: "Descriptive message" }, { sta
 10. Never duplicate functions — check if it exists first
 11. Never use Turbopack
 12. Never install `@clerk/nextjs@latest` — always pin to v6
-13. Never install Next.js 16+ — always use 15.3.8
+13. Never install Next.js 16+ — always use the latest patched 15.5.x (NOT 15.3.8; see Critical Version Rules)
 14. Never use `npx prisma` — always `./node_modules/.bin/prisma`
 15. Portal routes must have `portal-` prefix
 16. Every route group folder must have a `layout.tsx`
@@ -678,3 +682,74 @@ To close this gap: migrate the seven `@/lib/ngf` consumers to the flat map, repl
 with the canonical file, add `scripts/sync-ngf.mjs` and the `sync-ngf` scripts to `package.json`,
 then run `npm run sync-ngf:check` until it is clean. Until then, running the starter's sync script
 against this repo overwrites `lib/ngf.ts` and takes the site down.
+
+---
+
+## SITE REBUILD — 2026-09-23
+
+The marketing site was rebuilt from a single scrolling page into six routes. What changed, and what
+a later session still needs to check.
+
+### Structure
+
+`/` (home), `/services`, `/work`, `/pricing`, `/about`, `/contact`. `lib/nav.ts` is the ONE table of
+destinations — the navbar, the mobile menu, the footer and `app/sitemap.ts` all read it, so adding a
+page in one place adds it everywhere. The old site hard-coded the same three anchors in three
+components and shipped a sitemap listing only the home page.
+
+Navbar and Footer moved into `app/layout.tsx`, so a page renders only its own content.
+
+### Pricing is now capability-based, not page-count-based
+
+`lib/pricing.ts` is the single price list. The buyer makes two independent decisions: a payment
+track (monthly plan / one-time build) and a set of modules. Each module names the `client_configs`
+column that delivers it, so nothing can be sold that `NGF-Systems-app/lib/portal-capabilities.ts`
+cannot switch on.
+
+**Numbers still needing Nick's sign-off are listed in `UNCONFIRMED_PRICING` in that file.** The base
+figures ($100/mo, $600 build, $20/mo hosting, $80/hr) are CANONICAL and match
+`NGF-Systems-app/lib/pricing.ts`. The module prices and the $150 setup fee are PROPOSALS.
+
+The old published prices contradicted the contract generator — the site quoted one-time builds at
+$799/$1,500/$2,500+ with $30/mo hosting, while `lib/pricing.ts` in the app (sourced from HANDOFF.md,
+which Nick signs contracts from) said $600 and $20/mo. That contradiction is resolved in favour of
+HANDOFF. If the app's figures ever change, change both.
+
+### Editor field keys changed
+
+The old `feature0.title` … `feature8.title` keys are gone. Nine sibling keys made the portal editor
+render nine separate sections all labelled "Features" (editor audit P1.3). They are replaced by one
+`data-ngf-group="services.pillars"` with `services.pillars.<i>.title` / `.body`.
+
+**Any content already published against the old keys is orphaned** and will show as unknown keys in
+the editor. Current annotated fields: `hero.headline`, `hero.subheadline`, `services.title`,
+`services.subtitle`, `services.pillars.<i>.{title,body}`, `work.title`, `work.subtitle`,
+`pricing.title`, `pricing.subtitle`, `footer.location`, `footer.blurb`.
+
+Only the home page and the footer are annotated. The portal scraper reads the home page only
+(editor audit P1.1), so annotating the five new pages would not surface them in the editor anyway.
+
+### Three bugs fixed in `app/api/contact/route.ts`
+
+1. `new Resend(...)` ran at module scope and threw during `next build` whenever `RESEND_API_KEY` was
+   absent — the build failed outright rather than the contact form degrading.
+2. The lead was relayed to `/api/leads/ingest` only AFTER the email succeeded, so a Resend outage
+   lost the enquiry with no record anywhere. It is now persisted first. This is exactly the failure
+   `ngf-doctor`'s "Lead capture reaches the portal" rule exists to catch — the rule passed only
+   because it pattern-matches the string, not the ordering.
+3. Form fields were interpolated into the notification email unescaped.
+
+The endpoint now also validates the email shape, caps field lengths, and whitelists `?intent=`
+against `CONTACT_INTENTS` server-side as well as in the browser.
+
+### Known gaps from this rebuild
+
+| Area | Status | Notes |
+|---|---|---|
+| Module prices | ⚠️ Proposed, not confirmed | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Do not treat as published prices until Nick sets them. |
+| Portfolio screenshots | ⚠️ Not captured | `ClientWork.image` is wired and the grid renders without it. Drop JPEGs at `public/work/<slug>.jpg` and set `image` in `lib/clients.ts`. Capture was blocked in the build sandbox, not in code. |
+| Browser verification | ⚠️ Local only | Verified with `next build`, `npm run doctor` (0 failures) and headless screenshots at 1440px and 390px, light and dark. Not opened in a real browser, and the portal editor was never pointed at it. |
+| Full CSP | ⚠️ Partial | `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` added. `default-src`/`object-src`/`base-uri`/`form-action` deliberately left out — this page loads Google Fonts and gtag, and a wrong `default-src` breaks them silently. Needs a browser to verify. |
+| `feature0`–`feature8` content | ⚠️ Orphaned | Published content under the old keys is no longer read by anything. |
+| Body font | ℹ️ Changed | Inter → Source Sans 3, because the design system above rules out Inter by name. One-line revert in `app/layout.tsx` if unwanted. |
+

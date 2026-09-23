@@ -1,51 +1,96 @@
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
+import Container from '@/components/ui/Container'
+import Icon from '@/components/ui/Icon'
 import type { NgfSiteContent } from '@/lib/ngf'
+import { CLIENTS } from '@/lib/clients'
 
+/**
+ * The home page's opening statement. One sentence on what NGF does, one on
+ * who for, and two actions — see the work, or start a conversation.
+ *
+ * The old hero was a full viewport tall with four stacked background layers,
+ * an animated badge and gradient text, and said "We build websites that
+ * work", which is true of every web company there has ever been. It also
+ * pushed everything of substance below the fold.
+ */
 export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
-  const subheadline = ngf?.hero?.subheadline || 'NGF Systems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.'
-  const ctaText = ngf?.hero?.ctaText || 'Get a Free Mockup'
-  const ctaLink = ngf?.hero?.ctaLink || '/?intent=Free+Mockup+Request#contact'
+  const headline =
+    ngf?.hero?.headline || 'Websites for small businesses, built and looked after by one person.'
+  const subheadline =
+    ngf?.hero?.subheadline ||
+    'We design the site, host it, keep it secure, and give you a portal where you can change your own text and photos whenever you want. No agency retainer, no ticket queue.'
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center text-center px-5 pt-24 pb-20 overflow-hidden bg-white dark:bg-slate-950">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-slate-950 dark:to-slate-950"/>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-indigo-50/60 via-transparent to-transparent dark:from-indigo-950/20 dark:via-transparent dark:to-transparent"/>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.07)_1px,transparent_1px)] bg-[size:48px_48px] dark:bg-[linear-gradient(rgba(148,163,184,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.03)_1px,transparent_1px)]"/>
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-400/10 dark:bg-blue-500/5 rounded-full blur-3xl pointer-events-none"/>
+    <div className="relative overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+      {/* One restrained background wash, not four stacked gradients. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-slate-50 to-transparent dark:from-slate-900/50"
+      />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-900 shadow-sm shadow-blue-100/50 dark:shadow-blue-900/20 rounded-full px-4 py-1.5 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"/>
-          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 font-inter tracking-wide">Michigan-based · Web Management Platform</span>
+      <Container className="relative py-20 sm:py-28 lg:py-32">
+        <div className="max-w-3xl">
+          <p className="font-body text-xs font-semibold uppercase tracking-[0.12em] text-blue-600 dark:text-blue-400">
+            Hudsonville, Michigan
+          </p>
+
+          <h1
+            data-ngf-field="hero.headline"
+            data-ngf-label="Headline"
+            data-ngf-type="textarea"
+            data-ngf-section="Hero"
+            className="mt-5 font-sora text-4xl font-semibold leading-[1.1] tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl"
+          >
+            {headline}
+          </h1>
+
+          <p
+            data-ngf-field="hero.subheadline"
+            data-ngf-label="Intro"
+            data-ngf-type="textarea"
+            data-ngf-section="Hero"
+            className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-slate-600 dark:text-slate-400"
+          >
+            {subheadline}
+          </p>
+
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <Button href="/contact" size="lg">
+              Get a free mockup
+              <Icon name="arrow-right" className="h-4 w-4" />
+            </Button>
+            <Button href="/work" variant="secondary" size="lg">
+              See our work
+            </Button>
+          </div>
+
+          <p className="mt-6 font-body text-sm text-slate-500 dark:text-slate-500">
+            We build you a mockup before you pay anything. If you do not like it, you owe nothing.
+          </p>
         </div>
 
-        <h1 className="font-sora font-bold text-5xl sm:text-6xl lg:text-[72px] tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-6">
-          We build websites{' '}
-          <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
-            that work.
-          </span>
-        </h1>
-
-        <p data-ngf-field="hero.subheadline" data-ngf-label="Subheadline" data-ngf-type="textarea" data-ngf-section="Hero" className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
-          {subheadline}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16">
-          <Link
-            href="#pricing"
-            className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 font-inter"
-          >
-            See Pricing
-          </Link>
-          <Link
-            href={ctaLink}
-            className="group bg-white dark:bg-slate-900 border border-slate-900/10 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-sm dark:shadow-none dark:hover:border-slate-600 font-inter"
-          >
-            <span data-ngf-field="hero.ctaText" data-ngf-label="Cta Text" data-ngf-type="text" data-ngf-section="Hero">{ctaText}</span>
-            <span className="inline-block ml-2 group-hover:translate-x-0.5 transition-transform">→</span>
-          </Link>
-        </div>
-      </div>
-    </section>
+        {/* Proof, stated as a countable fact rather than a claim. */}
+        <dl className="mt-16 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-8 border-t border-slate-200 dark:border-slate-800 pt-10 sm:grid-cols-3">
+          <div>
+            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">Live client sites</dt>
+            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
+              {CLIENTS.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">Industries served</dt>
+            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
+              {new Set(CLIENTS.map((c) => c.industry)).size}
+            </dd>
+          </div>
+          <div className="col-span-2 sm:col-span-1">
+            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">You talk to</dt>
+            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
+              The builder
+            </dd>
+          </div>
+        </dl>
+      </Container>
+    </div>
   )
 }
