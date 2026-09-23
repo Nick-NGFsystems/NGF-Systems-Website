@@ -23,10 +23,10 @@ export default function WorkPage() {
         subtitle={`${CLIENTS.length} businesses across ${industries} industries. These are not mockups or concept pieces — click any of them and you are on a site we built and still look after today.`}
       />
 
-      <Section width="wide">
+      <Section bleed>
         <WorkGrid clients={CLIENTS} detailed />
 
-        <p className="mt-12 max-w-2xl font-body text-sm leading-relaxed text-slate-500 dark:text-slate-500">
+        <p className="mt-12 max-w-2xl text-[14.5px] leading-relaxed text-dim">
           Each of these clients edits their own content through the NGF portal. The capabilities
           listed on each card are the systems actually switched on for that business — a shop that
           does not sell online does not have a storefront it never uses.

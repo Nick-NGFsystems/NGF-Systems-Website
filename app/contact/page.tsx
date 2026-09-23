@@ -23,15 +23,13 @@ export default function ContactPage() {
         subtitle="We will come back within one business day, usually with a couple of questions and a straight answer on whether we are the right fit."
       />
 
-      <Section width="wide">
+      <Section bleed width="wide">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] lg:gap-16">
           <div>
             {/* The form reads ?intent= on mount, so it needs a Suspense
                 boundary for the static shell to prerender cleanly. */}
             <Suspense
-              fallback={
-                <div className="h-[520px] rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
-              }
+              fallback={<div className="h-[520px] rounded-xl border border-line bg-panel" />}
             >
               <ContactForm />
             </Suspense>
@@ -39,35 +37,31 @@ export default function ContactPage() {
 
           <div className="flex flex-col gap-8">
             <div>
-              <h2 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                Or reach us directly
-              </h2>
+              <h2 className="text-[16.5px] font-semibold text-white">Or reach us directly</h2>
               <ul className="mt-4 flex flex-col gap-3">
                 <li>
                   <a
                     href={`mailto:${CONTACT.email}`}
-                    className="inline-flex items-center gap-2.5 font-body text-sm text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
+                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-white"
                   >
-                    <Icon name="inbox" className="h-4 w-4 shrink-0 text-slate-400" />
+                    <Icon name="inbox" className="h-4 w-4 shrink-0 text-dim" />
                     <span className="break-all">{CONTACT.email}</span>
                   </a>
                 </li>
                 <li>
                   <a
                     href={CONTACT.phoneHref}
-                    className="inline-flex items-center gap-2.5 font-body text-sm text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
+                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-white"
                   >
-                    <Icon name="chat" className="h-4 w-4 shrink-0 text-slate-400" />
+                    <Icon name="chat" className="h-4 w-4 shrink-0 text-dim" />
                     {CONTACT.phone}
                   </a>
                 </li>
               </ul>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-              <h2 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                What happens next
-              </h2>
+            <div className="rounded-xl border border-line bg-panel p-6">
+              <h2 className="text-[16.5px] font-semibold text-white">What happens next</h2>
               <ol className="mt-4 flex flex-col gap-3">
                 {[
                   'We reply within one business day.',
@@ -76,35 +70,29 @@ export default function ContactPage() {
                   'You decide. If it is not right, you owe nothing.',
                 ].map((line, index) => (
                   <li key={line} className="flex gap-3">
-                    <span className="font-body text-sm font-semibold text-blue-600 dark:text-blue-400">
-                      {index + 1}.
-                    </span>
-                    <span className="font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                      {line}
-                    </span>
+                    <span className="text-[14.5px] font-semibold text-sand">{index + 1}.</span>
+                    <span className="text-[14.5px] leading-relaxed text-muted">{line}</span>
                   </li>
                 ))}
               </ol>
             </div>
 
             <div>
-              <h2 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                Where we work
-              </h2>
-              <p className="mt-3 font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              <h2 className="text-[16.5px] font-semibold text-white">Where we work</h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-muted">
                 Based in {CONTACT.location}. Most clients are in West Michigan, but the work is
                 remote-friendly — one of our sites is run from New Zealand.
               </p>
             </div>
 
-            <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
-              <p className="font-body text-sm text-slate-600 dark:text-slate-400">
+            <div className="border-t border-line pt-6">
+              <p className="text-[14.5px] text-muted">
                 Already a client?{' '}
                 <a
                   href={PORTAL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-semibold text-blue-600 hover:underline dark:text-blue-400 underline-offset-4"
+                  className="font-medium text-accent-light hover:underline underline-offset-4"
                 >
                   Sign in to your portal
                 </a>{' '}

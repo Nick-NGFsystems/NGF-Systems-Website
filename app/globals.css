@@ -5,48 +5,24 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 88px;
     -webkit-text-size-adjust: 100%;
-  }
-
-  section[id] {
-    scroll-margin-top: 88px;
+    /* The page is dark in every state, including the overscroll gutter and
+       the native form controls the browser draws for us. */
+    color-scheme: dark;
   }
 
   body {
-    @apply antialiased bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200;
+    @apply bg-ink text-white antialiased;
     overflow-x: hidden;
   }
-}
 
-@layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
+  /* One visible focus ring for the whole site. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-light ring-offset-2 ring-offset-ink;
   }
 
-  .glass-panel {
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.48));
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-  }
-
-  .dark .glass-panel {
-    background: linear-gradient(160deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.5));
-    border-color: rgba(148, 163, 184, 0.24);
-    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
-  }
-
-  .glass-nav {
-    background: rgba(255, 255, 255, 0.72);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-  }
-
-  .dark .glass-nav {
-    background: rgba(2, 6, 23, 0.72);
-    border-bottom-color: rgba(51, 65, 85, 0.7);
+  ::selection {
+    background: #5e8b87;
+    color: #fff;
   }
 }

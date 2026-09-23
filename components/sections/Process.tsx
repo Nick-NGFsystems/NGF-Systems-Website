@@ -3,14 +3,13 @@ import SectionHeading from '@/components/ui/SectionHeading'
 import { TERMS } from '@/lib/pricing'
 
 /**
- * How a project actually runs. This is the most common thing a small-business
- * owner is anxious about — what will be asked of me, and when do I pay — and
- * the old site answered none of it.
+ * How a project actually runs. This is the most common anxiety a small-business
+ * owner has — what will be asked of me, and when do I pay — and the old site
+ * answered none of it.
  *
  * The figures come from lib/pricing.ts, which mirrors the contract, so the
  * process described here cannot drift from the terms the client signs.
  */
-
 const STEPS = [
   {
     title: 'We talk',
@@ -34,9 +33,9 @@ const STEPS = [
   },
 ]
 
-export default function Process({ tone = 'muted' }: { tone?: 'default' | 'muted' }) {
+export default function Process() {
   return (
-    <Section id="process" tone={tone}>
+    <Section id="process">
       <SectionHeading
         eyebrow="How it works"
         title="You see the site before you pay for it"
@@ -45,29 +44,19 @@ export default function Process({ tone = 'muted' }: { tone?: 'default' | 'muted'
 
       <ol className="mt-14 flex flex-col">
         {STEPS.map((step, index) => (
-          <li
-            key={step.title}
-            className="relative flex gap-6 pb-10 last:pb-0"
-          >
-            {/* The rail, drawn between markers rather than under the last one. */}
+          <li key={step.title} className="relative flex gap-6 pb-10 last:pb-0">
             {index < STEPS.length - 1 && (
               <span
-                aria-hidden="true"
-                className="absolute left-[19px] top-10 bottom-0 w-px bg-slate-200 dark:bg-slate-800"
+                aria-hidden
+                className="absolute bottom-0 left-[19px] top-10 w-px bg-line"
               />
             )}
-
-            <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white font-sora text-sm font-semibold text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
+            <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-panel text-[14px] font-semibold text-white">
               {index + 1}
             </span>
-
             <div className="pt-1.5">
-              <h3 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                {step.title}
-              </h3>
-              <p className="mt-2 max-w-xl font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {step.body}
-              </p>
+              <h3 className="text-[16.5px] font-semibold text-white">{step.title}</h3>
+              <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-muted">{step.body}</p>
             </div>
           </li>
         ))}

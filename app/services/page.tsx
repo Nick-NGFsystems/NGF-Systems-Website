@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/ui/PageHeader'
 import Section from '@/components/ui/Section'
 import SectionHeading from '@/components/ui/SectionHeading'
-import FeatureItem from '@/components/ui/FeatureItem'
+import FeatureItem, { Tick } from '@/components/ui/FeatureItem'
 import Card from '@/components/ui/Card'
 import Icon, { type IconName } from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import CallToAction from '@/components/sections/CallToAction'
+import PortalShowcase from '@/components/sections/PortalShowcase'
 import { MODULES, contactHref } from '@/lib/pricing'
 
 export const metadata: Metadata = {
@@ -16,7 +17,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/services' },
 }
 
-/** The base, stated as capabilities rather than marketing lines. */
 const CORE: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'layout',
@@ -31,7 +31,7 @@ const CORE: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'shield',
     title: 'Hosting, SSL and backups',
-    body: 'Your site runs on infrastructure we manage. SSL certificates, daily backups, security updates and uptime are our responsibility, not a checklist we hand you.',
+    body: 'Your site runs on infrastructure we manage. Certificates, daily backups, security updates and uptime are our responsibility, not a checklist we hand you.',
   },
   {
     icon: 'edit',
@@ -66,7 +66,7 @@ export default function ServicesPage() {
         subtitle="Every NGF site gets the same foundation. On top of that you add only the parts your business actually uses — nothing is bundled in to justify a tier."
       />
 
-      <Section width="wide">
+      <Section bleed>
         <SectionHeading
           eyebrow="Included on every site"
           title="The foundation"
@@ -81,54 +81,36 @@ export default function ServicesPage() {
         </div>
       </Section>
 
-      <Section tone="muted" width="wide">
+      <PortalShowcase />
+
+      <Section>
         <SectionHeading
           eyebrow="Add what you need"
           title="Systems that do the work for you"
-          subtitle="Each of these is a real system in your portal, switched on only for the businesses that use it. This is what you are actually paying more for — not extra pages."
+          subtitle="Each of these is a real system in your portal, switched on only for the businesses that use it. This is what you are paying more for — not extra pages."
         />
 
-        <ul className="mt-14 grid gap-6 lg:grid-cols-2">
+        <ul className="mt-14 grid gap-5 lg:grid-cols-2">
           {MODULES.map((module) => (
             <Card as="li" key={module.key} className="flex flex-col p-7">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-blue-600 dark:border-slate-800 dark:bg-slate-950 dark:text-blue-400">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-line bg-panel text-accent-light">
                 <Icon name={MODULE_ICONS[module.key] ?? 'plug'} />
               </div>
 
-              <h3 className="mt-5 font-sora text-lg font-semibold text-slate-900 dark:text-white">
-                {module.name}
-              </h3>
+              <h3 className="mt-5 text-[18px] font-semibold text-white">{module.name}</h3>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-muted">{module.summary}</p>
 
-              <p className="mt-3 font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {module.summary}
-              </p>
-
-              <ul className="mt-5 flex flex-col gap-2">
+              <ul className="mt-5 space-y-2.5">
                 {module.includes.map((line) => (
-                  <li key={line} className="flex items-start gap-2.5">
-                    <Icon
-                      name="check"
-                      className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"
-                    />
-                    <span className="font-body text-sm text-slate-700 dark:text-slate-300">
-                      {line}
-                    </span>
-                  </li>
+                  <Tick key={line}>{line}</Tick>
                 ))}
               </ul>
 
               <div className="mt-6 flex-1" />
 
-              <div className="border-t border-slate-200 pt-5 dark:border-slate-800">
-                <p className="font-body text-xs text-slate-500 dark:text-slate-500">
-                  Usually for: {module.bestFor}
-                </p>
-                <Button
-                  href={contactHref(module.name)}
-                  variant="ghost"
-                  size="sm"
-                  className="-ml-4 mt-2"
-                >
+              <div className="border-t border-line pt-5">
+                <p className="text-[13px] text-dim">Usually for: {module.bestFor}</p>
+                <Button href={contactHref(module.name)} variant="ghost" size="sm" className="-ml-1 mt-2">
                   Ask about {module.name.toLowerCase()}
                   <Icon name="arrow-right" className="h-4 w-4" />
                 </Button>

@@ -3,14 +3,11 @@ import SectionHeading from '@/components/ui/SectionHeading'
 import Icon, { type IconName } from '@/components/ui/Icon'
 
 /**
- * The portal — the thing NGF has that a freelancer with a template does not,
- * and which the old site mentioned only as a login link in a grey bar at the
- * bottom of the page.
+ * The portal — the thing NGF has that a freelancer with a template does not.
  *
- * Each row below is a real capability in the platform
+ * Each row is a real capability in the platform
  * (NGF-Systems-app/lib/portal-capabilities.ts). Nothing here is aspirational.
  */
-
 const CAPABILITIES: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'edit',
@@ -46,35 +43,31 @@ const CAPABILITIES: { icon: IconName; title: string; body: string }[] = [
 
 export default function PortalShowcase() {
   return (
-    <Section id="portal" width="wide">
-      <div className="grid gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
+    <Section id="portal">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionHeading
             eyebrow="Your portal"
             title="Your website is not a black box"
             subtitle="Every client gets an account at app.ngfsystems.com. It is where your site, your enquiries and your billing all live — and you only ever see the parts that apply to your business."
           />
-          <p className="mt-6 font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          <p className="mt-6 text-[15px] leading-relaxed text-muted">
             A restaurant does not need a storefront. A jeweller does not need a booking diary. We
             switch on what you use and leave the rest out, so the portal stays something you can
-            actually learn in an afternoon.
+            learn in an afternoon.
           </p>
         </div>
 
-        <ul className="grid gap-x-10 gap-y-9 sm:grid-cols-2">
+        <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
           {CAPABILITIES.map(({ icon, title, body }) => (
             <li key={title}>
               <div className="flex items-center gap-2.5">
-                <span className="text-blue-600 dark:text-blue-400">
+                <span className="text-accent-light">
                   <Icon name={icon} className="h-[18px] w-[18px]" />
                 </span>
-                <h3 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                  {title}
-                </h3>
+                <h3 className="text-[16px] font-semibold text-white">{title}</h3>
               </div>
-              <p className="mt-2 font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {body}
-              </p>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{body}</p>
             </li>
           ))}
         </ul>

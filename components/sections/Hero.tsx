@@ -1,96 +1,92 @@
 import Button from '@/components/ui/Button'
 import Container from '@/components/ui/Container'
 import Icon from '@/components/ui/Icon'
+import { EYEBROW } from '@/components/ui/SectionHeading'
+import { WebsiteEditorPanel } from './PortalPanels'
 import type { NgfSiteContent } from '@/lib/ngf'
 import { CLIENTS } from '@/lib/clients'
+import { CONTACT } from '@/lib/nav'
 
 /**
- * The home page's opening statement. One sentence on what NGF does, one on
- * who for, and two actions — see the work, or start a conversation.
+ * Left-aligned and two-column: a statement beside the product.
  *
- * The old hero was a full viewport tall with four stacked background layers,
- * an animated badge and gradient text, and said "We build websites that
- * work", which is true of every web company there has ever been. It also
- * pushed everything of substance below the fold.
+ * A centred headline floating over a screenshot is the startup landing-page
+ * shape, and it reads less like an established firm. The stat row states
+ * countable facts rather than adjectives, and every figure is derived rather
+ * than typed, so it cannot drift from reality.
  */
 export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
-  const headline =
-    ngf?.hero?.headline || 'Websites for small businesses, built and looked after by one person.'
+  const headline = ngf?.hero?.headline || 'Your website, and everything you need to run it.'
   const subheadline =
     ngf?.hero?.subheadline ||
-    'We design the site, host it, keep it secure, and give you a portal where you can change your own text and photos whenever you want. No agency retainer, no ticket queue.'
+    'We design and build the site, host it, and give you one place to change your own words and pictures, read every enquiry, and take bookings. One person builds it, and you always know who to call.'
+
+  const industries = new Set(CLIENTS.map((c) => c.industry)).size
 
   return (
-    <div className="relative overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-      {/* One restrained background wash, not four stacked gradients. */}
+    <section className="relative overflow-hidden">
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-slate-50 to-transparent dark:from-slate-900/50"
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(75%_60%_at_25%_0%,rgba(94,139,135,.16),transparent_72%)]"
       />
 
-      <Container className="relative py-20 sm:py-28 lg:py-32">
-        <div className="max-w-3xl">
-          <p className="font-body text-xs font-semibold uppercase tracking-[0.12em] text-blue-600 dark:text-blue-400">
-            Hudsonville, Michigan
-          </p>
+      <Container className="relative pb-16 pt-16 sm:pt-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+          <div>
+            <p className={EYEBROW}>{CONTACT.location}</p>
 
-          <h1
-            data-ngf-field="hero.headline"
-            data-ngf-label="Headline"
-            data-ngf-type="textarea"
-            data-ngf-section="Hero"
-            className="mt-5 font-sora text-4xl font-semibold leading-[1.1] tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl"
-          >
-            {headline}
-          </h1>
+            <h1
+              data-ngf-field="hero.headline"
+              data-ngf-label="Headline"
+              data-ngf-type="textarea"
+              data-ngf-section="Hero"
+              className="mt-6 text-[40px] font-semibold leading-[1.08] tracking-[-0.025em] text-white sm:text-[52px]"
+            >
+              {headline}
+            </h1>
 
-          <p
-            data-ngf-field="hero.subheadline"
-            data-ngf-label="Intro"
-            data-ngf-type="textarea"
-            data-ngf-section="Hero"
-            className="mt-6 max-w-2xl font-body text-lg leading-relaxed text-slate-600 dark:text-slate-400"
-          >
-            {subheadline}
-          </p>
+            <p
+              data-ngf-field="hero.subheadline"
+              data-ngf-label="Intro"
+              data-ngf-type="textarea"
+              data-ngf-section="Hero"
+              className="mt-6 max-w-lg text-[17px] leading-[1.65] text-muted"
+            >
+              {subheadline}
+            </p>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button href="/contact" size="lg">
-              Get a free mockup
-              <Icon name="arrow-right" className="h-4 w-4" />
-            </Button>
-            <Button href="/work" variant="secondary" size="lg">
-              See our work
-            </Button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href="/contact" size="lg">
+                Get a free mockup
+                <Icon name="arrow-right" className="h-4 w-4" />
+              </Button>
+              <Button href="/work" variant="secondary" size="lg">
+                See our work
+              </Button>
+            </div>
+
+            <p className="mt-5 text-[14.5px] text-dim">
+              You see the design before you pay anything.
+            </p>
           </div>
 
-          <p className="mt-6 font-body text-sm text-slate-500 dark:text-slate-500">
-            We build you a mockup before you pay anything. If you do not like it, you owe nothing.
-          </p>
+          <WebsiteEditorPanel className="shadow-[0_32px_90px_-30px_rgba(0,0,0,.8)]" />
         </div>
 
-        {/* Proof, stated as a countable fact rather than a claim. */}
-        <dl className="mt-16 grid max-w-2xl grid-cols-2 gap-x-8 gap-y-8 border-t border-slate-200 dark:border-slate-800 pt-10 sm:grid-cols-3">
-          <div>
-            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">Live client sites</dt>
-            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
-              {CLIENTS.length}
-            </dd>
-          </div>
-          <div>
-            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">Industries served</dt>
-            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
-              {new Set(CLIENTS.map((c) => c.industry)).size}
-            </dd>
-          </div>
-          <div className="col-span-2 sm:col-span-1">
-            <dt className="font-body text-sm text-slate-500 dark:text-slate-500">You talk to</dt>
-            <dd className="mt-1 font-sora text-3xl font-semibold text-slate-900 dark:text-white">
-              The builder
-            </dd>
-          </div>
+        <dl className="mt-16 grid gap-8 border-t border-line pt-10 sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            [String(CLIENTS.length), 'Live client sites'],
+            [String(industries), 'Industries served'],
+            ['1 business day', 'Typical reply time'],
+            ['West Michigan', 'And remote'],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <dd className="text-[26px] font-semibold tracking-tight text-white">{value}</dd>
+              <dt className="mt-1.5 text-[14px] text-muted">{label}</dt>
+            </div>
+          ))}
         </dl>
       </Container>
-    </div>
+    </section>
   )
 }

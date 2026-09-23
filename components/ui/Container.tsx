@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 
 const WIDTHS = {
   narrow: 'max-w-3xl',
-  default: 'max-w-5xl',
-  wide: 'max-w-6xl',
+  default: 'max-w-6xl',
+  wide: 'max-w-7xl',
 } as const
 
 /** The one horizontal rhythm on the site. Nothing sets its own page margin. */

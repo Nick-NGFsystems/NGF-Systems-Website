@@ -32,11 +32,16 @@
  *   maintenanceRateCents, lateFeePctPerMonth, termDiscounts,
  *   freeMockupRevisionRounds, mockupAcceptanceDays
  *
- * PROPOSED — flagged `unconfirmed: true`. The app has no figure for these, and
- * the old website's numbers ($150/$300/$600 setup, $799/$1,500/$2,500 builds,
- * $30/mo hosting) were never reconciled with HANDOFF. They are a starting
- * point for Nick to set, not established prices. `UNCONFIRMED_PRICING` lists
- * them so a check can fail the build before any of them go live by accident.
+ * UNCONFIRMED — anything Nick has not set is `null`, and renders as "Quoted"
+ * rather than a number. This is not squeamishness: a build of this file with
+ * invented figures reached production on 2026-09-23 and published a $150 setup
+ * fee and +$50/+$75 module prices on ngfsystems.com, any of which a prospect
+ * could have held him to. Only figures that match HANDOFF.md — the document
+ * contracts are signed from — are ever rendered as prices.
+ *
+ * To publish a real number: set the cents value here AND remove its line from
+ * `UNCONFIRMED_PRICING` AND clear `unconfirmed` on the module. All three, so
+ * the sign-off gate below stays honest.
  *
  * Money in CENTS. Pure: no React, no env, no network — importable anywhere.
  */
@@ -82,8 +87,11 @@ export const TRACKS: readonly Track[] = [
     tagline: 'We build it, host it, and keep it running. You pay monthly and can stop any time.',
     baseCents: 10_000, // CANONICAL — HANDOFF "$100/mo"
     basePer: '/month',
-    setupCents: 15_000, // PROPOSED
-    setupNote: 'one-time setup, due at launch',
+    // PROPOSED figures are not published. A setup fee is real, but the amount
+    // is Nick's to set — see UNCONFIRMED_PRICING. Null renders as "quoted with
+    // your mockup" rather than a number a prospect could hold him to.
+    setupCents: null,
+    setupNote: 'setup fee quoted with your mockup',
     ownership: 'NGF owns the site and licenses it to you while your plan is active.',
     changes: 'Ordinary content changes are included — submit them from your portal.',
     terms: [
@@ -201,8 +209,8 @@ export const MODULES: readonly Module[] = [
       'Every appointment in your portal, with the ability to cancel or reschedule',
     ],
     configColumn: 'feature_booking',
-    monthlyCents: 5_000, // PROPOSED
-    oneTimeCents: 40_000, // PROPOSED
+    monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
+    oneTimeCents: null,
     unconfirmed: true,
     bestFor: 'Barbers, detailers, tint shops, trades, consultants',
   },
@@ -217,8 +225,8 @@ export const MODULES: readonly Module[] = [
       'Order notifications by email',
     ],
     configColumn: 'page_orders',
-    monthlyCents: 7_500, // PROPOSED
-    oneTimeCents: 75_000, // PROPOSED
+    monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
+    oneTimeCents: null,
     unconfirmed: true,
     bestFor: 'Retail, makers, jewellery, anyone shipping a physical product',
   },
@@ -349,11 +357,11 @@ export const TERMS = {
  * `unconfirmed` on the module.
  */
 export const UNCONFIRMED_PRICING: readonly string[] = [
-  'TRACKS.monthly.setupCents ($150 setup fee — the app has no figure for this)',
-  'MODULES.booking.monthlyCents / oneTimeCents',
-  'MODULES.store.monthlyCents / oneTimeCents',
-  'MODULES.accounts — quote-only, no figure set',
-  'MODULES.integrations — quote-only, no figure set',
+  'TRACKS.monthly.setupCents — the monthly setup fee. The app has no figure.',
+  'MODULES.booking.monthlyCents / oneTimeCents — online booking',
+  'MODULES.store.monthlyCents / oneTimeCents — online store',
+  'MODULES.accounts — customer accounts, quote-only',
+  'MODULES.integrations — custom integrations, quote-only',
 ]
 
 export const HAS_UNCONFIRMED_PRICING = UNCONFIRMED_PRICING.length > 0

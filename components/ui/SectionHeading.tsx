@@ -1,39 +1,38 @@
 import type { ReactNode } from 'react'
 
+/** The eyebrow style, shared so every section labels itself identically. */
+export const EYEBROW =
+  'text-[12px] font-semibold uppercase tracking-[0.16em] text-sand'
+
 /**
  * The heading block every section uses: a small uppercase eyebrow, a title,
- * and at most one line of subtitle. Sentence case throughout — the old page
- * mixed Title Case headings with sentence-case body and read as a template.
+ * and at most one line of intro. Sentence case throughout.
  *
- * `ngfField` wires the title and subtitle to the portal editor when the page
- * is one the scraper reads (today: the home page only).
+ * `ngf*` props wire the title and intro to the portal editor on pages the
+ * scraper reads (today: the home page only).
  */
 export default function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = 'left',
   ngfSection,
   ngfTitleField,
   ngfSubtitleField,
   as: Tag = 'h2',
+  className = '',
 }: {
   eyebrow?: string
   title: ReactNode
   subtitle?: ReactNode
-  align?: 'left' | 'center'
   ngfSection?: string
   ngfTitleField?: string
   ngfSubtitleField?: string
   as?: 'h1' | 'h2'
+  className?: string
 }) {
-  const alignment = align === 'center' ? 'text-center mx-auto max-w-2xl' : 'max-w-2xl'
-  const size =
-    Tag === 'h1'
-      ? 'text-4xl sm:text-5xl lg:text-6xl'
-      : 'text-3xl sm:text-4xl'
+  const size = Tag === 'h1' ? 'text-[42px] sm:text-[52px]' : 'text-[32px] sm:text-[36px]'
 
-  const ngfTitleAttrs =
+  const titleAttrs =
     ngfTitleField && ngfSection
       ? {
           'data-ngf-field': ngfTitleField,
@@ -43,7 +42,7 @@ export default function SectionHeading({
         }
       : {}
 
-  const ngfSubtitleAttrs =
+  const subtitleAttrs =
     ngfSubtitleField && ngfSection
       ? {
           'data-ngf-field': ngfSubtitleField,
@@ -54,23 +53,16 @@ export default function SectionHeading({
       : {}
 
   return (
-    <div className={alignment}>
-      {eyebrow && (
-        <p className="font-body text-xs font-semibold uppercase tracking-[0.12em] text-blue-600 dark:text-blue-400 mb-4">
-          {eyebrow}
-        </p>
-      )}
+    <div className={`max-w-2xl ${className}`}>
+      {eyebrow && <p className={EYEBROW}>{eyebrow}</p>}
       <Tag
-        {...ngfTitleAttrs}
-        className={`font-sora font-semibold tracking-tight text-slate-900 dark:text-white ${size} leading-[1.12]`}
+        {...titleAttrs}
+        className={`${eyebrow ? 'mt-4' : ''} font-semibold tracking-[-0.02em] text-white ${size} leading-[1.12]`}
       >
         {title}
       </Tag>
       {subtitle && (
-        <p
-          {...ngfSubtitleAttrs}
-          className="mt-5 font-body text-lg leading-relaxed text-slate-600 dark:text-slate-400"
-        >
+        <p {...subtitleAttrs} className="mt-5 text-[16.5px] leading-[1.65] text-muted">
           {subtitle}
         </p>
       )}

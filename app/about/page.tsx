@@ -45,23 +45,20 @@ export default function AboutPage() {
         subtitle="NGF Systems builds, hosts and maintains websites for small businesses. It is deliberately small, which is the reason the work looks the way it does."
       />
 
-      <Section>
+      <Section bleed>
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-20">
           <div>
-            <SectionHeading
-              eyebrow="Who you are working with"
-              title="Small on purpose"
-            />
-            <div className="mt-8 flex flex-col gap-5 font-body text-base leading-relaxed text-slate-600 dark:text-slate-400">
+            <SectionHeading eyebrow="Who you are working with" title="Small on purpose" />
+            <div className="mt-8 flex flex-col gap-5 text-[16px] leading-relaxed text-muted">
               <p>
-                NGF Systems is run by Nick, out of Hudsonville, Michigan. Every site on the work
-                page was designed, built, launched and is still maintained by the same person you
-                will be emailing.
+                NGF Systems is run by Nick, out of {CONTACT.location}. Every site on the work page
+                was designed, built, launched and is still maintained by the same person you will be
+                emailing.
               </p>
               <p>
                 That is a real constraint and it is worth being honest about it: we take on fewer
-                projects than an agency, and we are not the right choice for a company that needs
-                a team of twelve on site next week. What it buys you is that nothing is lost in a
+                projects than an agency, and we are not the right choice for a company that needs a
+                team of twelve on site next week. What it buys you is that nothing is lost in a
                 handoff, nobody has to be brought up to speed on your business, and a small change
                 does not have to travel through three people to get made.
               </p>
@@ -69,14 +66,14 @@ export default function AboutPage() {
                 The other half of the answer is the platform. Rather than build every client a
                 bespoke system from nothing, NGF runs its own software — the portal your site is
                 managed through. That is what makes it possible for one person to look after{' '}
-                {CLIENTS.length} live sites across {industries} industries without any of them
-                being neglected.
+                {CLIENTS.length} live sites across {industries} industries without any of them being
+                neglected.
               </p>
             </div>
           </div>
 
           <div className="lg:pt-24">
-            <dl className="flex flex-col divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            <dl className="flex flex-col divide-y divide-line rounded-xl border border-line">
               {[
                 ['Based in', CONTACT.location],
                 ['Working with', CONTACT.serviceArea],
@@ -84,10 +81,8 @@ export default function AboutPage() {
                 ['Industries served', String(industries)],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between gap-4 px-5 py-4">
-                  <dt className="font-body text-sm text-slate-500 dark:text-slate-500">{label}</dt>
-                  <dd className="text-right font-body text-sm font-semibold text-slate-900 dark:text-white">
-                    {value}
-                  </dd>
+                  <dt className="text-[14.5px] text-muted">{label}</dt>
+                  <dd className="text-right text-[14.5px] font-semibold text-white">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -95,7 +90,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section tone="muted">
+      <Section>
         <SectionHeading
           eyebrow="How we work"
           title="Four things we hold to"
@@ -106,23 +101,16 @@ export default function AboutPage() {
           {PRINCIPLES.map((principle) => (
             <div key={principle.title}>
               <div className="flex items-start gap-3">
-                <Icon
-                  name="check"
-                  className="mt-1 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"
-                />
-                <h3 className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                  {principle.title}
-                </h3>
+                <Icon name="check" className="mt-1 h-5 w-5 shrink-0 text-sand" />
+                <h3 className="text-[16.5px] font-semibold text-white">{principle.title}</h3>
               </div>
-              <p className="mt-2.5 pl-8 font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {principle.body}
-              </p>
+              <p className="mt-2.5 pl-8 text-[15px] leading-relaxed text-muted">{principle.body}</p>
             </div>
           ))}
         </div>
       </Section>
 
-      <Process tone="default" />
+      <Process />
 
       <CallToAction />
     </>

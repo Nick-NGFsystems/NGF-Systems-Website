@@ -19,6 +19,10 @@ const FAQ: { q: string; a: string }[] = [
     a: 'Because page count has almost nothing to do with the work. A three-page site that takes bookings and payments is more to build and far more to look after than a nine-page brochure. Pricing by pages meant charging the wrong people too much and the right people too little, and it made adding a page feel like a penalty.',
   },
   {
+    q: 'Why do some things say "Quoted" instead of a price?',
+    a: 'Because we would rather say nothing than publish a number we have not stood behind. Anything shown as Quoted is priced with your mockup, before you commit to anything.',
+  },
+  {
     q: 'What happens if I want to leave?',
     a: 'On the monthly plan you can cancel at any time — there is no minimum term. The site was built and is owned by us, so it comes down when the plan ends, and we will hand over your content and point your domain wherever you like. On a one-time build you already own the code, so nothing changes; you can move it or keep us hosting it.',
   },
@@ -53,31 +57,27 @@ export default function PricingPage() {
         subtitle="Two decisions: how you want to pay for the build, and what the site needs to do. Nothing else changes the price, and there is nothing you have to buy to unlock something else."
       />
 
-      <Section width="wide">
+      <Section bleed width="wide">
         <PricingTables />
       </Section>
 
-      <Section tone="muted">
+      <Section>
         <SectionHeading
           eyebrow="The details"
           title="The things people ask before they sign"
           subtitle="If the answer you need is not here, ask — we would rather have the awkward conversation now than after you have paid."
         />
 
-        <dl className="mt-14 flex flex-col divide-y divide-slate-200 border-y border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+        <dl className="mt-14 flex flex-col divide-y divide-line border-y border-line">
           {FAQ.map(({ q, a }) => (
             <div key={q} className="py-7">
-              <dt className="font-sora text-base font-semibold text-slate-900 dark:text-white">
-                {q}
-              </dt>
-              <dd className="mt-2.5 max-w-2xl font-body text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                {a}
-              </dd>
+              <dt className="text-[16.5px] font-semibold text-white">{q}</dt>
+              <dd className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-muted">{a}</dd>
             </div>
           ))}
         </dl>
 
-        <p className="mt-10 max-w-2xl font-body text-sm leading-relaxed text-slate-500 dark:text-slate-500">
+        <p className="mt-10 max-w-2xl text-[14px] leading-relaxed text-dim">
           Overdue invoices carry a {TERMS.lateFeePctPerMonth}% monthly late fee. Longer term
           commitments are available at a discount if you want one, but we never ask for one.
         </p>

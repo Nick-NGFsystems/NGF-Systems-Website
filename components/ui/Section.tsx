@@ -2,30 +2,29 @@ import type { ReactNode } from 'react'
 import Container from './Container'
 
 /**
- * One vertical rhythm for every band on the site, and one place that decides
- * what a "muted" band looks like. Sections alternate tone rather than each
- * inventing a gradient, which is what made the old page feel busy.
+ * One vertical rhythm for every band on the site, and one hairline between
+ * them. Direction A separates sections with a rule rather than alternating
+ * background tones — on a dark canvas, tonal bands muddy into each other.
  */
 export default function Section({
   children,
   id,
-  tone = 'default',
+  bleed = false,
   width = 'default',
   className = '',
 }: {
   children: ReactNode
   id?: string
-  tone?: 'default' | 'muted'
+  /** Drop the top rule — for a section that follows one already drawing it. */
+  bleed?: boolean
   width?: 'narrow' | 'default' | 'wide'
   className?: string
 }) {
-  const bg =
-    tone === 'muted'
-      ? 'bg-slate-50 dark:bg-slate-900/40 border-y border-slate-200/70 dark:border-slate-800'
-      : 'bg-white dark:bg-slate-950'
-
   return (
-    <section id={id} className={`${bg} py-20 sm:py-28 ${className}`}>
+    <section
+      id={id}
+      className={`${bleed ? '' : 'border-t border-line'} py-20 sm:py-24 ${className}`}
+    >
       <Container width={width}>{children}</Container>
     </section>
   )

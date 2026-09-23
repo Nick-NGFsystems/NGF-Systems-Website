@@ -8,9 +8,9 @@ import { isKnownIntent } from '@/lib/pricing'
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
 const FIELD =
-  'w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 font-body text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60 min-h-[44px]'
+  'w-full min-h-[44px] rounded-lg border border-line bg-ink px-3.5 py-2.5 text-[15px] text-white placeholder:text-dim focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60'
 
-const LABEL = 'font-body text-sm font-medium text-slate-700 dark:text-slate-300'
+const LABEL = 'text-[14.5px] font-medium text-white/85'
 
 export default function ContactForm() {
   const [name, setName] = useState('')
@@ -66,14 +66,12 @@ export default function ContactForm() {
 
   if (state === 'success') {
     return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
+      <div className="rounded-xl border border-line bg-panel p-8 text-center">
+        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-accent/20 text-accent-light">
           <Icon name="check" className="h-5 w-5" />
         </div>
-        <p className="font-sora font-semibold text-lg text-slate-900 dark:text-white">
-          Thanks — that came through.
-        </p>
-        <p className="mt-2 font-body text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-[18px] font-semibold text-white">Thanks — that came through.</p>
+        <p className="mt-2 text-[15px] text-muted">
           We reply within one business day, usually sooner.
         </p>
       </div>
@@ -83,18 +81,18 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8"
+      className="rounded-xl border border-line bg-panel p-6 sm:p-8"
       noValidate
     >
       {intent && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/50 px-4 py-3">
-          <span className="font-body text-sm font-medium text-blue-800 dark:text-blue-300">
+        <div className="mb-6 flex items-center gap-3 rounded-lg border border-accent/40 bg-accent/10 px-4 py-3">
+          <span className="text-[14.5px] font-medium text-accent-light">
             Enquiring about: {intent}
           </span>
           <button
             type="button"
             onClick={() => setIntent('')}
-            className="ml-auto font-body text-xs text-blue-600/70 dark:text-blue-400/70 hover:text-blue-800 dark:hover:text-blue-300"
+            className="ml-auto text-[13px] text-muted transition-colors hover:text-white"
           >
             Clear
           </button>
@@ -156,7 +154,7 @@ export default function ContactForm() {
       {errorMsg && (
         <p
           role="alert"
-          className="mt-5 rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 px-4 py-3 font-body text-sm text-red-700 dark:text-red-400"
+          className="mt-5 rounded-lg border border-red-900/60 bg-red-950/40 px-4 py-3 text-[14.5px] text-red-300"
         >
           {errorMsg}
         </p>
@@ -166,9 +164,7 @@ export default function ContactForm() {
         <Button type="submit" size="lg" disabled={state === 'loading'}>
           {state === 'loading' ? 'Sending…' : 'Send enquiry'}
         </Button>
-        <p className="font-body text-xs text-slate-500 dark:text-slate-500">
-          No obligation. We reply within one business day.
-        </p>
+        <p className="text-[13px] text-dim">No obligation. We reply within one business day.</p>
       </div>
     </form>
   )
