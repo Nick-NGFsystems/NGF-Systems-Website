@@ -1,51 +1,92 @@
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
+import Container from '@/components/ui/Container'
+import Icon from '@/components/ui/Icon'
+import { EYEBROW } from '@/components/ui/SectionHeading'
+import { WebsiteEditorPanel } from './PortalPanels'
 import type { NgfSiteContent } from '@/lib/ngf'
+import { CLIENTS } from '@/lib/clients'
+import { CONTACT } from '@/lib/nav'
 
+/**
+ * Left-aligned and two-column: a statement beside the product.
+ *
+ * A centred headline floating over a screenshot is the startup landing-page
+ * shape, and it reads less like an established firm. The stat row states
+ * countable facts rather than adjectives, and every figure is derived rather
+ * than typed, so it cannot drift from reality.
+ */
 export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
-  const subheadline = ngf?.hero?.subheadline || 'NGF Systems builds and manages websites for small businesses and realtors across Michigan. We handle everything — so you can focus on running your business.'
-  const ctaText = ngf?.hero?.ctaText || 'Get a Free Mockup'
-  const ctaLink = ngf?.hero?.ctaLink || '/?intent=Free+Mockup+Request#contact'
+  const headline = ngf?.hero?.headline || 'Your website, and everything you need to run it.'
+  const subheadline =
+    ngf?.hero?.subheadline ||
+    'We design and build the site, host it, and give you one place to change your own words and pictures, read every enquiry, and take bookings. One person builds it, and you always know who to call.'
+
+  const industries = new Set(CLIENTS.map((c) => c.industry)).size
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center text-center px-5 pt-24 pb-20 overflow-hidden bg-white dark:bg-slate-950">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-slate-950 dark:to-slate-950"/>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-indigo-50/60 via-transparent to-transparent dark:from-indigo-950/20 dark:via-transparent dark:to-transparent"/>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.07)_1px,transparent_1px)] bg-[size:48px_48px] dark:bg-[linear-gradient(rgba(148,163,184,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.03)_1px,transparent_1px)]"/>
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-blue-400/10 dark:bg-blue-500/5 rounded-full blur-3xl pointer-events-none"/>
+    <section className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(75%_60%_at_25%_0%,rgba(94,139,135,.16),transparent_72%)]"
+      />
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 border border-blue-100 dark:border-blue-900 shadow-sm shadow-blue-100/50 dark:shadow-blue-900/20 rounded-full px-4 py-1.5 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"/>
-          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 font-inter tracking-wide">Michigan-based · Web Management Platform</span>
+      <Container className="relative pb-16 pt-16 sm:pt-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+          <div>
+            <p className={EYEBROW}>{CONTACT.location}</p>
+
+            <h1
+              data-ngf-field="hero.headline"
+              data-ngf-label="Headline"
+              data-ngf-type="textarea"
+              data-ngf-section="Hero"
+              className="mt-6 text-[40px] font-semibold leading-[1.08] tracking-[-0.025em] text-white sm:text-[52px]"
+            >
+              {headline}
+            </h1>
+
+            <p
+              data-ngf-field="hero.subheadline"
+              data-ngf-label="Intro"
+              data-ngf-type="textarea"
+              data-ngf-section="Hero"
+              className="mt-6 max-w-lg text-[17px] leading-[1.65] text-muted"
+            >
+              {subheadline}
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button href="/contact" size="lg">
+                Get a free mockup
+                <Icon name="arrow-right" className="h-4 w-4" />
+              </Button>
+              <Button href="/work" variant="secondary" size="lg">
+                See our work
+              </Button>
+            </div>
+
+            <p className="mt-5 text-[14.5px] text-dim">
+              You see the design before you pay anything.
+            </p>
+          </div>
+
+          <WebsiteEditorPanel className="shadow-[0_32px_90px_-30px_rgba(0,0,0,.8)]" />
         </div>
 
-        <h1 className="font-sora font-bold text-5xl sm:text-6xl lg:text-[72px] tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-6">
-          We build websites{' '}
-          <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 bg-clip-text text-transparent">
-            that work.
-          </span>
-        </h1>
-
-        <p data-ngf-field="hero.subheadline" data-ngf-label="Subheadline" data-ngf-type="textarea" data-ngf-section="Hero" className="text-lg sm:text-xl text-slate-500 dark:text-slate-400 font-inter leading-relaxed max-w-2xl mx-auto mb-10">
-          {subheadline}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-16">
-          <Link
-            href="#pricing"
-            className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 font-inter"
-          >
-            See Pricing
-          </Link>
-          <Link
-            href={ctaLink}
-            className="group bg-white dark:bg-slate-900 border border-slate-900/10 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-base px-8 py-4 rounded-xl transition-all shadow-sm dark:shadow-none dark:hover:border-slate-600 font-inter"
-          >
-            <span data-ngf-field="hero.ctaText" data-ngf-label="Cta Text" data-ngf-type="text" data-ngf-section="Hero">{ctaText}</span>
-            <span className="inline-block ml-2 group-hover:translate-x-0.5 transition-transform">→</span>
-          </Link>
-        </div>
-      </div>
+        <dl className="mt-16 grid gap-8 border-t border-line pt-10 sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            [String(CLIENTS.length), 'Live client sites'],
+            [String(industries), 'Industries served'],
+            ['1 business day', 'Typical reply time'],
+            ['West Michigan', 'And remote'],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <dd className="text-[26px] font-semibold tracking-tight text-white">{value}</dd>
+              <dt className="mt-1.5 text-[14px] text-muted">{label}</dt>
+            </div>
+          ))}
+        </dl>
+      </Container>
     </section>
   )
 }

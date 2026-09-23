@@ -2,116 +2,133 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import ThemeToggle from '@/components/ui/ThemeToggle'
+import { usePathname } from 'next/navigation'
+import Button from '@/components/ui/Button'
+import { NAV, PORTAL_URL, CONTACT } from '@/lib/nav'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
 
+  // A route change must close the menu, or tapping a link on a phone
+  // navigates behind a panel that stays open over the new page.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    setMenuOpen(false)
+  }, [pathname])
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled
-        ? 'bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50 border-b border-slate-200/50 dark:border-slate-800/50'
-        : 'bg-transparent'
-    }`}>
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="font-sora font-bold text-xl tracking-tight">
-          <span className="text-blue-600">NGF</span>
-          <span className="text-slate-900 dark:text-white"> Systems</span>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-line/70 bg-ink/85 backdrop-blur-xl">
+      <nav className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-6 sm:px-8">
+        <Link href="/" className="shrink-0 text-[17px] font-semibold tracking-tight text-white">
+          NGF<span className="text-sand"> Systems</span>
         </Link>
 
-        {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-1">
-          {[['#features', 'Features'], ['#pricing', 'Pricing'], ['#contact', 'Contact']].map(([href, label]) => (
+        <ul className="hidden items-center gap-8 lg:flex">
+          {NAV.map(({ href, label }) => (
             <li key={href}>
               <Link
                 href={href}
-                className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-4 py-2 rounded-lg hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-all"
+                aria-current={isActive(href) ? 'page' : undefined}
+                className={`text-[15px] transition-colors ${
+                  isActive(href) ? 'text-white' : 'text-muted hover:text-white'
+                }`}
               >
                 {label}
               </Link>
             </li>
           ))}
-
-          {/* Divider */}
-          <li className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
-
-          {/* Client login */}
-          <li>
-            <Link
-              href="https://app.ngfsystems.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-50/80 dark:hover:bg-blue-950/40 transition-all"
-            >
-              Client Login
-            </Link>
-          </li>
-
-          <li><ThemeToggle /></li>
-          <li className="ml-1">
-            <Link
-              href="#contact"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-px"
-            >
-              Get Started
-            </Link>
-          </li>
         </ul>
 
-        {/* Mobile right side */}
-        <div className="md:hidden flex items-center gap-2">
-          <ThemeToggle />
-          <button
-            className="flex flex-col gap-1.5 p-2 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+        <div className="hidden items-center gap-5 md:flex">
+          {/* A business that publishes its number reads differently from one
+              that only offers a form. */}
+          <a
+            href={CONTACT.phoneHref}
+            className="hidden text-[15px] text-muted transition-colors hover:text-white lg:block"
           >
-            <span className={`block w-5 h-0.5 bg-slate-700 dark:bg-slate-300 transition-all duration-200 origin-center ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-slate-700 dark:bg-slate-300 transition-all duration-200 ${menuOpen ? 'opacity-0 scale-x-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-slate-700 dark:bg-slate-300 transition-all duration-200 origin-center ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-5 py-4 flex flex-col gap-1 shadow-xl">
-          {[['#features', 'Features'], ['#pricing', 'Pricing'], ['#contact', 'Contact']].map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 min-h-[44px] flex items-center px-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              {label}
-            </Link>
-          ))}
-          <div className="w-full h-px bg-slate-100 dark:bg-slate-800 my-1" />
+            {CONTACT.phone}
+          </a>
           <Link
-            href="https://app.ngfsystems.com"
+            href={PORTAL_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-blue-600 dark:text-blue-400 min-h-[44px] flex items-center px-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
-            onClick={() => setMenuOpen(false)}
+            className="text-[15px] text-muted transition-colors hover:text-white"
           >
-            Client Login →
+            Client login
           </Link>
-          <Link
-            href="#contact"
-            className="bg-blue-600 text-white text-sm font-semibold px-5 py-3 rounded-xl text-center mt-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            Get Started
-          </Link>
+          <Button href="/contact" size="sm">
+            Get a free mockup
+          </Button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-lg transition-colors hover:bg-panel md:hidden"
+        >
+          <span
+            className={`block h-0.5 w-5 bg-white transition-transform duration-200 ${
+              menuOpen ? 'translate-y-2 rotate-45' : ''
+            }`}
+          />
+          <span
+            className={`block h-0.5 w-5 bg-white transition-opacity duration-200 ${
+              menuOpen ? 'opacity-0' : ''
+            }`}
+          />
+          <span
+            className={`block h-0.5 w-5 bg-white transition-transform duration-200 ${
+              menuOpen ? '-translate-y-2 -rotate-45' : ''
+            }`}
+          />
+        </button>
+      </nav>
+
+      {menuOpen && (
+        <div id="mobile-menu" className="border-t border-line bg-ink px-6 py-3 md:hidden">
+          <ul className="flex flex-col">
+            {NAV.map(({ href, label }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                  className={`flex min-h-[48px] items-center text-[16px] font-medium ${
+                    isActive(href) ? 'text-sand' : 'text-white/85'
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+            <li className="mt-1 border-t border-line pt-1">
+              <a
+                href={CONTACT.phoneHref}
+                className="flex min-h-[48px] items-center text-[16px] font-medium text-muted"
+              >
+                {CONTACT.phone}
+              </a>
+            </li>
+            <li>
+              <Link
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[48px] items-center text-[16px] font-medium text-muted"
+              >
+                Client login
+              </Link>
+            </li>
+          </ul>
+          <Button href="/contact" size="md" className="mt-3 w-full">
+            Get a free mockup
+          </Button>
         </div>
       )}
-    </nav>
+    </header>
   )
 }

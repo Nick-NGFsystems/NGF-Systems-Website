@@ -83,7 +83,7 @@ async headers() {
 
 | Layer | Tool | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 15.3.8 exactly |
+| Framework | Next.js (App Router) | latest patched 15.5.x |
 | Runtime | React | 18.x |
 | Language | TypeScript | always, never plain JS |
 | Styling | Tailwind CSS | 3.x |
@@ -96,7 +96,11 @@ async headers() {
 
 ### Critical Version Rules
 - **Never install Next.js 16+** — breaks route groups and has incompatibilities with React 18
-- **Always use Next.js 15.3.8 specifically** — earlier 15.x versions have a security vulnerability (CVE-2025-66478)
+- **Stay on the latest patched 15.5.x.** This rule previously said "15.3.8 exactly". That is wrong and
+  was actively unsafe: upstream only patches the NEWEST minor of a supported major, so 15.3.x is
+  unpatched — it is the version that sat in range for the middleware-bypass advisory, which is why
+  `NGF-Systems-app/CLAUDE.md` names it directly. `scripts/ngf-doctor.mjs` enforces the correct rule
+  and FAILS on 15.3.8. This repo is on 15.5.25.
 - **Never install React 19+** — incompatible with Next.js 15
 - **Never install Prisma 6+** — breaking changes in schema syntax
 - **Turbopack must always be disabled** — never use `--turbopack` flag or enable it in config
@@ -539,7 +543,7 @@ return NextResponse.json({ success: false, error: "Descriptive message" }, { sta
 10. Never duplicate functions — check if it exists first
 11. Never use Turbopack
 12. Never install `@clerk/nextjs@latest` — always pin to v6
-13. Never install Next.js 16+ — always use 15.3.8
+13. Never install Next.js 16+ — always use the latest patched 15.5.x (NOT 15.3.8; see Critical Version Rules)
 14. Never use `npx prisma` — always `./node_modules/.bin/prisma`
 15. Portal routes must have `portal-` prefix
 16. Every route group folder must have a `layout.tsx`
@@ -678,3 +682,130 @@ To close this gap: migrate the seven `@/lib/ngf` consumers to the flat map, repl
 with the canonical file, add `scripts/sync-ngf.mjs` and the `sync-ngf` scripts to `package.json`,
 then run `npm run sync-ngf:check` until it is clean. Until then, running the starter's sync script
 against this repo overwrites `lib/ngf.ts` and takes the site down.
+
+---
+
+## SITE REBUILD — 2026-09-23
+
+The marketing site was rebuilt from a single scrolling page into six routes. What changed, and what
+a later session still needs to check.
+
+### Structure
+
+`/` (home), `/services`, `/work`, `/pricing`, `/about`, `/contact`. `lib/nav.ts` is the ONE table of
+destinations — the navbar, the mobile menu, the footer and `app/sitemap.ts` all read it, so adding a
+page in one place adds it everywhere. The old site hard-coded the same three anchors in three
+components and shipped a sitemap listing only the home page.
+
+Navbar and Footer moved into `app/layout.tsx`, so a page renders only its own content.
+
+### Pricing is now capability-based, not page-count-based
+
+`lib/pricing.ts` is the single price list. The buyer makes two independent decisions: a payment
+track (monthly plan / one-time build) and a set of modules. Each module names the `client_configs`
+column that delivers it, so nothing can be sold that `NGF-Systems-app/lib/portal-capabilities.ts`
+cannot switch on.
+
+**Numbers still needing Nick's sign-off are listed in `UNCONFIRMED_PRICING` in that file.** The base
+figures ($100/mo, $600 build, $20/mo hosting, $80/hr) are CANONICAL and match
+`NGF-Systems-app/lib/pricing.ts`. The module prices and the $150 setup fee are PROPOSALS.
+
+The old published prices contradicted the contract generator — the site quoted one-time builds at
+$799/$1,500/$2,500+ with $30/mo hosting, while `lib/pricing.ts` in the app (sourced from HANDOFF.md,
+which Nick signs contracts from) said $600 and $20/mo. That contradiction is resolved in favour of
+HANDOFF. If the app's figures ever change, change both.
+
+### Editor field keys changed
+
+The old `feature0.title` … `feature8.title` keys are gone. Nine sibling keys made the portal editor
+render nine separate sections all labelled "Features" (editor audit P1.3). They are replaced by one
+`data-ngf-group="services.pillars"` with `services.pillars.<i>.title` / `.body`.
+
+**Any content already published against the old keys is orphaned** and will show as unknown keys in
+the editor. Current annotated fields: `hero.headline`, `hero.subheadline`, `services.title`,
+`services.subtitle`, `services.pillars.<i>.{title,body}`, `work.title`, `work.subtitle`,
+`pricing.title`, `pricing.subtitle`, `footer.location`, `footer.blurb`.
+
+Only the home page and the footer are annotated. The portal scraper reads the home page only
+(editor audit P1.1), so annotating the five new pages would not surface them in the editor anyway.
+
+### Three bugs fixed in `app/api/contact/route.ts`
+
+1. `new Resend(...)` ran at module scope and threw during `next build` whenever `RESEND_API_KEY` was
+   absent — the build failed outright rather than the contact form degrading.
+2. The lead was relayed to `/api/leads/ingest` only AFTER the email succeeded, so a Resend outage
+   lost the enquiry with no record anywhere. It is now persisted first. This is exactly the failure
+   `ngf-doctor`'s "Lead capture reaches the portal" rule exists to catch — the rule passed only
+   because it pattern-matches the string, not the ordering.
+3. Form fields were interpolated into the notification email unescaped.
+
+The endpoint now also validates the email shape, caps field lengths, and whitelists `?intent=`
+against `CONTACT_INTENTS` server-side as well as in the browser.
+
+### Known gaps from this rebuild
+
+| Area | Status | Notes |
+|---|---|---|
+| Module prices | ⚠️ Unset, render as "Quoted" | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Nothing is published until Nick sets them. |
+| Portfolio screenshots | ⚠️ Not captured | `ClientWork.image` is wired and the grid renders without it. Drop JPEGs at `public/work/<slug>.jpg` and set `image` in `lib/clients.ts`. Capture was blocked in the build sandbox, not in code. |
+| Browser verification | ⚠️ Local only | Verified with `next build`, `npm run doctor` (0 failures) and headless screenshots at 1440px and 390px, light and dark. Not opened in a real browser, and the portal editor was never pointed at it. |
+| Full CSP | ⚠️ Partial | `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` added. `default-src`/`object-src`/`base-uri`/`form-action` deliberately left out — this page loads Google Fonts and gtag, and a wrong `default-src` breaks them silently. Needs a browser to verify. |
+| `feature0`–`feature8` content | ⚠️ Orphaned | Published content under the old keys is no longer read by anything. |
+| Body font | ℹ️ Changed | Inter → Source Sans 3, because the design system above rules out Inter by name. One-line revert in `app/layout.tsx` if unwanted. |
+
+
+
+---
+
+## CLAIMS AUDIT — 2026-09-23
+
+Nick asked that the site list "only our actual services and actual things we feature." Every
+capability claim was checked against `NGF-Systems-app` before being kept, rewritten or removed.
+**The rule this establishes: a claim goes on the site only if you can point at the code that
+delivers it.**
+
+### Removed — the platform does not do these
+
+| Claim | Was | Reality |
+|---|---|---|
+| "Daily backups" | `lib/pricing.ts` ALWAYS_INCLUDED, `app/services/page.tsx` CORE | **Nothing runs on a schedule.** No `crons` in `vercel.json`, no `app/api/cron/*`, no `schedule` in `.github/workflows/ci.yml`, no `pg_dump`. What exists is `WebsiteContentVersion` — snapshotted **on publish** (plus admin reset and site-URL change), capped at 20 per client (`VERSION_HISTORY_CAP`, `lib/website-content-reset.ts:19`), covering **one table**. Neon's own PITR is the only real database backup and its window depends on the Neon plan. Replaced with "Every version saved", which is true. |
+| "If something breaks at 2am it is our problem" / "uptime ... our responsibility" | same two files | **No uptime monitoring and no alerting.** `lib/connection-health.ts` is an on-demand check clicked in the admin hub. Nobody is paged. Replaced with "tell us and we fix it". |
+| "Security updates" as an automated promise | `app/services/page.tsx` | Manual. No Dependabot or Renovate config in either repo. Softened to "keeping it patched is our job". |
+| "Customers book **and pay** for their own appointments" | `MODULES.booking.summary` | Booking takes **no payment**. `Service.price_cents` is display only; there is no Stripe path in `app/api/public/bookings/`. Now "book their own appointments". |
+| "Products, photos and prices you control" as a store feature | `MODULES.store.includes` | **There is no product catalog.** No `Product` model. `StoreSettings` is shipping/tax/policy/notification-email only, and `Order` is explicitly a mirror ("NGF is a MIRROR, not the system of record"). Products are edited as site content through the website editor. Reworded to say exactly that. |
+| Module: **Customer accounts** — "a secure login for each of your customers" | `MODULES.accounts` | Not a capability. It named `database_url`, which is the admin-side external-DB **service requests** read (`config.secrets`, the WrenchTime pattern). No customer auth exists, and clients do not even see service requests in their own portal. |
+| Module: **Custom integrations** — CRM / accounting connectors, extra payment processing, data imports | `MODULES.integrations` | `configColumn` was literally `'—'`. Nothing exists. |
+| "Structured data" as something every client site gets | both files | NGF's own site emits JSON-LD (`app/layout.tsx:82`). **DemarcusCuts does not.** Not universal, so the claim was dropped rather than qualified. |
+
+`accounts` and `integrations` were replaced by one honest module, **`custom` — Custom development**:
+bespoke work, quoted per job, explicitly commented as not being a `client_configs` switch.
+`CONTACT_INTENTS` and `MODULE_ICONS` were updated to match; a `history` icon was added to
+`components/ui/Icon.tsx`.
+
+### Kept — verified true, and some were under-sold
+
+- **Booking** does more than the site claimed: SMS via Twilio (`BookingConfig.sms_sender`,
+  `sms_country_code`, `sms_only`), an optional approval hold (`require_approval`), self-service
+  cancel/reschedule links (`Appointment.manage_token`), buffers, lead time and max-advance. Those
+  are now listed.
+- **Store** emails: `lib/order-emails.ts` sends the buyer a confirmation and the owner a
+  notification on the transition into PAID. Payment and fulfilment are genuinely separate columns.
+- **GA4 is in the client portal**, not just admin — `PortalSiteAnalyticsWidget` is mounted at
+  `app/portal/portal-dashboard/page.tsx:88`.
+- Website editor (draft → preview → publish + history), Leads with per-enquiry status, Change
+  requests, Invoices with a pay link — all six match `PORTAL_CAPABILITIES`.
+- Sitemap and robots **are** on client sites (`app/sitemap.ts`, `app/robots.ts` in DemarcusCuts).
+
+### Also fixed: hosting was not in the price list
+
+`$20/month` was a hardcoded string in `PricingTables.tsx` twice and in a `TRACKS.oneTime.terms`
+bullet, while the file header claimed a canonical `oneTime.hostingCents` that **did not exist**.
+That is the same figure that caused the original site-vs-app contradiction ($30 vs $20). It is now
+`TERMS.hostingCents` and rendered through `usd()`.
+
+### Still not verified
+
+The claims audit was done against source code, not against a running system. Not exercised: a live
+booking, a live order, an actual rollback from version history, or Neon's real PITR window — that
+last one needs the Neon dashboard and decides whether "every version saved" should also mention a
+database-level restore.

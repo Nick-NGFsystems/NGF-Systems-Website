@@ -1,30 +1,28 @@
 import type { Metadata } from 'next'
 import NgfEditBridge from '@/components/NgfEditBridge'
-import { Sora, Inter } from 'next/font/google'
-import { ThemeProvider } from 'next-themes'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+import { getNgfContent } from '@/lib/ngf'
+import { Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
 import { GA_MEASUREMENT_ID } from '@/lib/analytics'
 import './globals.css'
 
-const sora = Sora({
+// One typeface for the whole site. Space Grotesk carries Direction A; the
+// monospace that used to sit alongside it read as a developer tool.
+const display = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-sora',
-  weight: ['300', '400', '500', '600', '700'],
-})
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  weight: ['300', '400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
 })
 
 export const metadata: Metadata = {
   title: {
-    default: 'NGF Systems — Web Design & Management',
+    default: 'NGF Systems — Websites built and managed for small businesses',
     template: '%s | NGF Systems',
   },
   description:
-    'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
+    'NGF Systems builds, hosts and manages websites for small businesses in West Michigan. Custom design, a portal you run yourself, and pricing based on what your site does — not how many pages it has.',
   keywords: [
     'web design',
     'web development',
@@ -49,23 +47,23 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://ngfsystems.com',
     siteName: 'NGF Systems',
-    title: 'NGF Systems — Web Design & Management',
+    title: 'NGF Systems — Websites built and managed for small businesses',
     description:
-      'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes — custom builds, ongoing support, and flexible pricing.',
+      'NGF Systems builds, hosts and manages websites for small businesses in West Michigan. Custom design, a portal you run yourself, and pricing based on what your site does — not how many pages it has.',
     images: [
       {
         url: '/api/og',
         width: 1200,
         height: 630,
-        alt: 'NGF Systems — Web Design & Management',
+        alt: 'NGF Systems — Websites built and managed for small businesses',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NGF Systems — Web Design & Management',
+    title: 'NGF Systems — Websites built and managed for small businesses',
     description:
-      'NGF Systems is a Michigan-based web development company. We build and manage professional websites for businesses of all sizes.',
+      'We build, host and manage websites for small businesses in West Michigan — with a portal you run yourself.',
     images: ['/api/og'],
   },
   robots: {
@@ -86,7 +84,7 @@ const jsonLd = {
   '@type': 'LocalBusiness',
   name: 'NGF Systems',
   description:
-    'Michigan-based web development company building and managing professional websites for small businesses and realtors.',
+    'Michigan-based web company that builds, hosts and manages websites for small businesses, with a client portal for editing content, tracking enquiries and managing bookings or orders.',
   url: 'https://ngfsystems.com',
   logo: 'https://ngfsystems.com/api/og',
   image: 'https://ngfsystems.com/api/og',
@@ -103,23 +101,34 @@ const jsonLd = {
   },
   priceRange: '$$',
   sameAs: [],
-  serviceType: ['Web Design', 'Web Development', 'Website Management'],
+  serviceType: [
+    'Web Design',
+    'Web Development',
+    'Website Hosting',
+    'Website Management',
+    'Search Engine Optimization',
+  ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Fetched once here for the footer. Pages that need content call
+  // getNgfContent() too; Next dedupes the fetch within a single request.
+  const ngf = await getNgfContent()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={display.variable} suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#0E100F" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${sora.variable} ${inter.variable} antialiased`}>
+      <body className="font-sans antialiased">
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"
@@ -133,9 +142,17 @@ export default function RootLayout({
           `}
         </Script>
         <NgfEditBridge />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        >
+          Skip to content
+        </a>
+        <Navbar />
+        <main id="main" className="pt-[68px]">
           {children}
-        </ThemeProvider>
+        </main>
+        <Footer ngf={ngf} />
       </body>
     </html>
   )
