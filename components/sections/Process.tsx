@@ -29,7 +29,7 @@ const STEPS = [
   },
   {
     title: 'We keep it running',
-    body: 'Hosting, security and backups are ours. Change your own content whenever you like, or send us a request and track it.',
+    body: 'Hosting and keeping it patched are ours. Change your own content whenever you like, or send us a request from the portal and track it.',
   },
 ]
 

@@ -36,7 +36,7 @@ export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
               'Change your own text and photos, then publish',
               'Every enquiry tracked, none lost to a spam folder',
               'Bookings and orders in the same place, if you sell that way',
-              'Hosting, security and backups handled without you asking',
+              'Every publish saved, so a change you regret is one click back',
             ].map((line) => (
               <Tick key={line}>{line}</Tick>
             ))}

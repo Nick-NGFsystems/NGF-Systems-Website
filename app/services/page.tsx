@@ -13,7 +13,7 @@ import { MODULES, contactHref } from '@/lib/pricing'
 export const metadata: Metadata = {
   title: 'Services',
   description:
-    'What NGF Systems builds and manages: custom website design, hosting and security, a client portal you run yourself, online booking, online stores, and custom integrations.',
+    'What NGF Systems builds and manages: custom website design, hosting and SSL, a client portal you run yourself, online booking, online stores, and custom development.',
   alternates: { canonical: '/services' },
 }
 
@@ -26,12 +26,17 @@ const CORE: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'search',
     title: 'Search and analytics',
-    body: 'Page titles, descriptions, structured data, a sitemap and genuinely fast load times, done at build time. Google Analytics wired up so you can see who arrives and from where.',
+    body: 'Page titles, descriptions, a sitemap and genuinely fast load times, done at build time. Google Analytics wired into your portal so you can see who arrives and from where.',
   },
   {
     icon: 'shield',
-    title: 'Hosting, SSL and backups',
-    body: 'Your site runs on infrastructure we manage. Certificates, daily backups, security updates and uptime are our responsibility, not a checklist we hand you.',
+    title: 'Hosting and SSL',
+    body: 'Your site runs on infrastructure we manage, with certificates and the domain handled. Keeping it patched and working is our job — if something is wrong, tell us and we fix it.',
+  },
+  {
+    icon: 'history',
+    title: 'Version history',
+    body: 'Every publish keeps the version before it. Change your mind, or catch a mistake a week later, and roll back from your own history without calling anyone.',
   },
   {
     icon: 'edit',
@@ -53,8 +58,7 @@ const CORE: { icon: IconName; title: string; body: string }[] = [
 const MODULE_ICONS: Record<string, IconName> = {
   booking: 'calendar',
   store: 'cart',
-  accounts: 'users',
-  integrations: 'plug',
+  custom: 'plug',
 }
 
 export default function ServicesPage() {

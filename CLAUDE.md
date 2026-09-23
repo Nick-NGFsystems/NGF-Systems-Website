@@ -746,10 +746,66 @@ against `CONTACT_INTENTS` server-side as well as in the browser.
 
 | Area | Status | Notes |
 |---|---|---|
-| Module prices | ⚠️ Proposed, not confirmed | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Do not treat as published prices until Nick sets them. |
+| Module prices | ⚠️ Unset, render as "Quoted" | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Nothing is published until Nick sets them. |
 | Portfolio screenshots | ⚠️ Not captured | `ClientWork.image` is wired and the grid renders without it. Drop JPEGs at `public/work/<slug>.jpg` and set `image` in `lib/clients.ts`. Capture was blocked in the build sandbox, not in code. |
 | Browser verification | ⚠️ Local only | Verified with `next build`, `npm run doctor` (0 failures) and headless screenshots at 1440px and 390px, light and dark. Not opened in a real browser, and the portal editor was never pointed at it. |
 | Full CSP | ⚠️ Partial | `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` added. `default-src`/`object-src`/`base-uri`/`form-action` deliberately left out — this page loads Google Fonts and gtag, and a wrong `default-src` breaks them silently. Needs a browser to verify. |
 | `feature0`–`feature8` content | ⚠️ Orphaned | Published content under the old keys is no longer read by anything. |
 | Body font | ℹ️ Changed | Inter → Source Sans 3, because the design system above rules out Inter by name. One-line revert in `app/layout.tsx` if unwanted. |
 
+
+
+---
+
+## CLAIMS AUDIT — 2026-09-23
+
+Nick asked that the site list "only our actual services and actual things we feature." Every
+capability claim was checked against `NGF-Systems-app` before being kept, rewritten or removed.
+**The rule this establishes: a claim goes on the site only if you can point at the code that
+delivers it.**
+
+### Removed — the platform does not do these
+
+| Claim | Was | Reality |
+|---|---|---|
+| "Daily backups" | `lib/pricing.ts` ALWAYS_INCLUDED, `app/services/page.tsx` CORE | **Nothing runs on a schedule.** No `crons` in `vercel.json`, no `app/api/cron/*`, no `schedule` in `.github/workflows/ci.yml`, no `pg_dump`. What exists is `WebsiteContentVersion` — snapshotted **on publish** (plus admin reset and site-URL change), capped at 20 per client (`VERSION_HISTORY_CAP`, `lib/website-content-reset.ts:19`), covering **one table**. Neon's own PITR is the only real database backup and its window depends on the Neon plan. Replaced with "Every version saved", which is true. |
+| "If something breaks at 2am it is our problem" / "uptime ... our responsibility" | same two files | **No uptime monitoring and no alerting.** `lib/connection-health.ts` is an on-demand check clicked in the admin hub. Nobody is paged. Replaced with "tell us and we fix it". |
+| "Security updates" as an automated promise | `app/services/page.tsx` | Manual. No Dependabot or Renovate config in either repo. Softened to "keeping it patched is our job". |
+| "Customers book **and pay** for their own appointments" | `MODULES.booking.summary` | Booking takes **no payment**. `Service.price_cents` is display only; there is no Stripe path in `app/api/public/bookings/`. Now "book their own appointments". |
+| "Products, photos and prices you control" as a store feature | `MODULES.store.includes` | **There is no product catalog.** No `Product` model. `StoreSettings` is shipping/tax/policy/notification-email only, and `Order` is explicitly a mirror ("NGF is a MIRROR, not the system of record"). Products are edited as site content through the website editor. Reworded to say exactly that. |
+| Module: **Customer accounts** — "a secure login for each of your customers" | `MODULES.accounts` | Not a capability. It named `database_url`, which is the admin-side external-DB **service requests** read (`config.secrets`, the WrenchTime pattern). No customer auth exists, and clients do not even see service requests in their own portal. |
+| Module: **Custom integrations** — CRM / accounting connectors, extra payment processing, data imports | `MODULES.integrations` | `configColumn` was literally `'—'`. Nothing exists. |
+| "Structured data" as something every client site gets | both files | NGF's own site emits JSON-LD (`app/layout.tsx:82`). **DemarcusCuts does not.** Not universal, so the claim was dropped rather than qualified. |
+
+`accounts` and `integrations` were replaced by one honest module, **`custom` — Custom development**:
+bespoke work, quoted per job, explicitly commented as not being a `client_configs` switch.
+`CONTACT_INTENTS` and `MODULE_ICONS` were updated to match; a `history` icon was added to
+`components/ui/Icon.tsx`.
+
+### Kept — verified true, and some were under-sold
+
+- **Booking** does more than the site claimed: SMS via Twilio (`BookingConfig.sms_sender`,
+  `sms_country_code`, `sms_only`), an optional approval hold (`require_approval`), self-service
+  cancel/reschedule links (`Appointment.manage_token`), buffers, lead time and max-advance. Those
+  are now listed.
+- **Store** emails: `lib/order-emails.ts` sends the buyer a confirmation and the owner a
+  notification on the transition into PAID. Payment and fulfilment are genuinely separate columns.
+- **GA4 is in the client portal**, not just admin — `PortalSiteAnalyticsWidget` is mounted at
+  `app/portal/portal-dashboard/page.tsx:88`.
+- Website editor (draft → preview → publish + history), Leads with per-enquiry status, Change
+  requests, Invoices with a pay link — all six match `PORTAL_CAPABILITIES`.
+- Sitemap and robots **are** on client sites (`app/sitemap.ts`, `app/robots.ts` in DemarcusCuts).
+
+### Also fixed: hosting was not in the price list
+
+`$20/month` was a hardcoded string in `PricingTables.tsx` twice and in a `TRACKS.oneTime.terms`
+bullet, while the file header claimed a canonical `oneTime.hostingCents` that **did not exist**.
+That is the same figure that caused the original site-vs-app contradiction ($30 vs $20). It is now
+`TERMS.hostingCents` and rendered through `usd()`.
+
+### Still not verified
+
+The claims audit was done against source code, not against a running system. Not exercised: a live
+booking, a live order, an actual rollback from version history, or Neon's real PITR window — that
+last one needs the Neon dashboard and decides whether "every version saved" should also mention a
+database-level restore.

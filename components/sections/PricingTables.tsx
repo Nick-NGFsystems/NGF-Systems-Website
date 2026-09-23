@@ -10,6 +10,7 @@ import {
   MODULES,
   EXAMPLES,
   ALWAYS_INCLUDED,
+  TERMS,
   usd,
   quote,
   track,
@@ -85,7 +86,7 @@ export default function PricingTables() {
             )}
             {!isMonthly && (
               <p className="mt-2 text-[14.5px] text-muted">
-                plus $20/month hosting, cancel any time
+                plus {usd(TERMS.hostingCents)}/month hosting, cancel any time
               </p>
             )}
 
@@ -200,7 +201,9 @@ export default function PricingTables() {
                     </p>
                   )}
                   {!isMonthly && (
-                    <p className="mt-1 text-[13px] text-dim">plus $20/month hosting</p>
+                    <p className="mt-1 text-[13px] text-dim">
+                      plus {usd(TERMS.hostingCents)}/month hosting
+                    </p>
                   )}
                 </div>
               </Card>

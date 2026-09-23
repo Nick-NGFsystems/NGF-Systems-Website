@@ -32,7 +32,7 @@ const CAPABILITIES: { icon: IconName; title: string; body: string }[] = [
   {
     icon: 'cart',
     title: 'Orders and store',
-    body: 'Products, orders as they arrive, and the shipping, tax and policy settings behind them.',
+    body: 'Every order as it arrives, payment and fulfilment tracked separately, and the shipping, tax and policy settings behind them.',
   },
   {
     icon: 'shield',

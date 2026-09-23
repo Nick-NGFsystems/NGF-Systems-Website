@@ -28,9 +28,10 @@
  * CANONICAL — these figures match NGF-Systems-app/lib/pricing.ts, which is
  * generated from HANDOFF.md and prefills the Contract tab. Do not change one
  * without the other, or the website and the signed contract disagree:
- *   monthly.baseMonthlyCents, oneTime.baseBuildCents, oneTime.hostingCents,
- *   maintenanceRateCents, lateFeePctPerMonth, termDiscounts,
- *   freeMockupRevisionRounds, mockupAcceptanceDays
+ *   TRACKS.monthly.baseCents, TRACKS.oneTime.baseCents, TERMS.hostingCents,
+ *   TERMS.maintenanceRateCents, TERMS.lateFeePctPerMonth, TERMS.termDiscounts,
+ *   TERMS.freeMockupRevisionRounds, TERMS.mockupAcceptanceDays,
+ *   TERMS.reactivationFeeCents
  *
  * UNCONFIRMED — anything Nick has not set is `null`, and renders as "Quoted"
  * rather than a number. This is not squeamishness: a build of this file with
@@ -113,7 +114,7 @@ export const TRACKS: readonly Track[] = [
     changes: 'Changes after launch are billed at $80/hour, in 15-minute increments.',
     terms: [
       'Due in full within 14 days of mockup approval',
-      'Hosting is $20/month and can be cancelled any time',
+      'Hosting is billed separately and can be cancelled any time',
       'You keep the site whether or not you stay hosted with us',
       'Up to 3 rounds of mockup revisions included',
     ],
@@ -154,14 +155,19 @@ export const ALWAYS_INCLUDED: readonly IncludedItem[] = [
       'Contact forms on your site land in your portal with a status on each one, and land in your email the moment they arrive.',
   },
   {
-    title: 'Hosting, security and backups',
+    title: 'Hosting, SSL and the domain',
     detail:
-      'SSL, daily backups, and the domain pointed correctly. If something breaks at 2am it is our problem, not yours.',
+      'Your site runs on infrastructure we manage, with SSL and the domain pointed correctly. Something wrong? Tell us and we fix it — you are not the one working out why.',
+  },
+  {
+    title: 'Every version saved',
+    detail:
+      'Every time you publish, the previous version is kept. If a change was a mistake, roll it back from your history in a couple of clicks.',
   },
   {
     title: 'Found on Google',
     detail:
-      'Page titles, descriptions, structured data, a sitemap and fast load times done properly at build time, plus Google Analytics wired up so you can see who is arriving.',
+      'Page titles, descriptions, a sitemap and genuinely fast load times done properly at build time, plus Google Analytics in your portal so you can see who is arriving.',
   },
   {
     title: 'A person who answers',
@@ -201,12 +207,13 @@ export const MODULES: readonly Module[] = [
     key: 'booking',
     name: 'Online booking',
     summary:
-      'Customers book and pay for their own appointments. You stop losing evenings to phone tag.',
+      'Customers book their own appointments from your site. You stop losing evenings to phone tag.',
     includes: [
       'Your services, prices and durations',
-      'Weekly opening hours and time off',
-      'Automatic confirmation emails to the customer',
-      'Every appointment in your portal, with the ability to cancel or reschedule',
+      'Weekly opening hours, time off, buffers and how far ahead people can book',
+      'Confirmations by email or text, and a link the customer can use to cancel or reschedule themselves',
+      'Optionally hold every booking for your approval before it is confirmed',
+      'Every appointment in your portal, with cancel and reschedule',
     ],
     configColumn: 'feature_booking',
     monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
@@ -219,10 +226,10 @@ export const MODULES: readonly Module[] = [
     name: 'Online store',
     summary: 'Sell products from your own site and keep the margin a marketplace would take.',
     includes: [
-      'Products, photos and prices you control',
-      'Orders in your portal as they come in',
-      'Shipping, tax and store policy settings',
-      'Order notifications by email',
+      'Product photos, descriptions and prices changed in the website editor, like the rest of your site',
+      'Every order in your portal as it comes in, with payment and fulfilment tracked separately',
+      'Your shipping rates, free-shipping threshold, sales tax rules and returns policy',
+      'A confirmation email to the buyer and a notification to you on every paid order',
     ],
     configColumn: 'page_orders',
     monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
@@ -231,36 +238,24 @@ export const MODULES: readonly Module[] = [
     bestFor: 'Retail, makers, jewellery, anyone shipping a physical product',
   },
   {
-    key: 'accounts',
-    name: 'Customer accounts',
+    key: 'custom',
+    name: 'Custom development',
     summary:
-      'Your own customers get a login — to file a request, track a job, or see their history.',
+      'Something your business needs that none of the above covers. Built for you, quoted per job before any work starts.',
     includes: [
-      'A secure login for each of your customers',
-      'Requests and job status tracked against their account',
-      'Runs against your own database, which stays yours',
+      'Scoped and quoted from a conversation, never billed as a surprise',
+      'Built on the same stack as your site, by the person who built your site',
+      'Can run against a database of your own, which stays yours',
     ],
-    configColumn: 'database_url',
-    monthlyCents: null,
-    oneTimeCents: null,
-    unconfirmed: true,
-    bestFor: 'Service businesses with repeat customers and ongoing jobs',
-  },
-  {
-    key: 'integrations',
-    name: 'Custom integrations',
-    summary:
-      'Connect the site to the software you already run, so you are not typing the same thing twice.',
-    includes: [
-      'CRM, scheduling and accounting connections',
-      'Payment processing beyond the standard checkout',
-      'Data imports from whatever you are on today',
-    ],
+    // Deliberately not a capability: there is no switch for this in
+    // client_configs, because it is bespoke work rather than a system that
+    // is turned on. It is listed as a module so buyers know it is available,
+    // and it is quote-only by definition.
     configColumn: '—',
     monthlyCents: null,
     oneTimeCents: null,
     unconfirmed: true,
-    bestFor: 'Established businesses with systems already in place',
+    bestFor: 'Businesses with a workflow no off-the-shelf system fits',
   },
 ]
 
@@ -327,6 +322,8 @@ export const EXAMPLES: readonly Example[] = [
 
 /** CANONICAL — every figure here matches the app's lib/pricing.ts. */
 export const TERMS = {
+  /** Hosting on the one-time track. Included in the fee on the monthly track. */
+  hostingCents: 2_000,
   /** Post-launch work on the one-time track, and beyond included changes on monthly. */
   maintenanceRateCents: 8_000,
   maintenanceMinimumMinutes: 15,
@@ -360,8 +357,7 @@ export const UNCONFIRMED_PRICING: readonly string[] = [
   'TRACKS.monthly.setupCents — the monthly setup fee. The app has no figure.',
   'MODULES.booking.monthlyCents / oneTimeCents — online booking',
   'MODULES.store.monthlyCents / oneTimeCents — online store',
-  'MODULES.accounts — customer accounts, quote-only',
-  'MODULES.integrations — custom integrations, quote-only',
+  'MODULES.custom — custom development, quote-only by nature',
 ]
 
 export const HAS_UNCONFIRMED_PRICING = UNCONFIRMED_PRICING.length > 0
@@ -381,8 +377,7 @@ export const CONTACT_INTENTS: readonly string[] = [
   'One-time build',
   'Online booking',
   'Online store',
-  'Customer accounts',
-  'Custom integrations',
+  'Custom development',
   'General enquiry',
 ]
 

@@ -21,6 +21,7 @@ export type IconName =
   | 'cart'
   | 'users'
   | 'plug'
+  | 'history'
   | 'check'
   | 'arrow-right'
   | 'external'
@@ -89,6 +90,13 @@ const PATHS: Record<IconName, ReactElement> = {
     </>
   ),
   check: <path d="m4.5 12.5 5 5 10-11" />,
+  history: (
+    <>
+      <path d="M3 3v6h6" />
+      <path d="M3.5 9a9 9 0 1 0 2.1-3.4L3 9" />
+      <path d="M12 7.5V12l3.5 2" />
+    </>
+  ),
   'arrow-right': <path d="M4 12h15m-6-6 6 6-6 6" />,
   external: (
     <>
