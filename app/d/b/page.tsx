@@ -20,7 +20,7 @@ export default function DirectionB() {
           </ul>
           <div className="flex items-center gap-6">
             <span className="hidden text-[14px] text-[#5C544A] md:block">Client login</span>
-            <span className="border-b-2 border-[#B3421F] pb-0.5 text-[14px] font-medium text-[#B3421F]">
+            <span className="border-b-2 border-[#9C5238] pb-0.5 text-[14px] font-medium text-[#9C5238]">
               Get a free mockup
             </span>
           </div>
@@ -31,7 +31,7 @@ export default function DirectionB() {
       <section className="mx-auto max-w-[1200px] px-8 pt-24 pb-20">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-9">
-            <p className="mb-8 text-[13px] uppercase tracking-[0.22em] text-[#B3421F]">
+            <p className="mb-8 text-[13px] uppercase tracking-[0.22em] text-[#9C5238]">
               Hudsonville, Michigan · Est. 2024
             </p>
             <h1 className={`${D} text-[86px] font-light leading-[0.95] tracking-[-0.025em]`}>
@@ -75,22 +75,45 @@ export default function DirectionB() {
         </div>
       </section>
 
-      {/* what we do */}
+      {/* what you get */}
       <section className="bg-[#EBE6DC] py-24">
         <div className="mx-auto max-w-[1200px] px-8">
-          <p className="text-[13px] uppercase tracking-[0.22em] text-[#B3421F]">What we do</p>
-          <div className={`mt-14 divide-y ${RULE}`}>
-            {[
-              ['01', 'We build it', 'Designed around how your business actually sells and written from scratch — not a theme, not a page builder, not a template the next town over is also using.'],
-              ['02', 'We run it', 'Hosting, certificates, backups and security updates are ours to worry about. If something breaks at two in the morning, it is our phone that rings.'],
-              ['03', 'You control it', 'Click any line of text or any photo on your live site and change it yourself. Your enquiries, invoices and bookings live in the same place.'],
-            ].map(([n, t, b]) => (
-              <div key={n} className="grid grid-cols-12 gap-8 py-10">
-                <p className={`${D} col-span-2 text-[40px] font-light leading-none text-[#B3421F]`}>{n}</p>
-                <h3 className={`${D} col-span-4 text-[30px] font-normal leading-tight`}>{t}</h3>
-                <p className="col-span-6 text-[16px] leading-[1.75] text-[#5C544A]">{b}</p>
+          <div className="grid grid-cols-12 gap-8">
+            <div className="col-span-12 lg:col-span-5">
+              <p className="text-[13px] uppercase tracking-[0.22em] text-[#9C5238]">What you get</p>
+              <h2 className={`${D} mt-5 text-[46px] font-light leading-[1.05] tracking-[-0.02em]`}>
+                Every enquiry, in
+                <br />
+                one place you own.
+              </h2>
+              <p className="mt-6 max-w-sm text-[16px] leading-[1.75] text-[#5C544A]">
+                Contact forms on your site do not vanish into a personal inbox. They arrive in your
+                portal with a status on each one, and in your email the moment they are sent.
+              </p>
+            </div>
+
+            <div className="col-span-12 lg:col-span-7">
+              <div className={`border-t ${RULE}`}>
+                {[
+                  ['Dana Whitfield', 'Ceramic tint, full vehicle', 'New'],
+                  ['Marcus Webb', 'Quote for storefront film', 'New'],
+                  ['Priya Raman', 'Two cars, asked about timing', 'Replied'],
+                  ['Tom Alderman', 'Vinyl wrap, colour samples', 'Won'],
+                ].map(([name, note, status]) => (
+                  <div key={name} className={`flex items-baseline justify-between gap-6 border-b ${RULE} py-5`}>
+                    <div>
+                      <p className={`${D} text-[20px] font-normal`}>{name}</p>
+                      <p className="mt-1 text-[14px] text-[#5C544A]">{note}</p>
+                    </div>
+                    <span className="shrink-0 text-[12px] uppercase tracking-[0.16em] text-[#9C5238]">{status}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+              <p className="mt-6 text-[14px] leading-relaxed text-[#5C544A]">
+                Alongside them: edit any text or photo on your live site and publish it yourself, and
+                take bookings or orders in the same place if you sell that way.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -100,7 +123,7 @@ export default function DirectionB() {
         <div className="mx-auto max-w-[1200px] px-8">
           <div className={`flex items-baseline justify-between border-b ${RULE} pb-6`}>
             <h2 className={`${D} text-[46px] font-light tracking-[-0.02em]`}>Selected work</h2>
-            <span className="text-[14px] text-[#B3421F]">All six →</span>
+            <span className="text-[14px] text-[#9C5238]">All six →</span>
           </div>
           <div className="mt-12 grid gap-12 md:grid-cols-2">
             <article>
@@ -112,7 +135,7 @@ export default function DirectionB() {
               <p className="mt-2 text-[15px] leading-relaxed text-[#5C544A]">
                 A shop whose work is entirely visual, whose diary was run by phone.
               </p>
-              <p className="mt-3 text-[14px] text-[#B3421F]">westmiwindowtint.com</p>
+              <p className="mt-3 text-[14px] text-[#9C5238]">westmiwindowtint.com</p>
             </article>
             <article className="md:mt-20">
               <div className="aspect-[4/3] bg-[#D6CFC0]" />
@@ -123,7 +146,7 @@ export default function DirectionB() {
               <p className="mt-2 text-[15px] leading-relaxed text-[#5C544A]">
                 Three properties that each needed to sell themselves, without a marketplace cut.
               </p>
-              <p className="mt-3 text-[14px] text-[#B3421F]">squarekvacations.com</p>
+              <p className="mt-3 text-[14px] text-[#9C5238]">squarekvacations.com</p>
             </article>
           </div>
         </div>
@@ -134,7 +157,7 @@ export default function DirectionB() {
         <div className="mx-auto max-w-[1200px] px-8">
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-12 lg:col-span-5">
-              <p className="text-[13px] uppercase tracking-[0.22em] text-[#B3421F]">Pricing</p>
+              <p className="text-[13px] uppercase tracking-[0.22em] text-[#9C5238]">Pricing</p>
               <h2 className={`${D} mt-5 text-[46px] font-light leading-[1.05] tracking-[-0.02em]`}>
                 Priced by what
                 <br />
@@ -162,7 +185,7 @@ export default function DirectionB() {
                     <p className={`${D} text-[26px] font-normal`}>{t as string}</p>
                     <p className="mt-1 text-[14px] text-[#5C544A]">{s as string}</p>
                   </div>
-                  <p className={`${D} text-[40px] font-light ${acc ? 'text-[#B3421F]' : ''}`}>
+                  <p className={`${D} text-[40px] font-light ${acc ? 'text-[#9C5238]' : ''}`}>
                     {p as string}
                     <span className="text-[16px] text-[#5C544A]">{suf as string}</span>
                   </p>
