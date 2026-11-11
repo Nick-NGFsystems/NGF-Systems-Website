@@ -4,17 +4,36 @@ import GlassFilters from '@/components/ui/GlassFilters'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { getNgfContent } from '@/lib/ngf'
-import { Space_Grotesk } from 'next/font/google'
+import localFont from 'next/font/local'
 import Script from 'next/script'
 import { GA_MEASUREMENT_ID } from '@/lib/analytics'
 import './globals.css'
 
-// One typeface for the whole site. Space Grotesk carries Direction A; the
-// monospace that used to sit alongside it read as a developer tool.
-const display = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+/**
+ * Space Grotesk, SELF-HOSTED.
+ *
+ * This was `next/font/google`, which fetches the font from Google at BUILD
+ * time. On 2026-11-11 that call failed on Vercel and took the whole
+ * deployment with it ("An error occurred in next/font ... Cannot read
+ * properties of null"), even though nothing about the font had changed and
+ * the same commit built here. A marketing site should not have a third party
+ * standing between a commit and a deploy, so the file is in the repo now.
+ *
+ * It is the variable font (300-700) for the latin subset, which is exactly
+ * what `subsets: ['latin']` used to pull. Licensed under the SIL OFL 1.1 —
+ * app/fonts/OFL.txt — which permits redistribution with the licence kept
+ * alongside it. To update: re-download from the URL in that CSS and keep the
+ * licence file in step.
+ */
+const display = localFont({
+  src: './fonts/SpaceGrotesk-latin.woff2',
+  weight: '300 700',
+  style: 'normal',
+  display: 'swap',
   variable: '--font-display',
+  // Metric-matched fallback, so the swap does not shift the layout.
+  fallback: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+  adjustFontFallback: false,
 })
 
 export const metadata: Metadata = {
