@@ -80,7 +80,15 @@ const TH = 26 // gap at which a neck still forms
 const STIFF = [240, 196] as const // right gap softer, so the two do not move in lockstep
 const REST = 31 // apart, at the top of the page
 const FUSED = 3 // together, once scrolled
-const RANGE = 180 // px of scroll over which it morphs
+/* START is a dead zone: nothing moves until the page has really been
+   scrolled. Without it the morph began on the first wheel notch — a neck
+   formed by about 48px and the bar was fused by 140px, so the split state
+   nobody had seen yet was gone "as soon as I scroll down even a little".
+   RANGE then spreads the rest over most of a screen. Together they put the
+   first thread around 290px and full fusion around 600px, which is past the
+   hero rather than inside the first flick of the wheel. */
+const START = 180 // px of scroll before the morph begins at all
+const RANGE = 420 // px of scroll over which it then morphs
 const ZETA = 0.72 // damping ratio: 1 is a dead stop, lower overshoots
 
 interface Pill {
@@ -281,7 +289,7 @@ export default function Navbar() {
 
     const onScroll = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0
-      let pr = Math.max(0, Math.min(1, y / RANGE))
+      let pr = Math.max(0, Math.min(1, (y - START) / RANGE))
       pr = pr * pr * (3 - 2 * pr) // smoothstep, so it eases in and out
       target.current = REST + (FUSED - REST) * pr
 

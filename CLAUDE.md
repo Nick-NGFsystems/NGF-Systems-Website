@@ -875,6 +875,13 @@ Things that will bite whoever edits this:
   does. An earlier version left it at 0.17r, so the thread vanished while still 4.8px thick: a pop,
   not a break.
 - `prefers-reduced-motion` snaps to the target instead of springing.
+- **`START` is a dead zone and it is load-bearing.** The morph is
+  `(scrollY - START) / RANGE`, smoothstepped. With `START = 0` and
+  `RANGE = 180` — the original — a neck formed by about 48px of scroll and the
+  bar was fused by 140px, so the split state nobody had seen yet was gone on
+  the first notch of the wheel. `START = 180, RANGE = 420` puts the first
+  thread near 290px and full fusion near 600px. Measured in headless Chromium:
+  the clip path holds 3 subpaths through 290px, where it used to break at 48px.
 
 ### Mobile: bring the elements to the thumb
 
