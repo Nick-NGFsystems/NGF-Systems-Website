@@ -20,7 +20,7 @@ export default function FeatureItem({
         <Icon name={icon} />
       </div>
       <div>
-        <h3 className="text-[16.5px] font-semibold text-white">{title}</h3>
+        <h3 className="text-[16.5px] font-semibold text-head">{title}</h3>
         <p className="mt-2 text-[15px] leading-relaxed text-muted">{children}</p>
       </div>
     </div>
@@ -32,7 +32,7 @@ export function Tick({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3">
       <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-sand" />
-      <span className="text-[15.5px] leading-relaxed text-white/85">{children}</span>
+      <span className="text-[15.5px] leading-relaxed text-head/85">{children}</span>
     </li>
   )
 }

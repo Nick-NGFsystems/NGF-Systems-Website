@@ -51,11 +51,11 @@ export default function Process() {
                 className="absolute bottom-0 left-[19px] top-10 w-px bg-line"
               />
             )}
-            <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-panel text-[14px] font-semibold text-white">
+            <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-panel text-[14px] font-semibold text-head">
               {index + 1}
             </span>
             <div className="pt-1.5">
-              <h3 className="text-[16.5px] font-semibold text-white">{step.title}</h3>
+              <h3 className="text-[16.5px] font-semibold text-head">{step.title}</h3>
               <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-muted">{step.body}</p>
             </div>
           </li>

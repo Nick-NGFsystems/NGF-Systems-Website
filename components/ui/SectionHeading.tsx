@@ -57,7 +57,7 @@ export default function SectionHeading({
       {eyebrow && <p className={EYEBROW}>{eyebrow}</p>}
       <Tag
         {...titleAttrs}
-        className={`${eyebrow ? 'mt-4' : ''} font-semibold tracking-[-0.02em] text-white ${size} leading-[1.12]`}
+        className={`${eyebrow ? 'mt-4' : ''} font-semibold tracking-[-0.02em] text-head ${size} leading-[1.12]`}
       >
         {title}
       </Tag>

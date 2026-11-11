@@ -101,7 +101,7 @@ export default function ServicesPage() {
                 <Icon name={MODULE_ICONS[module.key] ?? 'plug'} />
               </div>
 
-              <h3 className="mt-5 text-[18px] font-semibold text-white">{module.name}</h3>
+              <h3 className="mt-5 text-[18px] font-semibold text-head">{module.name}</h3>
               <p className="mt-3 text-[14.5px] leading-relaxed text-muted">{module.summary}</p>
 
               <ul className="mt-5 space-y-2.5">

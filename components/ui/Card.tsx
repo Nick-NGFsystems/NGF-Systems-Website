@@ -43,7 +43,7 @@ export function CardHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-line bg-panel px-5 py-3.5">
-      <span className="text-[14px] font-medium text-white/80">{title}</span>
+      <span className="text-[14px] font-medium text-head/80">{title}</span>
       {badge && (
         <span
           className={`shrink-0 rounded-md px-2.5 py-1 text-[12.5px] font-medium ${

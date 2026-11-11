@@ -23,7 +23,7 @@ export default function PageHeader({
       />
       <Container className="relative py-16 sm:py-20">
         <p className={EYEBROW}>{eyebrow}</p>
-        <h1 className="mt-4 max-w-3xl text-[38px] font-semibold leading-[1.1] tracking-[-0.025em] text-white sm:text-[46px]">
+        <h1 className="mt-4 max-w-3xl text-[38px] font-semibold leading-[1.1] tracking-[-0.025em] text-head sm:text-[46px]">
           {title}
         </h1>
         <p className="mt-5 max-w-2xl text-[17px] leading-[1.65] text-muted">{subtitle}</p>

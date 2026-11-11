@@ -1,92 +1,92 @@
-import Button from '@/components/ui/Button'
+import Link from 'next/link'
 import Container from '@/components/ui/Container'
-import Icon from '@/components/ui/Icon'
-import { EYEBROW } from '@/components/ui/SectionHeading'
-import { WebsiteEditorPanel } from './PortalPanels'
+import ScreenshotSlot from '@/components/ui/ScreenshotSlot'
 import type { NgfSiteContent } from '@/lib/ngf'
-import { CLIENTS } from '@/lib/clients'
-import { CONTACT } from '@/lib/nav'
 
 /**
- * Left-aligned and two-column: a statement beside the product.
+ * Centred statement over one graphite panel, with the product underneath it.
  *
- * A centred headline floating over a screenshot is the startup landing-page
- * shape, and it reads less like an established firm. The stat row states
- * countable facts rather than adjectives, and every figure is derived rather
- * than typed, so it cannot drift from reality.
+ * The panel is deep on purpose. The glass nav floats over this, and glass
+ * needs something worth refracting — over a pale ground it renders as grey
+ * mush however good the filter is. One dark band near the top, light
+ * everywhere else, so the screenshots are the only colour that matters.
+ *
+ * The frosted pills sit ON the screenshot. That is the one place on the whole
+ * site where translucency is over real content, which is the only place it
+ * means anything.
  */
 export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
-  const headline = ngf?.hero?.headline || 'Your website, and everything you need to run it.'
+  const headline = ngf?.hero?.headline || 'Your website, and one place to run it from.'
   const subheadline =
     ngf?.hero?.subheadline ||
-    'We design and build the site, host it, and give you one place to change your own words and pictures, read every enquiry, and take bookings. One person builds it, and you always know who to call.'
-
-  const industries = new Set(CLIENTS.map((c) => c.industry)).size
+    'We design and build the site, host it, and give you a portal where you change your own words and pictures, read every enquiry and take bookings.'
 
   return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(75%_60%_at_25%_0%,rgba(94,139,135,.16),transparent_72%)]"
-      />
+    <section className="px-5 sm:px-7">
+      <div className="mx-auto max-w-[1280px] overflow-hidden rounded-[28px] bg-well px-5 pt-14 text-center sm:rounded-[34px] sm:px-8 lg:pt-24">
+        <h1
+          data-ngf-field="hero.headline"
+          data-ngf-label="Headline"
+          data-ngf-type="text"
+          data-ngf-section="Hero"
+          className="mx-auto max-w-[15em] text-[38px] font-medium leading-[1.04] tracking-[-0.042em] text-white sm:text-[54px] lg:text-[72px] lg:leading-[1.03] lg:tracking-[-0.046em]"
+        >
+          {headline}
+        </h1>
 
-      <Container className="relative pb-16 pt-16 sm:pt-20">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
-          <div>
-            <p className={EYEBROW}>{CONTACT.location}</p>
+        <p
+          data-ngf-field="hero.subheadline"
+          data-ngf-label="Opening paragraph"
+          data-ngf-type="text"
+          data-ngf-section="Hero"
+          className="mx-auto mt-6 max-w-[31em] text-[16.5px] leading-[1.55] tracking-[-0.013em] text-onwell sm:text-[20px] lg:mt-7"
+        >
+          {subheadline}
+        </p>
 
-            <h1
-              data-ngf-field="hero.headline"
-              data-ngf-label="Headline"
-              data-ngf-type="textarea"
-              data-ngf-section="Hero"
-              className="mt-6 text-[40px] font-semibold leading-[1.08] tracking-[-0.025em] text-white sm:text-[52px]"
-            >
-              {headline}
-            </h1>
-
-            <p
-              data-ngf-field="hero.subheadline"
-              data-ngf-label="Intro"
-              data-ngf-type="textarea"
-              data-ngf-section="Hero"
-              className="mt-6 max-w-lg text-[17px] leading-[1.65] text-muted"
-            >
-              {subheadline}
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button href="/contact" size="lg">
-                Get a free mockup
-                <Icon name="arrow-right" className="h-4 w-4" />
-              </Button>
-              <Button href="/work" variant="secondary" size="lg">
-                See our work
-              </Button>
-            </div>
-
-            <p className="mt-5 text-[14.5px] text-dim">
-              You see the design before you pay anything.
-            </p>
-          </div>
-
-          <WebsiteEditorPanel className="shadow-[0_32px_90px_-30px_rgba(0,0,0,.8)]" />
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5 lg:mt-9">
+          <Link
+            href="/contact?intent=Free%20mockup"
+            className="inline-flex h-[54px] items-center rounded-full bg-white px-8 text-[17px] font-medium tracking-[-0.012em] text-head transition-colors hover:bg-onwell"
+          >
+            Get a free mockup
+          </Link>
+          <Link
+            href="/services"
+            className="inline-flex h-[54px] items-center rounded-full px-6 text-[17px] tracking-[-0.012em] text-white transition-colors hover:text-onwell"
+          >
+            Look inside the portal &rsaquo;
+          </Link>
         </div>
 
-        <dl className="mt-16 grid gap-8 border-t border-line pt-10 sm:mt-20 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            [String(CLIENTS.length), 'Live client sites'],
-            [String(industries), 'Industries served'],
-            ['1 business day', 'Typical reply time'],
-            ['West Michigan', 'And remote'],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <dd className="text-[26px] font-semibold tracking-tight text-white">{value}</dd>
-              <dt className="mt-1.5 text-[14px] text-muted">{label}</dt>
+        <p className="mt-5 text-[14.5px] text-onwell-dim">
+          Free. You see the design before you pay anything.
+        </p>
+
+        {/* The product, bleeding off the bottom of the panel. */}
+        <div className="relative mx-auto mt-12 max-w-[1040px] lg:mt-[60px]">
+          <div className="overflow-hidden rounded-t-[18px] shadow-[inset_0_0_0_1px_rgba(255,255,255,.10)]">
+            <div className="h-[260px] sm:h-[360px] lg:h-[430px]">
+              <ScreenshotSlot shot="editor" tone="dark" priority />
             </div>
-          ))}
-        </dl>
-      </Container>
+          </div>
+
+          <ul className="absolute inset-x-0 bottom-5 hidden flex-wrap justify-center gap-2.5 sm:flex lg:bottom-[26px]">
+            {[
+              'Click any text to change it',
+              'Preview before it goes live',
+              'Every version saved',
+            ].map((line) => (
+              <li
+                key={line}
+                className="glass glass-pill rounded-full px-[22px] py-3 text-[14.5px] font-medium text-head"
+              >
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </section>
   )
 }

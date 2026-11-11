@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import NgfEditBridge from '@/components/NgfEditBridge'
+import GlassFilters from '@/components/ui/GlassFilters'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { getNgfContent } from '@/lib/ngf'
@@ -122,7 +123,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={display.variable} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#0E100F" />
+        <meta name="theme-color" content="#FFFFFF" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -142,17 +143,21 @@ export default async function RootLayout({
           `}
         </Script>
         <NgfEditBridge />
+        <GlassFilters />
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-head"
         >
           Skip to content
         </a>
         <Navbar />
-        <main id="main" className="pt-[68px]">
-          {children}
-        </main>
+        {/* The nav is sticky and sits IN the flow now, so no top padding is
+            needed. On a phone the dock is fixed to the bottom, so the page
+            gets bottom clearance instead — otherwise the dock covers the
+            footer's last rows. */}
+        <main id="main">{children}</main>
         <Footer ngf={ngf} />
+        <div aria-hidden className="h-[92px] lg:hidden" />
       </body>
     </html>
   )

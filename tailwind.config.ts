@@ -1,43 +1,60 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Direction A, as tokens.
+ * Product-led, as tokens.
  *
- * The site is dark-first and has ONE design, not a light and a dark one. The
- * previous build carried `dark:` variants on every element plus a system
- * theme toggle, which meant two designs to maintain and only one of them ever
- * reviewed — and it was why ngfsystems.com rendered dark for anyone whose
- * machine was in dark mode while the light version was the one being designed.
+ * ONE design, light-first. The earlier build was dark-first (Direction A) and
+ * read as unfinished, because the page had no imagery in it and a dark ground
+ * with nothing on it is just empty. This palette is near-white with ONE
+ * graphite band (the hero) and ONE accent, so the screenshots are the only
+ * colour that matters on the page.
+ *
+ * `head` exists because `text-white` was used 61 times for headings in the
+ * dark build. On a light ground that is invisible, and a literal colour class
+ * cannot be re-pointed from here — so headings now use a token and the
+ * inversion lives in this file.
+ *
+ * White text is still correct in exactly three places, and those keep
+ * `text-white` on purpose: inside the primary button, inside the graphite
+ * hero panel, and in the footer.
  */
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        // One typeface. No monospace anywhere — it read as a developer tool.
+        // One typeface, tight tracking at display sizes.
         sans: ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        /** Page background. A charcoal with a little green in it, not pure black. */
-        ink: '#0E100F',
-        /** Raised surfaces: nav, card headers, sidebars. */
-        panel: '#171A18',
-        /** Deeper than the page — the footer. */
-        well: '#0B0D0C',
+        /** Page background. */
+        ink: '#FFFFFF',
+        /** Raised and inset surfaces: cards, the pricing band. */
+        panel: '#F6F8FA',
+        /** The graphite used for the hero panel and the footer. */
+        well: '#16181C',
         /** Every border and divider. */
-        line: '#262825',
-        /** Secondary text. */
-        muted: '#9A9C95',
-        /** Tertiary text — captions, legal. */
-        dim: '#7E817B',
-        /** Primary action and the product-UI highlight. Muted petrol. */
+        line: '#E3E8ED',
+        /** Headings and primary text. */
+        head: '#15181C',
+        /** Secondary text. 7.4:1 on white. */
+        muted: '#434B55',
+        /** Tertiary text — captions, legal. 5.3:1 on white. */
+        dim: '#5C6671',
+        /** Primary action. 6.1:1 on white, so it is legible as text too. */
         accent: {
-          DEFAULT: '#5E8B87',
-          light: '#7BA39C',
-          hover: '#6E9C98',
+          DEFAULT: '#0B5CAD',
+          light: '#2E7DC9',
+          hover: '#08487F',
         },
-        /** The warm counterpoint: eyebrows, emphasis, "won" states. */
-        sand: '#C2A379',
+        /** Eyebrows and small emphasis. Kept as a token name the pages already use. */
+        sand: '#0B5CAD',
+        /** Text and borders on the graphite panel. */
+        onwell: {
+          DEFAULT: '#B4BCC6',
+          dim: '#8A93A0',
+          line: 'rgba(255,255,255,.12)',
+        },
       },
     },
   },

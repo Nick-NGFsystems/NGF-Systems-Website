@@ -65,7 +65,7 @@ export default function PortalShowcase() {
                 <span className="text-accent-light">
                   <Icon name={icon} className="h-[18px] w-[18px]" />
                 </span>
-                <h3 className="text-[16px] font-semibold text-white">{title}</h3>
+                <h3 className="text-[16px] font-semibold text-head">{title}</h3>
               </div>
               <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{body}</p>
             </li>

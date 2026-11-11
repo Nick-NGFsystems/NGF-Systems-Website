@@ -6,23 +6,83 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    /* The page is dark in every state, including the overscroll gutter and
-       the native form controls the browser draws for us. */
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    @apply bg-ink text-white antialiased;
+    @apply bg-ink text-head antialiased;
     overflow-x: hidden;
   }
 
   /* One visible focus ring for the whole site. */
   :focus-visible {
-    @apply outline-none ring-2 ring-accent-light ring-offset-2 ring-offset-ink;
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-ink;
   }
 
   ::selection {
-    background: #5e8b87;
+    background: #0b5cad;
     color: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  /* ── Liquid Glass ───────────────────────────────────────────────────────
+     Two declarations on purpose. The first is the baseline every engine
+     gets. The second adds real lensing through the SVG displacement maps in
+     components/ui/GlassFilters.tsx, and only Chromium honours it: Firefox and
+     WebKit parse the value but render the blur alone, so they land on the
+     first. @supports cannot tell them apart, which is why this is written as
+     an override rather than a query.
+
+     The box-shadow stack is the material. The inset top line is the specular
+     edge — a top-left light source — and the inset bottom line is the far
+     edge in shadow; without that pair a pane reads as a translucent box
+     rather than as a piece of glass with thickness.
+
+     Glass belongs ONLY on chrome that floats over content (the nav, the phone
+     dock, controls sitting on a screenshot). It is never used on a content
+     surface, and never stacked on itself. */
+  .glass {
+    backdrop-filter: blur(16px) saturate(185%) brightness(1.06);
+    -webkit-backdrop-filter: blur(16px) saturate(185%) brightness(1.06);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      inset 1px 0 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 rgba(10, 14, 20, 0.08),
+      inset -1px 0 0 rgba(10, 14, 20, 0.05),
+      0 0 0 0.5px rgba(10, 14, 20, 0.1),
+      0 10px 30px -10px rgba(10, 14, 20, 0.3);
+  }
+
+  .glass-bar {
+    backdrop-filter: url(#ngf-lens-bar) blur(3px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: url(#ngf-lens-bar) blur(3px) saturate(185%) brightness(1.08);
+  }
+
+  .glass-pill {
+    backdrop-filter: url(#ngf-lens-pill) blur(3px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: url(#ngf-lens-pill) blur(3px) saturate(185%) brightness(1.08);
+  }
+
+  /* Dropped for anyone who has asked the OS to cut transparency: the glass
+     becomes an opaque surface and keeps its edge. */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: #ffffff;
+    }
+    .glass-bar,
+    .glass-pill {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
   }
 }

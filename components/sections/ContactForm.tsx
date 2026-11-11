@@ -8,9 +8,9 @@ import { isKnownIntent } from '@/lib/pricing'
 type FormState = 'idle' | 'loading' | 'success' | 'error'
 
 const FIELD =
-  'w-full min-h-[44px] rounded-lg border border-line bg-ink px-3.5 py-2.5 text-[15px] text-white placeholder:text-dim focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60'
+  'w-full min-h-[44px] rounded-lg border border-line bg-ink px-3.5 py-2.5 text-[15px] text-head placeholder:text-dim focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60'
 
-const LABEL = 'text-[14.5px] font-medium text-white/85'
+const LABEL = 'text-[14.5px] font-medium text-head/85'
 
 export default function ContactForm() {
   const [name, setName] = useState('')
@@ -70,7 +70,7 @@ export default function ContactForm() {
         <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-accent/20 text-accent-light">
           <Icon name="check" className="h-5 w-5" />
         </div>
-        <p className="text-[18px] font-semibold text-white">Thanks — that came through.</p>
+        <p className="text-[18px] font-semibold text-head">Thanks — that came through.</p>
         <p className="mt-2 text-[15px] text-muted">
           We reply within one business day, usually sooner.
         </p>
@@ -92,7 +92,7 @@ export default function ContactForm() {
           <button
             type="button"
             onClick={() => setIntent('')}
-            className="ml-auto text-[13px] text-muted transition-colors hover:text-white"
+            className="ml-auto text-[13px] text-muted transition-colors hover:text-head"
           >
             Clear
           </button>

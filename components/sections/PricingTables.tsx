@@ -55,7 +55,7 @@ export default function PricingTables() {
             aria-selected={trackKey === t.key}
             onClick={() => setTrackKey(t.key)}
             className={`rounded-lg px-5 py-2.5 text-[14.5px] font-semibold transition-colors ${
-              trackKey === t.key ? 'bg-accent text-white' : 'text-muted hover:text-white'
+              trackKey === t.key ? 'bg-accent text-head' : 'text-muted hover:text-head'
             }`}
           >
             {t.name}
@@ -67,11 +67,11 @@ export default function PricingTables() {
       <Card className="mt-8 overflow-hidden">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
           <div className="border-b border-line p-7 sm:p-8 lg:border-b-0 lg:border-r">
-            <h3 className="text-[18px] font-semibold text-white">Every site starts here</h3>
+            <h3 className="text-[18px] font-semibold text-head">Every site starts here</h3>
             <p className="mt-2 text-[15px] leading-relaxed text-muted">{active.tagline}</p>
 
             <div className="mt-7 flex items-baseline gap-1.5">
-              <span className="text-[44px] font-semibold tracking-tight text-white">
+              <span className="text-[44px] font-semibold tracking-tight text-head">
                 {usd(active.baseCents)}
               </span>
               <span className="text-[17px] text-muted">{active.basePer}</span>
@@ -94,7 +94,7 @@ export default function PricingTables() {
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-dim">
                 Who owns it
               </p>
-              <p className="mt-1.5 text-[14.5px] leading-relaxed text-white/85">
+              <p className="mt-1.5 text-[14.5px] leading-relaxed text-head/85">
                 {active.ownership}
               </p>
             </div>
@@ -115,11 +115,11 @@ export default function PricingTables() {
           </div>
 
           <div className="bg-ink/40 p-7 sm:p-8">
-            <h3 className="text-[18px] font-semibold text-white">Included on either option</h3>
+            <h3 className="text-[18px] font-semibold text-head">Included on either option</h3>
             <ul className="mt-6 flex flex-col gap-5">
               {ALWAYS_INCLUDED.map((item) => (
                 <li key={item.title}>
-                  <p className="text-[15px] font-semibold text-white">{item.title}</p>
+                  <p className="text-[15px] font-semibold text-head">{item.title}</p>
                   <p className="mt-1 text-[14.5px] leading-relaxed text-muted">{item.detail}</p>
                 </li>
               ))}
@@ -131,21 +131,21 @@ export default function PricingTables() {
       {/* ── Decision 2: what it does ──────────────────────────────────────── */}
       <div className="mt-20">
         <p className={EYEBROW}>Add what you need</p>
-        <h3 className="mt-4 text-[30px] font-semibold tracking-[-0.02em] text-white sm:text-[34px]">
+        <h3 className="mt-4 text-[30px] font-semibold tracking-[-0.02em] text-head sm:text-[34px]">
           Then add what your business needs
         </h3>
         <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
           We do not price by page count, because page count has nothing to do with the work. A
           three-page site that takes bookings is more to build and more to look after than a
-          nine-page brochure. So you pay for what the site <em className="not-italic text-white">does</em>.
+          nine-page brochure. So you pay for what the site <em className="not-italic text-head">does</em>.
         </p>
 
         <ul className="mt-10 grid gap-5 lg:grid-cols-2">
           {MODULES.map((module) => (
             <Card as="li" key={module.key} className="flex flex-col p-6">
               <div className="flex items-start justify-between gap-4">
-                <h4 className="text-[16.5px] font-semibold text-white">{module.name}</h4>
-                <span className="shrink-0 rounded-md border border-line bg-panel px-2.5 py-1 text-[14px] font-semibold text-white">
+                <h4 className="text-[16.5px] font-semibold text-head">{module.name}</h4>
+                <span className="shrink-0 rounded-md border border-line bg-panel px-2.5 py-1 text-[14px] font-semibold text-head">
                   {modulePrice(module.monthlyCents, module.oneTimeCents)}
                 </span>
               </div>
@@ -171,7 +171,7 @@ export default function PricingTables() {
       {/* ── The arithmetic, done for them ─────────────────────────────────── */}
       <div className="mt-20">
         <p className={EYEBROW}>Worked examples</p>
-        <h3 className="mt-4 text-[30px] font-semibold tracking-[-0.02em] text-white sm:text-[34px]">
+        <h3 className="mt-4 text-[30px] font-semibold tracking-[-0.02em] text-head sm:text-[34px]">
           What that adds up to
         </h3>
         <p className="mt-4 max-w-2xl text-[16px] leading-relaxed text-muted">
@@ -184,17 +184,17 @@ export default function PricingTables() {
             return (
               <Card as="li" key={example.label} className="flex flex-col p-6">
                 <p className={EYEBROW}>{example.label}</p>
-                <p className="mt-3 text-[15px] font-medium text-white">{example.who}</p>
+                <p className="mt-3 text-[15px] font-medium text-head">{example.who}</p>
                 <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{example.rationale}</p>
 
                 <div className="mt-6 flex-1" />
 
                 <div className="border-t border-line pt-5">
                   {total === null ? (
-                    <p className="text-[24px] font-semibold text-white">Quoted</p>
+                    <p className="text-[24px] font-semibold text-head">Quoted</p>
                   ) : (
                     <p className="flex items-baseline gap-1.5">
-                      <span className="text-[30px] font-semibold tracking-tight text-white">
+                      <span className="text-[30px] font-semibold tracking-tight text-head">
                         {usd(total)}
                       </span>
                       <span className="text-[14.5px] text-muted">{active.basePer}</span>

@@ -71,7 +71,7 @@ export default function PricingPage() {
         <dl className="mt-14 flex flex-col divide-y divide-line border-y border-line">
           {FAQ.map(({ q, a }) => (
             <div key={q} className="py-7">
-              <dt className="text-[16.5px] font-semibold text-white">{q}</dt>
+              <dt className="text-[16.5px] font-semibold text-head">{q}</dt>
               <dd className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-muted">{a}</dd>
             </div>
           ))}

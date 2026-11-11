@@ -82,7 +82,7 @@ export default function AboutPage() {
               ].map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between gap-4 px-5 py-4">
                   <dt className="text-[14.5px] text-muted">{label}</dt>
-                  <dd className="text-right text-[14.5px] font-semibold text-white">{value}</dd>
+                  <dd className="text-right text-[14.5px] font-semibold text-head">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -102,7 +102,7 @@ export default function AboutPage() {
             <div key={principle.title}>
               <div className="flex items-start gap-3">
                 <Icon name="check" className="mt-1 h-5 w-5 shrink-0 text-sand" />
-                <h3 className="text-[16.5px] font-semibold text-white">{principle.title}</h3>
+                <h3 className="text-[16.5px] font-semibold text-head">{principle.title}</h3>
               </div>
               <p className="mt-2.5 pl-8 text-[15px] leading-relaxed text-muted">{principle.body}</p>
             </div>

@@ -40,7 +40,7 @@ export default function WorkGrid({
 
           <div className="flex flex-1 flex-col p-5">
             <p className={EYEBROW}>{client.industry}</p>
-            <h3 className="mt-2.5 text-[17.5px] font-semibold text-white">{client.name}</h3>
+            <h3 className="mt-2.5 text-[17.5px] font-semibold text-head">{client.name}</h3>
             <p className="mt-1 text-[13.5px] text-muted">{client.location}</p>
 
             <p className="mt-4 text-[14.5px] leading-relaxed text-muted">

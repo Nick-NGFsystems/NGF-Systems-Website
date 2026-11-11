@@ -29,7 +29,7 @@ export default function CallToAction({
       <Container className="relative py-16 sm:py-20">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-xl">
-            <h2 className="text-[26px] font-semibold tracking-tight text-white sm:text-[32px]">
+            <h2 className="text-[26px] font-semibold tracking-tight text-head sm:text-[32px]">
               {title}
             </h2>
             <p className="mt-3 text-[16px] leading-relaxed text-muted">{body}</p>
@@ -42,7 +42,7 @@ export default function CallToAction({
             </Button>
             <a
               href={CONTACT.phoneHref}
-              className="inline-flex h-12 items-center justify-center rounded-lg border border-line bg-panel px-7 text-[15px] font-semibold text-white transition-colors hover:bg-[#1E2220]"
+              className="inline-flex h-12 items-center justify-center rounded-lg border border-line bg-panel px-7 text-[15px] font-semibold text-head transition-colors hover:bg-panel"
             >
               {CONTACT.phone}
             </a>

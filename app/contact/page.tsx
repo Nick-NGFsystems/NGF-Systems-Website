@@ -37,12 +37,12 @@ export default function ContactPage() {
 
           <div className="flex flex-col gap-8">
             <div>
-              <h2 className="text-[16.5px] font-semibold text-white">Or reach us directly</h2>
+              <h2 className="text-[16.5px] font-semibold text-head">Or reach us directly</h2>
               <ul className="mt-4 flex flex-col gap-3">
                 <li>
                   <a
                     href={`mailto:${CONTACT.email}`}
-                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-white"
+                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-head"
                   >
                     <Icon name="inbox" className="h-4 w-4 shrink-0 text-dim" />
                     <span className="break-all">{CONTACT.email}</span>
@@ -51,7 +51,7 @@ export default function ContactPage() {
                 <li>
                   <a
                     href={CONTACT.phoneHref}
-                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-white"
+                    className="inline-flex items-center gap-2.5 text-[15px] text-muted transition-colors hover:text-head"
                   >
                     <Icon name="chat" className="h-4 w-4 shrink-0 text-dim" />
                     {CONTACT.phone}
@@ -61,7 +61,7 @@ export default function ContactPage() {
             </div>
 
             <div className="rounded-xl border border-line bg-panel p-6">
-              <h2 className="text-[16.5px] font-semibold text-white">What happens next</h2>
+              <h2 className="text-[16.5px] font-semibold text-head">What happens next</h2>
               <ol className="mt-4 flex flex-col gap-3">
                 {[
                   'We reply within one business day.',
@@ -78,7 +78,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <h2 className="text-[16.5px] font-semibold text-white">Where we work</h2>
+              <h2 className="text-[16.5px] font-semibold text-head">Where we work</h2>
               <p className="mt-3 text-[15px] leading-relaxed text-muted">
                 Based in {CONTACT.location}. Most clients are in West Michigan, but the work is
                 remote-friendly — one of our sites is run from New Zealand.

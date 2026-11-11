@@ -1,7 +1,7 @@
 import Section from '@/components/ui/Section'
 import SectionHeading from '@/components/ui/SectionHeading'
 import { Tick } from '@/components/ui/FeatureItem'
-import { LeadsPanel } from './PortalPanels'
+import ScreenshotSlot from '@/components/ui/ScreenshotSlot'
 import type { NgfSiteContent } from '@/lib/ngf'
 
 /**
@@ -12,6 +12,10 @@ import type { NgfSiteContent } from '@/lib/ngf'
  * doubts, and the one differentiating claim was then repeated below. This
  * shows the leads inbox instead, and answers the question a small-business
  * owner actually has: where do my enquiries go.
+ *
+ * It used to show a HAND-DRAWN imitation of that inbox, with invented
+ * customer names in it. A real screenshot is both more convincing and not a
+ * small lie about the product, so this is a ScreenshotSlot — see lib/shots.ts.
  */
 export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
   const title = ngf?.services?.title || 'Every enquiry, in one place you own.'
@@ -43,7 +47,11 @@ export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
           </ul>
         </div>
 
-        <LeadsPanel />
+        <div className="overflow-hidden rounded-[18px] shadow-[inset_0_0_0_1px_rgba(16,24,40,.08),0_12px_30px_-14px_rgba(16,24,40,.18)]">
+          <div className="h-[300px] sm:h-[360px]">
+            <ScreenshotSlot shot="leads" />
+          </div>
+        </div>
       </div>
     </Section>
   )

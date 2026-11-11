@@ -3,8 +3,8 @@ import type { ReactNode } from 'react'
 
 const VARIANTS = {
   primary: 'bg-accent text-white hover:bg-accent-hover',
-  secondary: 'border border-line bg-panel text-white/90 hover:border-line hover:bg-[#1E2220]',
-  ghost: 'text-muted hover:text-white',
+  secondary: 'border border-line bg-ink text-head hover:bg-panel',
+  ghost: 'text-muted hover:text-head',
 } as const
 
 const SIZES = {

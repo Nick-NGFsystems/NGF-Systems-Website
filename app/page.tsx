@@ -64,9 +64,9 @@ export default async function HomePage() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {[monthly, oneTime].map((t) => (
             <Card key={t.key} className="p-6">
-              <h3 className="text-[16.5px] font-semibold text-white">{t.name}</h3>
+              <h3 className="text-[16.5px] font-semibold text-head">{t.name}</h3>
               <p className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-[38px] font-semibold tracking-tight text-white">
+                <span className="text-[38px] font-semibold tracking-tight text-head">
                   {usd(t.baseCents)}
                 </span>
                 <span className="text-[16px] text-muted">{t.basePer}</span>
