@@ -35,7 +35,6 @@ const PRINCIPLES = [
 ]
 
 export default function AboutPage() {
-  const industries = new Set(CLIENTS.map((c) => c.industry)).size
 
   return (
     <>
@@ -66,8 +65,7 @@ export default function AboutPage() {
                 The other half of the answer is the platform. Rather than build every client a
                 bespoke system from nothing, NGF runs its own software — the portal your site is
                 managed through. That is what makes it possible for one person to look after{' '}
-                {CLIENTS.length} live sites across {industries} industries without any of them being
-                neglected.
+                a portfolio of live client sites without any of them being neglected.
               </p>
             </div>
           </div>
@@ -77,8 +75,6 @@ export default function AboutPage() {
               {[
                 ['Based in', CONTACT.location],
                 ['Working with', CONTACT.serviceArea],
-                ['Live client sites', String(CLIENTS.length)],
-                ['Industries served', String(industries)],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between gap-4 px-5 py-4">
                   <dt className="text-[14.5px] text-muted">{label}</dt>

@@ -13,14 +13,13 @@ export const metadata: Metadata = {
 }
 
 export default function WorkPage() {
-  const industries = new Set(CLIENTS.map((c) => c.industry)).size
 
   return (
     <>
       <PageHeader
         eyebrow="Work"
         title="Every site here is live right now"
-        subtitle={`${CLIENTS.length} businesses across ${industries} industries. These are not mockups or concept pieces — click any of them and you are on a site we built and still look after today.`}
+        subtitle="These are not mockups or concept pieces — click any of them and you are on a site we built and still look after today."
       />
 
       <Section bleed>

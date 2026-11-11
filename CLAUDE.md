@@ -884,19 +884,50 @@ page. The links render `flex-col-reverse` so the one most people want is nearest
 order would put Pricing furthest away, which defeats the point. `app/layout.tsx` adds bottom
 clearance below the footer or the dock covers its last rows.
 
-### Screenshots are the remaining blocker
+### Screenshots (`lib/shots.ts`)
 
-`lib/shots.ts` is the one table of the four product screenshots the design rests on, and
+`lib/shots.ts` is the one table of the product screenshots the design rests on, and
 `components/ui/ScreenshotSlot.tsx` renders either the image or a **visibly-marked slot** naming what
 is missing and at what size. `src: null` means it is still a gap.
 
-To fill one: put the file in `/public/shots` and set `src`. Take them from the **Test Client**
-account, never a real client's portal — a marketing page must not carry another business's
-enquiries. Capture at twice the listed size for retina.
+Two of the four are filled (Nick supplied them 2026-11-11, converted to webp with sharp):
+
+| Key | State | Where |
+|---|---|---|
+| `editor` | ✅ `/shots/editor.webp` (1915×907, 24 KB) | the hero panel |
+| `bookings` | ✅ `/shots/bookings.webp` (1290×740, 26 KB) | `components/sections/Bookings.tsx` |
+| `leads` | ❌ still a marked slot | `components/sections/WhatYouGet.tsx` |
+| `editorPhone` | ❌ not placed anywhere yet | — |
+
+**`leads` is deliberately still empty.** The capture supplied read "No submissions yet · All 0", and
+it sits under the heading "Every enquiry, in one place you own" — a picture of an empty inbox argues
+against the claim it is there to prove. It needs three or four submissions at different statuses
+first.
+
+**Two things to decide before this is public.** The `editor` shot shows an unbranded client site
+reading "YOUR BUSINESS" with the modal mid-edit on `Business Name = "Your Business"`, and it carries
+a real third party's contact details (Aurum Drones, an email and a phone number) legibly in the site
+nav. The `bookings` shot shows the Standard Haircut service, which is DemarcusCuts' live booking
+setup rather than Test Client's. Neither leaks a customer's data, but both are another business's
+details on NGF's marketing page.
+
+To fill one: put the file in `/public/shots` and set `src` **and `size`** in `lib/shots.ts`. The
+size is load-bearing — `ScreenshotSlot` is `object-cover`, so a frame whose aspect ratio does not
+match the file crops content off an edge. `Bookings.tsx` builds its frame from an `aspect-[w/h]`
+matching the entry, plus `self-start` so the grid does not stretch the column and leave a white band
+under the picture. Take new captures from the **Test Client** account, never a real client's portal,
+and crop out the dead whitespace before converting — a browser window of a mostly-empty admin page
+reads as an unfinished product.
 
 `components/sections/PortalPanels.tsx` is **deleted**. It hand-drew a fake leads inbox with invented
 customer names (Dana Whitfield, Marcus Webb…). A real screenshot is both more convincing and not a
 small lie about the product.
+
+### No client counts on the site (2026-11-11)
+
+At Nick's instruction the site does not state how many clients or industries NGF has. The home page,
+`/work` and `/about` each derived a number from `CLIENTS` in `lib/clients.ts`; those are gone and the
+`industries` derivation with them. **Do not re-add a count** — name the clients, do not tally them.
 
 ### Verified / not verified
 

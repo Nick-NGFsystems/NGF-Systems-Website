@@ -30,6 +30,10 @@ export default function ScreenshotSlot({
 
   if (src) {
     return (
+      // Deliberately a plain <img>, not next/image. These are already webp at
+      // the exact size the layout uses, so Vercel's optimizer would re-encode
+      // them (a billed transformation per variant) for no gain.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={alt}

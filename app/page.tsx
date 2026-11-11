@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Hero from '@/components/sections/Hero'
 import WhatYouGet from '@/components/sections/WhatYouGet'
+import Bookings from '@/components/sections/Bookings'
 import WorkGrid from '@/components/sections/WorkGrid'
 import Process from '@/components/sections/Process'
 import CallToAction from '@/components/sections/CallToAction'
@@ -22,6 +23,7 @@ export default async function HomePage() {
     <>
       <Hero ngf={ngf} />
       <WhatYouGet ngf={ngf} />
+      <Bookings />
 
       <Section id="work">
         <SectionHeading
@@ -29,7 +31,7 @@ export default async function HomePage() {
           title={ngf?.work?.title || 'Every one of these is live.'}
           subtitle={
             ngf?.work?.subtitle ||
-            'Six businesses across six industries. Click any of them and you are on a site we built and still look after today.'
+            'Click any of them and you are on a site we built and still look after today.'
           }
           ngfSection="Work"
           ngfTitleField="work.title"
@@ -40,7 +42,7 @@ export default async function HomePage() {
         </div>
         <div className="mt-10">
           <Button href="/work" variant="secondary">
-            See all six
+            See the work
             <Icon name="arrow-right" className="h-4 w-4" />
           </Button>
         </div>

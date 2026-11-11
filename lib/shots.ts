@@ -29,10 +29,10 @@ export interface Shot {
 
 export const SHOTS = {
   editor: {
-    src: null,
-    alt: 'The NGF portal website editor, with a client site open and one field being edited',
+    src: '/shots/editor.webp',
+    alt: 'The NGF portal website editor, with a client site open in the preview and the Business Name field being edited',
     want: 'The website editor, wide — a client site in the iframe, the sidebar open, one field mid-edit.',
-    size: [1200, 620],
+    size: [1915, 907],
   },
   editorPhone: {
     src: null,
@@ -41,16 +41,22 @@ export const SHOTS = {
     size: [390, 320],
   },
   leads: {
+    // Deliberately still empty. The capture supplied on 2026-11-11 showed
+    // "No submissions yet · All 0", and it sits directly under the heading
+    // "Every enquiry, in one place you own" — a screenshot of an empty inbox
+    // argues against the claim it is meant to prove. Needs three or four
+    // submissions in the Test Client account first, with a different status
+    // on each so the New / Contacted / Won tabs are doing visible work.
     src: null,
     alt: 'The NGF portal leads inbox, showing enquiries with a status on each one',
-    want: 'The leads inbox, with the status on each enquiry visible.',
-    size: [720, 440],
+    want: 'The leads inbox with THREE OR FOUR enquiries in it, each at a different status — an empty inbox undercuts the claim this sits under.',
+    size: [1270, 620],
   },
   bookings: {
-    src: null,
-    alt: 'The NGF portal bookings diary, showing appointments customers have booked',
-    want: 'The bookings diary, with appointments on it.',
-    size: [720, 440],
+    src: '/shots/bookings.webp',
+    alt: 'The NGF portal booking settings, showing weekly opening hours and a service',
+    want: 'The bookings page, with weekly hours and at least one service set.',
+    size: [1290, 740],
   },
 } as const satisfies Record<string, Shot>
 
