@@ -889,7 +889,24 @@ button, spanning the whole width. That lost on every count: the CTA duplicated t
 the hero a few hundred pixels above it, the call button was a third competing action, and the one
 thing the bar is actually for was the smallest target on it. Do not add a second action back.
 
-Two things in `Navbar.tsx` will bite whoever edits the sheet:
+**The sheet is a list of ROWS, not a list of words** (2026-11-11, second pass). Each row is a
+36px rounded icon tile plus a label; six bare words read as an unstyled fallback rather than a
+designed menu. Only the current page takes colour — an accent-filled tile, an accent label and an
+`accent/[0.08]` row — so the marking is visible without shouting. `Client login` sits below a
+hairline, quieter, with the `external` icon.
+
+`MENU` in `Navbar.tsx` is `NAV` plus two rows that only exist on a phone:
+
+- **Home.** On a desktop the wordmark is the way back; the phone menu has no wordmark, so before
+  this there was no way home from the menu at all.
+- **Client login**, which `lib/nav.ts` deliberately keeps out of `NAV` because it is a different
+  audience.
+
+`lib/nav.ts` is still the one table of destinations — a page added there appears here automatically,
+falling back to the `layout` icon until `MENU_ICONS` names one. The icons are phone-only; a desktop
+nav of six icons would be noise.
+
+Three things in `Navbar.tsx` will bite whoever edits the sheet:
 
 - **It stays mounted when closed.** `hidden` cannot be transitioned, so the closed state is made
   inert by hand — `pointer-events-none`, `aria-hidden`, `tabIndex={-1}` on every link. Drop any one
@@ -898,7 +915,10 @@ Two things in `Navbar.tsx` will bite whoever edits the sheet:
   auto height without measuring it in JS. The inner wrapper must keep `min-h-0 overflow-hidden` or
   the row refuses to collapse.
 - `STAGGER` is a written-out array of `delay-[Nms]` classes. Tailwind scans source text, so a
-  computed `` `delay-[${i * 40}ms]` `` produces no class at all.
+  computed `` `delay-[${i * 40}ms]` `` produces no class at all. `delayFor()` counts BACK from the
+  end of `MENU` so the bottom row moves first and the sheet unrolls up out of the button. The rows
+  render in plain reading order now; an earlier version reversed the array AND used
+  `flex-col-reverse`, a double negative that only existed to make the stagger run bottom-up.
 
 ### The phone hero is full-bleed (2026-11-11)
 

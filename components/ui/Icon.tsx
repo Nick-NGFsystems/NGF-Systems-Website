@@ -25,6 +25,9 @@ export type IconName =
   | 'check'
   | 'arrow-right'
   | 'external'
+  | 'home'
+  | 'grid'
+  | 'tag'
 
 const PATHS: Record<IconName, ReactElement> = {
   layout: (
@@ -103,6 +106,26 @@ const PATHS: Record<IconName, ReactElement> = {
       <path d="M14 4h6v6" />
       <path d="M20 4 11 13" />
       <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </>
+  ),
+  home: (
+    <>
+      <path d="M3.5 10.2 12 3.6l8.5 6.6" />
+      <path d="M5.9 9.5v10.9h12.2V9.5" />
+    </>
+  ),
+  grid: (
+    <>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.6" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.6" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.6" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.6" />
+    </>
+  ),
+  tag: (
+    <>
+      <path d="M11.3 3.6h9.1v9.1l-8.1 8.1a1.7 1.7 0 0 1-2.4 0l-6.7-6.7a1.7 1.7 0 0 1 0-2.4Z" />
+      <circle cx="16.4" cy="7.6" r="1.35" />
     </>
   ),
 }

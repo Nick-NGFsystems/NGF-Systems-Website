@@ -1,12 +1,42 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import Icon, { type IconName } from '@/components/ui/Icon'
 import { NAV, PORTAL_URL, CONTACT } from '@/lib/nav'
 
+/* ── The phone menu ───────────────────────────────────────────────────────
+   `lib/nav.ts` stays the one table of destinations; this adds the two rows
+   that only make sense on a phone. Home is one of them: on a desktop the
+   wordmark is the way back, and a phone has no wordmark in the menu, so
+   there was no way home at all without going back to the top of the page.
+   The icons are only here — a desktop nav of six icons would be noise.    */
+
+const MENU_ICONS: Record<string, IconName> = {
+  '/services': 'layout',
+  '/work': 'grid',
+  '/pricing': 'tag',
+  '/about': 'users',
+  '/contact': 'chat',
+}
+
+interface MenuRow {
+  href: string
+  label: string
+  icon: IconName
+  /** Opens the portal in a new tab, and is drawn as a quieter row. */
+  external?: boolean
+}
+
+const MENU: readonly MenuRow[] = [
+  { href: '/', label: 'Home', icon: 'home' },
+  ...NAV.map((n) => ({ href: n.href, label: n.label, icon: MENU_ICONS[n.href] ?? 'layout' })),
+  { href: PORTAL_URL, label: 'Client login', icon: 'external', external: true },
+]
+
 /* Written out rather than computed, because Tailwind scans source text: a
-   template literal like `delay-[${i * 40}ms]` produces no class at all. One
-   entry per NAV item plus the Client login row. */
+   template literal like `delay-[${i * 35}ms]` produces no class at all. */
 const STAGGER = [
   'delay-[30ms]',
   'delay-[65ms]',
@@ -16,6 +46,10 @@ const STAGGER = [
   'delay-[205ms]',
   'delay-[240ms]',
 ] as const
+
+/** The sheet unrolls upward out of the button, so the BOTTOM row moves
+ *  first: the delay counts back from the end of the list. */
+const delayFor = (i: number) => STAGGER[MENU.length - 1 - i] ?? ''
 
 /* ── Geometry ─────────────────────────────────────────────────────────────
    Three glass pills — wordmark / links / actions — that fuse into one bar as
@@ -165,6 +199,7 @@ export default function Navbar() {
     return { d: outline(p, [0, 0]), pills: p }
   })
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   const group = useRef<Array<HTMLElement | null>>([null, null, null])
 
@@ -412,51 +447,80 @@ export default function Navbar() {
         <div
           id="ngf-dock-menu"
           aria-hidden={!open}
-          className={`grid w-[min(70vw,248px)] origin-bottom-right transition-[grid-template-rows,opacity,transform,margin] duration-[360ms] ease-[cubic-bezier(.32,.72,0,1)] ${
+          className={`grid w-[min(78vw,272px)] origin-bottom-right transition-[grid-template-rows,opacity,transform,margin] duration-[360ms] ease-[cubic-bezier(.32,.72,0,1)] ${
             open
               ? 'mb-2.5 grid-rows-[1fr] scale-100 opacity-100'
               : 'pointer-events-none mb-0 grid-rows-[0fr] scale-90 opacity-0'
           }`}
         >
           <div className="min-h-0 overflow-hidden">
+            {/* Rows in reading order, so Contact — the one that converts —
+                lands at the bottom next to the thumb without any reversing.
+                Each row is an icon tile and a label rather than bare text:
+                a plain list of six words reads as an unstyled fallback, and
+                the tile is what makes the current page markable without
+                shouting. Only the active row takes colour. */}
             <nav
               aria-label="Main"
-              className="glass glass-pill flex flex-col-reverse rounded-[26px] p-2"
+              className="glass glass-pill flex flex-col gap-0.5 rounded-[26px] p-2"
             >
-              {/* Reversed so the link most people want sits nearest the thumb;
-                  reading order would put Contact furthest away. The stagger
-                  runs in DOM order, which is bottom-to-top under
-                  flex-col-reverse, so the sheet unrolls upward from the
-                  button. */}
-              {[...NAV].reverse().map((item, i) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  tabIndex={open ? 0 : -1}
-                  onClick={() => setOpen(false)}
-                  className={`flex min-h-[50px] items-center rounded-[18px] px-4 text-[16.5px] font-medium text-head transition-[opacity,transform] duration-300 ${
-                    open
-                      ? `translate-y-0 opacity-100 ${STAGGER[i] ?? ''}`
-                      : 'translate-y-1.5 opacity-0'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <a
-                href={PORTAL_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                tabIndex={open ? 0 : -1}
-                onClick={() => setOpen(false)}
-                className={`flex min-h-[50px] items-center rounded-[18px] px-4 text-[16.5px] text-muted transition-[opacity,transform] duration-300 ${
-                  open
-                    ? `translate-y-0 opacity-100 ${STAGGER[NAV.length] ?? ''}`
-                    : 'translate-y-1.5 opacity-0'
-                }`}
-              >
-                Client login
-              </a>
+              {MENU.map((item, i) => {
+                const active = !item.external && pathname === item.href
+                const inner = (
+                  <>
+                    <span
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] transition-colors ${
+                        active
+                          ? 'bg-accent text-white'
+                          : item.external
+                            ? 'bg-[#0C1016]/[0.05] text-dim'
+                            : 'bg-[#0C1016]/[0.06] text-head'
+                      }`}
+                    >
+                      <Icon name={item.icon} className="h-[17px] w-[17px]" />
+                    </span>
+                    <span
+                      className={`text-[16px] tracking-[-0.012em] ${
+                        active
+                          ? 'font-semibold text-accent'
+                          : item.external
+                            ? 'text-muted'
+                            : 'font-medium text-head'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </>
+                )
+                const cls = `flex items-center gap-3 rounded-[18px] p-1.5 pr-4 transition-[opacity,transform,background-color] duration-300 ${
+                  active ? 'bg-accent/[0.08]' : ''
+                } ${open ? `translate-y-0 opacity-100 ${delayFor(i)}` : 'translate-y-1.5 opacity-0'}`
+
+                return item.external ? (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    tabIndex={open ? 0 : -1}
+                    onClick={() => setOpen(false)}
+                    className={`mt-1 border-t border-[#0C1016]/10 pt-2.5 ${cls}`}
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    tabIndex={open ? 0 : -1}
+                    onClick={() => setOpen(false)}
+                    className={cls}
+                  >
+                    {inner}
+                  </Link>
+                )
+              })}
             </nav>
           </div>
         </div>

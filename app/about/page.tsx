@@ -5,7 +5,6 @@ import SectionHeading from '@/components/ui/SectionHeading'
 import Process from '@/components/sections/Process'
 import CallToAction from '@/components/sections/CallToAction'
 import Icon from '@/components/ui/Icon'
-import { CLIENTS } from '@/lib/clients'
 import { CONTACT } from '@/lib/nav'
 
 export const metadata: Metadata = {
