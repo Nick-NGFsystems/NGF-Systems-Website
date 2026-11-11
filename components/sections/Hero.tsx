@@ -57,7 +57,7 @@ export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
             Get a free mockup
           </Link>
           <Link
-            href="/services"
+            href="/portal-preview"
             className="inline-flex h-[54px] items-center rounded-full px-6 text-[17px] tracking-[-0.012em] text-white transition-colors hover:text-onwell"
           >
             Look inside the portal &rsaquo;

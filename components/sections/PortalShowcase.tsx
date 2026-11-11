@@ -45,7 +45,14 @@ export default function PortalShowcase() {
   return (
     <Section id="portal">
       <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        {/* Deliberately NOT sticky. This column used to be
+            `lg:sticky lg:top-28 lg:self-start`, but it is barely shorter than
+            the capability list beside it, so the pin had only a few dozen
+            pixels of travel. That did not read as "the heading holds while the
+            list scrolls" — it read as the box drifting up and down as you went
+            past. A sticky column needs a neighbour that is much taller than it
+            is; this one does not have that, so it just sits still. */}
+        <div>
           <SectionHeading
             eyebrow="Your portal"
             title="Your website is not a black box"

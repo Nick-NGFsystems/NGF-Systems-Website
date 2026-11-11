@@ -927,6 +927,14 @@ Three things in `Navbar.tsx` will bite whoever edits the sheet:
   render in plain reading order now; an earlier version reversed the array AND used
   `flex-col-reverse`, a double negative that only existed to make the stagger run bottom-up.
 
+### No sticky column in `PortalShowcase` (2026-11-11)
+
+The heading column was `lg:sticky lg:top-28 lg:self-start`. It is barely shorter than the capability
+list beside it, so the pin had only a few dozen pixels of travel — which did not read as "the
+heading holds while the list scrolls", it read as the box drifting up and down as you scrolled past.
+A sticky column needs a neighbour much taller than it is. **Do not put it back** unless that column
+grows a lot.
+
 ### The phone hero is full-bleed (2026-11-11)
 
 `components/sections/Hero.tsx` drops its side gutter below 640px and rounds only its bottom corners.
@@ -972,6 +980,26 @@ reads as an unfinished product.
 `components/sections/PortalPanels.tsx` is **deleted**. It hand-drew a fake leads inbox with invented
 customer names (Dana Whitfield, Marcus Webb…). A real screenshot is both more convincing and not a
 small lie about the product.
+
+### `/portal-preview` — the one place a drawn mock is allowed (2026-11-11)
+
+The hero's "Look inside the portal" used to go to `/services`, which did not show the portal at all.
+It now opens `/portal-preview`, built on `components/sections/PortalMock.tsx`: a tabbed drawing of
+the portal (Dashboard / Website editor / Leads / Bookings).
+
+**This is a deliberate exception to the rule that killed `PortalPanels.tsx`, and it survives only
+because of how it is labelled.** The difference is that nothing in it pretends to be real: every
+value is a visible placeholder (`Your Business`, `Your customer`, `Your first service`), the browser
+chrome carries a **PREVIEW** badge, and the caption under the frame opens with "Sample content."
+`PortalPanels` failed all three — it invented people and presented them as a working inbox.
+
+The **structure** is real and must stay that way: the tabs, the editor's field list, the New /
+Contacted / Won lead statuses and the weekly-hours rows all mirror what the platform ships
+(`NGF-Systems-app/lib/portal-capabilities.ts`). Do not add a panel for something the portal cannot
+do — that would be the claims audit all over again, just drawn instead of written.
+
+The page is indexable and in the sitemap via `EXTRA_ROUTES` in `lib/nav.ts`, which exists because
+`ROUTES` was `'/'` plus `NAV` and this page is deliberately not a nav destination.
 
 ### No client counts on the site (2026-11-11)
 

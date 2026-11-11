@@ -22,8 +22,16 @@ export const NAV: readonly NavItem[] = [
 /** Where existing clients sign in. Deliberately not a nav item — it is a different audience. */
 export const PORTAL_URL = 'https://app.ngfsystems.com'
 
-/** Routes for the sitemap, in priority order. `/` plus every nav destination. */
-export const ROUTES = ['/', ...NAV.map((n) => n.href)] as const
+/**
+ * Public pages that are not nav destinations. `/portal-preview` is linked from
+ * the hero rather than the navbar — it is something you look at once while
+ * deciding, not somewhere you go back to — but it is a real indexable page, so
+ * the sitemap has to know about it.
+ */
+const EXTRA_ROUTES = ['/portal-preview'] as const
+
+/** Routes for the sitemap, in priority order. `/`, every nav destination, then the rest. */
+export const ROUTES = ['/', ...NAV.map((n) => n.href), ...EXTRA_ROUTES] as const
 
 export const CONTACT = {
   email: 'nick@ngfsystems.com',
