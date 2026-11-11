@@ -2,8 +2,20 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import Icon from '@/components/ui/Icon'
 import { NAV, PORTAL_URL, CONTACT } from '@/lib/nav'
+
+/* Written out rather than computed, because Tailwind scans source text: a
+   template literal like `delay-[${i * 40}ms]` produces no class at all. One
+   entry per NAV item plus the Client login row. */
+const STAGGER = [
+  'delay-[30ms]',
+  'delay-[65ms]',
+  'delay-[100ms]',
+  'delay-[135ms]',
+  'delay-[170ms]',
+  'delay-[205ms]',
+  'delay-[240ms]',
+] as const
 
 /* ── Geometry ─────────────────────────────────────────────────────────────
    Three glass pills — wordmark / links / actions — that fuse into one bar as
@@ -362,11 +374,16 @@ export default function Navbar() {
       </div>
 
       {/* ── Phone and tablet: bring it to the thumb ──────────────────────
-          No top bar. Everything actionable lives in a dock at the bottom and
-          the menu grows UP out of it, so nothing asks the hand to travel to
-          the top of the page. The links run in reverse so the one most people
-          want is nearest the thumb — reading order would put Pricing
-          furthest away, which defeats the point. */}
+          No top nav — only a branding strip. Navigation is one button in the
+          bottom-RIGHT corner, where a right thumb rests, and the menu grows
+          up out of it.
+
+          It used to be a three-part dock: menu, a full-width "Get a free
+          mockup", and a call button. That lost on every count — the CTA
+          duplicated the one already in the hero a few hundred pixels above
+          it, the call button was a third competing action, and together they
+          spanned the whole width, so the one thing the bar is actually for
+          was the smallest target on it. */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-line bg-ink/90 px-5 py-3.5 backdrop-blur-md lg:hidden">
         <Link href="/" className="text-[16px] font-semibold tracking-[-0.02em] text-head">
           NGF&nbsp;Systems
@@ -374,79 +391,120 @@ export default function Navbar() {
         <span className="text-[13px] text-dim">{CONTACT.location}</span>
       </div>
 
-      {open && (
-        <button
-          type="button"
-          aria-label="Close menu"
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-[#0C1016]/35 lg:hidden"
-        />
-      )}
+      <button
+        type="button"
+        aria-label="Close menu"
+        tabIndex={open ? 0 : -1}
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-40 bg-[#0C1016]/35 transition-opacity duration-300 lg:hidden ${
+          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      />
 
-      <div className="fixed inset-x-3 bottom-3.5 z-50 lg:hidden">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end lg:hidden">
+        {/* The sheet GROWS out of the button rather than appearing under it:
+            the grid-rows 0fr→1fr pair is the only way to transition to an
+            auto height without measuring it in JS, and the scale/opacity are
+            anchored to the bottom-right so the motion starts at the thumb.
+            It stays mounted when closed — `hidden` cannot be transitioned —
+            so it is made inert by hand with pointer-events, aria-hidden and
+            tabIndex. */}
         <div
           id="ngf-dock-menu"
-          hidden={!open}
-          className="glass mb-2.5 overflow-hidden rounded-[30px]"
+          aria-hidden={!open}
+          className={`grid w-[min(70vw,248px)] origin-bottom-right transition-[grid-template-rows,opacity,transform,margin] duration-[360ms] ease-[cubic-bezier(.32,.72,0,1)] ${
+            open
+              ? 'mb-2.5 grid-rows-[1fr] scale-100 opacity-100'
+              : 'pointer-events-none mb-0 grid-rows-[0fr] scale-90 opacity-0'
+          }`}
         >
-          <nav aria-label="Main" className="flex flex-col-reverse p-2.5">
-            {[...NAV].reverse().map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="flex min-h-[52px] items-center rounded-[20px] px-4 text-[17px] font-medium text-head"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <a
-              href={PORTAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="flex min-h-[52px] items-center rounded-[20px] px-4 text-[17px] text-muted"
+          <div className="min-h-0 overflow-hidden">
+            <nav
+              aria-label="Main"
+              className="glass glass-pill flex flex-col-reverse rounded-[26px] p-2"
             >
-              Client login
-            </a>
-          </nav>
+              {/* Reversed so the link most people want sits nearest the thumb;
+                  reading order would put Contact furthest away. The stagger
+                  runs in DOM order, which is bottom-to-top under
+                  flex-col-reverse, so the sheet unrolls upward from the
+                  button. */}
+              {[...NAV].reverse().map((item, i) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  tabIndex={open ? 0 : -1}
+                  onClick={() => setOpen(false)}
+                  className={`flex min-h-[50px] items-center rounded-[18px] px-4 text-[16.5px] font-medium text-head transition-[opacity,transform] duration-300 ${
+                    open
+                      ? `translate-y-0 opacity-100 ${STAGGER[i] ?? ''}`
+                      : 'translate-y-1.5 opacity-0'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <a
+                href={PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                tabIndex={open ? 0 : -1}
+                onClick={() => setOpen(false)}
+                className={`flex min-h-[50px] items-center rounded-[18px] px-4 text-[16.5px] text-muted transition-[opacity,transform] duration-300 ${
+                  open
+                    ? `translate-y-0 opacity-100 ${STAGGER[NAV.length] ?? ''}`
+                    : 'translate-y-1.5 opacity-0'
+                }`}
+              >
+                Client login
+              </a>
+            </nav>
+          </div>
         </div>
 
-        <div className="glass glass-pill flex items-center gap-2 rounded-full p-2">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="ngf-dock-menu"
-            aria-label={open ? 'Close menu' : 'Menu'}
-            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#0C1016]/[0.06]"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-controls="ngf-dock-menu"
+          aria-label={open ? 'Close menu' : 'Menu'}
+          className="glass glass-pill flex h-[58px] w-[58px] items-center justify-center rounded-full transition-transform duration-200 active:scale-95"
+        >
+          {/* Two stacked icons that rotate past each other, rather than one
+              path swapped on click — a swap has no in-between state and reads
+              as a flicker next to a sheet that takes 360ms to open. */}
+          <span className="relative block h-5 w-5">
+            <svg
+              viewBox="0 0 20 20"
+              aria-hidden
+              className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
+                open ? 'rotate-90 opacity-0' : 'rotate-0 opacity-100'
+              }`}
+            >
               <path
-                d={open ? 'M5 5l10 10 M15 5L5 15' : 'M3 6h14 M3 10h14 M3 14h14'}
+                d="M3 6h14 M3 10h14 M3 14h14"
                 fill="none"
                 stroke="#15181C"
                 strokeWidth={1.8}
                 strokeLinecap="round"
               />
             </svg>
-          </button>
-
-          <Link
-            href="/contact?intent=Free%20mockup"
-            className="flex min-h-[52px] grow items-center justify-center rounded-full bg-accent text-[16.5px] font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,.28)]"
-          >
-            Get a free mockup
-          </Link>
-
-          <a
-            href={CONTACT.phoneHref}
-            aria-label={`Call NGF Systems on ${CONTACT.phone}`}
-            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#0C1016]/[0.06]"
-          >
-            <Icon name="chat" className="h-[19px] w-[19px] text-head" />
-          </a>
-        </div>
+            <svg
+              viewBox="0 0 20 20"
+              aria-hidden
+              className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
+                open ? 'rotate-0 opacity-100' : '-rotate-90 opacity-0'
+              }`}
+            >
+              <path
+                d="M5 5l10 10 M15 5L5 15"
+                fill="none"
+                stroke="#15181C"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+        </button>
       </div>
     </>
   )

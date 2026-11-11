@@ -176,7 +176,7 @@ export default async function RootLayout({
             footer's last rows. */}
         <main id="main">{children}</main>
         <Footer ngf={ngf} />
-        <div aria-hidden className="h-[92px] lg:hidden" />
+        <div aria-hidden className="h-[86px] lg:hidden" />
       </body>
     </html>
   )

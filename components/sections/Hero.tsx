@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Container from '@/components/ui/Container'
 import ScreenshotSlot from '@/components/ui/ScreenshotSlot'
 import type { NgfSiteContent } from '@/lib/ngf'
 
@@ -22,8 +21,14 @@ export default function Hero({ ngf }: { ngf?: NgfSiteContent }) {
     'We design and build the site, host it, and give you a portal where you change your own words and pictures, read every enquiry and take bookings.'
 
   return (
-    <section className="px-5 sm:px-7">
-      <div className="mx-auto max-w-[1280px] overflow-hidden rounded-[28px] bg-well px-5 pt-14 text-center sm:rounded-[34px] sm:px-8 lg:pt-24">
+    // Full-bleed on a phone, a card from 640px up. With a side gutter the
+    // dark panel read as a frame inside the frame of the branding strip, and
+    // a rounded card jammed flush under that strip looked like a mistake
+    // rather than a choice. Edge to edge the dark band simply IS the top of
+    // the page, and the curve at its foot is where it hands over to the white
+    // content below.
+    <section className="sm:px-7">
+      <div className="mx-auto max-w-[1280px] overflow-hidden rounded-b-[28px] bg-well px-5 pt-14 text-center sm:rounded-[34px] sm:px-8 lg:pt-24">
         <h1
           data-ngf-field="hero.headline"
           data-ngf-label="Headline"

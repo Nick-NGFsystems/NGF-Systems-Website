@@ -878,11 +878,34 @@ Things that will bite whoever edits this:
 
 ### Mobile: bring the elements to the thumb
 
-No top nav on a phone — only a branding strip. Everything actionable is in a glass dock fixed to the
-bottom, and the menu grows **up** out of it, so nothing asks the hand to travel to the top of the
-page. The links render `flex-col-reverse` so the one most people want is nearest the thumb; reading
-order would put Pricing furthest away, which defeats the point. `app/layout.tsx` adds bottom
-clearance below the footer or the dock covers its last rows.
+No top nav on a phone — only a branding strip. Navigation is **one glass button in the bottom-right
+corner**, where a right thumb rests, and the menu grows **up** out of it. The links render
+`flex-col-reverse` so the one most people want is nearest the thumb; reading order would put Contact
+furthest away, which defeats the point. `app/layout.tsx` adds bottom clearance below the footer or
+the button covers its last rows.
+
+**It was a three-part dock until 2026-11-11** — menu, a full-width "Get a free mockup", and a call
+button, spanning the whole width. That lost on every count: the CTA duplicated the one already in
+the hero a few hundred pixels above it, the call button was a third competing action, and the one
+thing the bar is actually for was the smallest target on it. Do not add a second action back.
+
+Two things in `Navbar.tsx` will bite whoever edits the sheet:
+
+- **It stays mounted when closed.** `hidden` cannot be transitioned, so the closed state is made
+  inert by hand — `pointer-events-none`, `aria-hidden`, `tabIndex={-1}` on every link. Drop any one
+  of those and the menu is still tabbable or clickable while invisible.
+- **Height animates with `grid-rows-[0fr]` → `[1fr]`**, which is the only way to transition to an
+  auto height without measuring it in JS. The inner wrapper must keep `min-h-0 overflow-hidden` or
+  the row refuses to collapse.
+- `STAGGER` is a written-out array of `delay-[Nms]` classes. Tailwind scans source text, so a
+  computed `` `delay-[${i * 40}ms]` `` produces no class at all.
+
+### The phone hero is full-bleed (2026-11-11)
+
+`components/sections/Hero.tsx` drops its side gutter below 640px and rounds only its bottom corners.
+With a gutter, the dark panel read as a frame inside the frame of the branding strip, and a rounded
+card jammed flush under that strip looked like a mistake rather than a choice. Edge to edge, the
+dark band simply **is** the top of the page. From `sm:` up it is a card again.
 
 ### Screenshots (`lib/shots.ts`)
 
