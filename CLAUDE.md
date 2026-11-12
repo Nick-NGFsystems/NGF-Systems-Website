@@ -83,7 +83,7 @@ async headers() {
 
 | Layer | Tool | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 15.3.8 exactly |
+| Framework | Next.js (App Router) | latest patched 15.5.x |
 | Runtime | React | 18.x |
 | Language | TypeScript | always, never plain JS |
 | Styling | Tailwind CSS | 3.x |
@@ -96,7 +96,11 @@ async headers() {
 
 ### Critical Version Rules
 - **Never install Next.js 16+** — breaks route groups and has incompatibilities with React 18
-- **Always use Next.js 15.3.8 specifically** — earlier 15.x versions have a security vulnerability (CVE-2025-66478)
+- **Stay on the latest patched 15.5.x.** This rule previously said "15.3.8 exactly". That is wrong and
+  was actively unsafe: upstream only patches the NEWEST minor of a supported major, so 15.3.x is
+  unpatched — it is the version that sat in range for the middleware-bypass advisory, which is why
+  `NGF-Systems-app/CLAUDE.md` names it directly. `scripts/ngf-doctor.mjs` enforces the correct rule
+  and FAILS on 15.3.8. This repo is on 15.5.25.
 - **Never install React 19+** — incompatible with Next.js 15
 - **Never install Prisma 6+** — breaking changes in schema syntax
 - **Turbopack must always be disabled** — never use `--turbopack` flag or enable it in config
@@ -539,7 +543,7 @@ return NextResponse.json({ success: false, error: "Descriptive message" }, { sta
 10. Never duplicate functions — check if it exists first
 11. Never use Turbopack
 12. Never install `@clerk/nextjs@latest` — always pin to v6
-13. Never install Next.js 16+ — always use 15.3.8
+13. Never install Next.js 16+ — always use the latest patched 15.5.x (NOT 15.3.8; see Critical Version Rules)
 14. Never use `npx prisma` — always `./node_modules/.bin/prisma`
 15. Portal routes must have `portal-` prefix
 16. Every route group folder must have a `layout.tsx`
@@ -678,3 +682,367 @@ To close this gap: migrate the seven `@/lib/ngf` consumers to the flat map, repl
 with the canonical file, add `scripts/sync-ngf.mjs` and the `sync-ngf` scripts to `package.json`,
 then run `npm run sync-ngf:check` until it is clean. Until then, running the starter's sync script
 against this repo overwrites `lib/ngf.ts` and takes the site down.
+
+---
+
+## SITE REBUILD — 2026-09-23
+
+The marketing site was rebuilt from a single scrolling page into six routes. What changed, and what
+a later session still needs to check.
+
+### Structure
+
+`/` (home), `/services`, `/work`, `/pricing`, `/about`, `/contact`. `lib/nav.ts` is the ONE table of
+destinations — the navbar, the mobile menu, the footer and `app/sitemap.ts` all read it, so adding a
+page in one place adds it everywhere. The old site hard-coded the same three anchors in three
+components and shipped a sitemap listing only the home page.
+
+Navbar and Footer moved into `app/layout.tsx`, so a page renders only its own content.
+
+### Pricing is now capability-based, not page-count-based
+
+`lib/pricing.ts` is the single price list. The buyer makes two independent decisions: a payment
+track (monthly plan / one-time build) and a set of modules. Each module names the `client_configs`
+column that delivers it, so nothing can be sold that `NGF-Systems-app/lib/portal-capabilities.ts`
+cannot switch on.
+
+**Numbers still needing Nick's sign-off are listed in `UNCONFIRMED_PRICING` in that file.** The base
+figures ($100/mo, $600 build, $20/mo hosting, $80/hr) are CANONICAL and match
+`NGF-Systems-app/lib/pricing.ts`. The module prices and the $150 setup fee are PROPOSALS.
+
+The old published prices contradicted the contract generator — the site quoted one-time builds at
+$799/$1,500/$2,500+ with $30/mo hosting, while `lib/pricing.ts` in the app (sourced from HANDOFF.md,
+which Nick signs contracts from) said $600 and $20/mo. That contradiction is resolved in favour of
+HANDOFF. If the app's figures ever change, change both.
+
+### Editor field keys changed
+
+The old `feature0.title` … `feature8.title` keys are gone. Nine sibling keys made the portal editor
+render nine separate sections all labelled "Features" (editor audit P1.3). They are replaced by one
+`data-ngf-group="services.pillars"` with `services.pillars.<i>.title` / `.body`.
+
+**Any content already published against the old keys is orphaned** and will show as unknown keys in
+the editor. Current annotated fields: `hero.headline`, `hero.subheadline`, `services.title`,
+`services.subtitle`, `services.pillars.<i>.{title,body}`, `work.title`, `work.subtitle`,
+`pricing.title`, `pricing.subtitle`, `footer.location`, `footer.blurb`.
+
+Only the home page and the footer are annotated. The portal scraper reads the home page only
+(editor audit P1.1), so annotating the five new pages would not surface them in the editor anyway.
+
+### Three bugs fixed in `app/api/contact/route.ts`
+
+1. `new Resend(...)` ran at module scope and threw during `next build` whenever `RESEND_API_KEY` was
+   absent — the build failed outright rather than the contact form degrading.
+2. The lead was relayed to `/api/leads/ingest` only AFTER the email succeeded, so a Resend outage
+   lost the enquiry with no record anywhere. It is now persisted first. This is exactly the failure
+   `ngf-doctor`'s "Lead capture reaches the portal" rule exists to catch — the rule passed only
+   because it pattern-matches the string, not the ordering.
+3. Form fields were interpolated into the notification email unescaped.
+
+The endpoint now also validates the email shape, caps field lengths, and whitelists `?intent=`
+against `CONTACT_INTENTS` server-side as well as in the browser.
+
+### Known gaps from this rebuild
+
+| Area | Status | Notes |
+|---|---|---|
+| Module prices | ⚠️ Unset, render as "Quoted" | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Nothing is published until Nick sets them. |
+| Portfolio screenshots | ⚠️ Not captured | `ClientWork.image` is wired and the grid renders without it. Drop JPEGs at `public/work/<slug>.jpg` and set `image` in `lib/clients.ts`. Capture was blocked in the build sandbox, not in code. |
+| Browser verification | ⚠️ Local only | Verified with `next build`, `npm run doctor` (0 failures) and headless screenshots at 1440px and 390px, light and dark. Not opened in a real browser, and the portal editor was never pointed at it. |
+| Full CSP | ⚠️ Partial | `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` added. `default-src`/`object-src`/`base-uri`/`form-action` deliberately left out — this page loads Google Fonts and gtag, and a wrong `default-src` breaks them silently. Needs a browser to verify. |
+| `feature0`–`feature8` content | ⚠️ Orphaned | Published content under the old keys is no longer read by anything. |
+| Body font | ℹ️ Changed | Inter → Source Sans 3, because the design system above rules out Inter by name. One-line revert in `app/layout.tsx` if unwanted. |
+
+
+
+---
+
+## CLAIMS AUDIT — 2026-09-23
+
+Nick asked that the site list "only our actual services and actual things we feature." Every
+capability claim was checked against `NGF-Systems-app` before being kept, rewritten or removed.
+**The rule this establishes: a claim goes on the site only if you can point at the code that
+delivers it.**
+
+### Removed — the platform does not do these
+
+| Claim | Was | Reality |
+|---|---|---|
+| "Daily backups" | `lib/pricing.ts` ALWAYS_INCLUDED, `app/services/page.tsx` CORE | **Nothing runs on a schedule.** No `crons` in `vercel.json`, no `app/api/cron/*`, no `schedule` in `.github/workflows/ci.yml`, no `pg_dump`. What exists is `WebsiteContentVersion` — snapshotted **on publish** (plus admin reset and site-URL change), capped at 20 per client (`VERSION_HISTORY_CAP`, `lib/website-content-reset.ts:19`), covering **one table**. Neon's own PITR is the only real database backup and its window depends on the Neon plan. Replaced with "Every version saved", which is true. |
+| "If something breaks at 2am it is our problem" / "uptime ... our responsibility" | same two files | **No uptime monitoring and no alerting.** `lib/connection-health.ts` is an on-demand check clicked in the admin hub. Nobody is paged. Replaced with "tell us and we fix it". |
+| "Security updates" as an automated promise | `app/services/page.tsx` | Manual. No Dependabot or Renovate config in either repo. Softened to "keeping it patched is our job". |
+| "Customers book **and pay** for their own appointments" | `MODULES.booking.summary` | Booking takes **no payment**. `Service.price_cents` is display only; there is no Stripe path in `app/api/public/bookings/`. Now "book their own appointments". |
+| "Products, photos and prices you control" as a store feature | `MODULES.store.includes` | **There is no product catalog.** No `Product` model. `StoreSettings` is shipping/tax/policy/notification-email only, and `Order` is explicitly a mirror ("NGF is a MIRROR, not the system of record"). Products are edited as site content through the website editor. Reworded to say exactly that. |
+| Module: **Customer accounts** — "a secure login for each of your customers" | `MODULES.accounts` | Not a capability. It named `database_url`, which is the admin-side external-DB **service requests** read (`config.secrets`, the WrenchTime pattern). No customer auth exists, and clients do not even see service requests in their own portal. |
+| Module: **Custom integrations** — CRM / accounting connectors, extra payment processing, data imports | `MODULES.integrations` | `configColumn` was literally `'—'`. Nothing exists. |
+| "Structured data" as something every client site gets | both files | NGF's own site emits JSON-LD (`app/layout.tsx:82`). **DemarcusCuts does not.** Not universal, so the claim was dropped rather than qualified. |
+
+`accounts` and `integrations` were replaced by one honest module, **`custom` — Custom development**:
+bespoke work, quoted per job, explicitly commented as not being a `client_configs` switch.
+`CONTACT_INTENTS` and `MODULE_ICONS` were updated to match; a `history` icon was added to
+`components/ui/Icon.tsx`.
+
+### Kept — verified true, and some were under-sold
+
+- **Booking** does more than the site claimed: SMS via Twilio (`BookingConfig.sms_sender`,
+  `sms_country_code`, `sms_only`), an optional approval hold (`require_approval`), self-service
+  cancel/reschedule links (`Appointment.manage_token`), buffers, lead time and max-advance. Those
+  are now listed.
+- **Store** emails: `lib/order-emails.ts` sends the buyer a confirmation and the owner a
+  notification on the transition into PAID. Payment and fulfilment are genuinely separate columns.
+- **GA4 is in the client portal**, not just admin — `PortalSiteAnalyticsWidget` is mounted at
+  `app/portal/portal-dashboard/page.tsx:88`.
+- Website editor (draft → preview → publish + history), Leads with per-enquiry status, Change
+  requests, Invoices with a pay link — all six match `PORTAL_CAPABILITIES`.
+- Sitemap and robots **are** on client sites (`app/sitemap.ts`, `app/robots.ts` in DemarcusCuts).
+
+### Also fixed: hosting was not in the price list
+
+`$20/month` was a hardcoded string in `PricingTables.tsx` twice and in a `TRACKS.oneTime.terms`
+bullet, while the file header claimed a canonical `oneTime.hostingCents` that **did not exist**.
+That is the same figure that caused the original site-vs-app contradiction ($30 vs $20). It is now
+`TERMS.hostingCents` and rendered through `usd()`.
+
+### Still not verified
+
+The claims audit was done against source code, not against a running system. Not exercised: a live
+booking, a live order, an actual rollback from version history, or Neon's real PITR window — that
+last one needs the Neon dashboard and decides whether "every version saved" should also mention a
+database-level restore.
+
+
+---
+
+## REDESIGN — 2026-11-11 (product-led, liquid glass)
+
+Direction A (dark-first) was replaced. It read as unfinished, and the reason was not the palette:
+**the site had no photograph or screenshot anywhere in it.** Every visual was a tinted gradient or a
+hand-drawn fake of the portal. A portfolio site with no pictures of the work reads as a template
+nobody finished, whatever colour it is.
+
+### The palette inverted, in one file
+
+`tailwind.config.ts` is where the inversion lives. The pages reference semantic tokens, so
+re-pointing them changed the whole site at once. One exception: `text-white` was used 61 times for
+headings and is a literal class, not a token — headings now use a **`head`** token. White text is
+still correct in exactly three places and keeps `text-white` on purpose: the primary button, inside
+the graphite hero panel, and the footer.
+
+New tokens: `head` (headings), `onwell` / `onwell-dim` / `onwell-line` (text on the graphite panel).
+`ink` is now white, `well` is the graphite `#16181C`, `accent` is `#0B5CAD` (6.1:1 on white, so it
+is legible as text, not only as a button fill).
+
+### Liquid Glass — where it is allowed
+
+Glass appears in **two places only**: the floating desktop nav, and the phone dock. It is never on a
+content surface and never stacked on itself. Those are Apple's own rules ("avoid using Liquid Glass
+in scrollable content areas", "avoid glass-on-glass stacking"), and an earlier pass that put glass
+on the pricing cards, the feature frames and the proof strip looked like 2018 glassmorphism.
+
+The material is defined by **lensing** — light bending at the edges — not blur.
+`components/ui/GlassFilters.tsx` holds the SVG filters; `/public/glass/*.png` are the displacement
+and specular maps, generated by `scripts/make-glass-maps.py`. **Regenerate, never hand-edit.** The
+displacement maps are neutral 128/128 through the middle and ramp only inside a band at the border,
+so the distortion lands at the rim and not across the face; a turbulence map instead gives the
+wobbly-frosted look, which is a different and much worse effect.
+
+Chromium only. Firefox and WebKit parse `backdrop-filter: url(...)` but render the blur alone, which
+is a clean fallback — `@supports` cannot tell them apart, so `app/globals.css` writes it as a
+baseline declaration with the lensing as an override, not as a query.
+
+**The nav must never overlap the graphite panel.** Light glass at 80% over `#16181C` composites to an
+opaque grey and the links stop being readable. The hero starts below the nav for that reason.
+
+### The nav bar (`components/layout/Navbar.tsx`)
+
+Three glass pills — wordmark / links / actions — at a fixed gap.
+
+**They do not react to scroll, and must not be made to.** An earlier version fused them into one
+bar as the page scrolled and pulled them apart at the top, with a tangential-neck union, damped
+springs on the two gaps and velocity-driven slosh. Nick's call (2026-11-12) was that the nav should
+hold still while you read — the liquid was only ever wanted for when the window changes size.
+Delaying the fuse had already been tried once and only moved the problem, so the scroll handler was
+deleted rather than tuned, and the neck/union geometry with it. **Do not add a scroll listener
+here.**
+
+What still animates is **width**. The pills are measured from their own content, so the display face
+landing after first paint, or a link added to `lib/nav.ts`, changes how wide they are — and a resize
+can too, once the content inside them reflows. Each pill's width is a damped spring, so the bar
+flows to its new size with momentum instead of snapping. Measured: a width change runs
+1044 → 1092 → 1138 → 1157 → 1166 → **1168** → 1167 → 1166, i.e. it overshoots and settles.
+
+Things that will bite whoever edits this:
+
+- **Pill widths are MEASURED, never hard-coded.** `lib/nav.ts` is the one table of destinations, and
+  a fixed 322px links pill overflowed into the next one the moment it held five items. The measuring
+  pass runs in `useLayoutEffect`, i.e. before paint, and re-runs on resize and once the display font
+  loads.
+- `shown` is what is on screen, `want` is what the content measures. The spring closes the gap
+  between them. `first` makes the very first measurement land instantly rather than springing out of
+  the fallback widths, and `reduced()` does the same for anyone who asked the OS to cut motion.
+- **The outline is still one path**, one subpath per pill, rather than three stroked divs — the rim
+  is a single gradient that has to run across the whole group.
+
+### Mobile: bring the elements to the thumb
+
+No top nav on a phone — only a branding strip. Navigation is **one glass button in the bottom-right
+corner**, where a right thumb rests, and the menu grows **up** out of it. The links render
+`flex-col-reverse` so the one most people want is nearest the thumb; reading order would put Contact
+furthest away, which defeats the point. `app/layout.tsx` adds bottom clearance below the footer or
+the button covers its last rows.
+
+**It was a three-part dock until 2026-11-11** — menu, a full-width "Get a free mockup", and a call
+button, spanning the whole width. That lost on every count: the CTA duplicated the one already in
+the hero a few hundred pixels above it, the call button was a third competing action, and the one
+thing the bar is actually for was the smallest target on it. Do not add a second action back.
+
+**The sheet is a list of ROWS, not a list of words** (2026-11-11, second pass). Each row is a
+36px rounded icon tile plus a label; six bare words read as an unstyled fallback rather than a
+designed menu. Only the current page takes colour — an accent-filled tile, an accent label and an
+`accent/[0.08]` row — so the marking is visible without shouting. `Client login` sits below a
+hairline, quieter, with the `external` icon.
+
+`MENU` in `Navbar.tsx` is `NAV` plus two rows that only exist on a phone:
+
+- **Home.** On a desktop the wordmark is the way back; the phone menu has no wordmark, so before
+  this there was no way home from the menu at all.
+- **Client login**, which `lib/nav.ts` deliberately keeps out of `NAV` because it is a different
+  audience.
+
+`lib/nav.ts` is still the one table of destinations — a page added there appears here automatically,
+falling back to the `layout` icon until `MENU_ICONS` names one. The icons are phone-only; a desktop
+nav of six icons would be noise.
+
+Three things in `Navbar.tsx` will bite whoever edits the sheet:
+
+- **It stays mounted when closed.** `hidden` cannot be transitioned, so the closed state is made
+  inert by hand — `pointer-events-none`, `aria-hidden`, `tabIndex={-1}` on every link. Drop any one
+  of those and the menu is still tabbable or clickable while invisible.
+- **Height animates with `grid-rows-[0fr]` → `[1fr]`**, which is the only way to transition to an
+  auto height without measuring it in JS. The inner wrapper must keep `min-h-0 overflow-hidden` or
+  the row refuses to collapse.
+- `STAGGER` is a written-out array of `delay-[Nms]` classes. Tailwind scans source text, so a
+  computed `` `delay-[${i * 40}ms]` `` produces no class at all. `delayFor()` counts BACK from the
+  end of `MENU` so the bottom row moves first and the sheet unrolls up out of the button. The rows
+  render in plain reading order now; an earlier version reversed the array AND used
+  `flex-col-reverse`, a double negative that only existed to make the stagger run bottom-up.
+- **The active-page marking is applied after mount, and must stay that way.** The first version
+  compared `usePathname()` to each row's href during render. Every page's build-time prerender
+  marked the right row, it was verified on production right after the promote, and then it rotted:
+  an hour later the home page — which had revalidated under traffic — served HTML with no row
+  marked, while pages that had not regenerated yet still looked correct. `usePathname()` is
+  reliable in the browser but not in whatever context an ISR regeneration renders in, and React 18
+  does not repair attribute mismatches on hydration, so the wrong HTML stuck even after the client
+  knew better. `const here = mounted ? pathname : null` makes the server output consistently
+  unmarked and lets the client decide. Nothing flashes, because the sheet is closed and invisible
+  until it is tapped. **Do not "optimise" this back into the render pass** — it will pass every
+  local check and then decay in production an hour after you ship it.
+
+### No sticky column in `PortalShowcase` (2026-11-11)
+
+The heading column was `lg:sticky lg:top-28 lg:self-start`. It is barely shorter than the capability
+list beside it, so the pin had only a few dozen pixels of travel — which did not read as "the
+heading holds while the list scrolls", it read as the box drifting up and down as you scrolled past.
+A sticky column needs a neighbour much taller than it is. **Do not put it back** unless that column
+grows a lot.
+
+### The phone hero is full-bleed (2026-11-11)
+
+`components/sections/Hero.tsx` drops its side gutter below 640px and rounds only its bottom corners.
+With a gutter, the dark panel read as a frame inside the frame of the branding strip, and a rounded
+card jammed flush under that strip looked like a mistake rather than a choice. Edge to edge, the
+dark band simply **is** the top of the page. From `sm:` up it is a card again.
+
+### Screenshots (`lib/shots.ts`)
+
+`lib/shots.ts` is the one table of the product screenshots the design rests on, and
+`components/ui/ScreenshotSlot.tsx` renders either the image or a **visibly-marked slot** naming what
+is missing and at what size. `src: null` means it is still a gap.
+
+Two of the four are filled (Nick supplied them 2026-11-11, converted to webp with sharp):
+
+| Key | State | Where |
+|---|---|---|
+| `editor` | ✅ `/shots/editor.webp` (1915×907, 24 KB) | the hero panel |
+| `bookings` | ✅ `/shots/bookings.webp` (1290×740, 26 KB) | `components/sections/Bookings.tsx` |
+| `leads` | ❌ still a marked slot | `components/sections/WhatYouGet.tsx` |
+| `editorPhone` | ❌ not placed anywhere yet | — |
+
+**`leads` is deliberately still empty.** The capture supplied read "No submissions yet · All 0", and
+it sits under the heading "Every enquiry, in one place you own" — a picture of an empty inbox argues
+against the claim it is there to prove. It needs three or four submissions at different statuses
+first.
+
+**Two things to decide before this is public.** The `editor` shot shows an unbranded client site
+reading "YOUR BUSINESS" with the modal mid-edit on `Business Name = "Your Business"`, and it carries
+a real third party's contact details (Aurum Drones, an email and a phone number) legibly in the site
+nav. The `bookings` shot shows the Standard Haircut service, which is DemarcusCuts' live booking
+setup rather than Test Client's. Neither leaks a customer's data, but both are another business's
+details on NGF's marketing page.
+
+To fill one: put the file in `/public/shots` and set `src` **and `size`** in `lib/shots.ts`. The
+size is load-bearing — `ScreenshotSlot` is `object-cover`, so a frame whose aspect ratio does not
+match the file crops content off an edge. `Bookings.tsx` builds its frame from an `aspect-[w/h]`
+matching the entry, plus `self-start` so the grid does not stretch the column and leave a white band
+under the picture. Take new captures from the **Test Client** account, never a real client's portal,
+and crop out the dead whitespace before converting — a browser window of a mostly-empty admin page
+reads as an unfinished product.
+
+`components/sections/PortalPanels.tsx` is **deleted**. It hand-drew a fake leads inbox with invented
+customer names (Dana Whitfield, Marcus Webb…). A real screenshot is both more convincing and not a
+small lie about the product.
+
+### `/portal-preview` — the one place a drawn mock is allowed (2026-11-11)
+
+The hero's "Look inside the portal" used to go to `/services`, which did not show the portal at all.
+It now opens `/portal-preview`, built on `components/sections/PortalMock.tsx`: a tabbed drawing of
+the portal (Dashboard / Website editor / Leads / Bookings).
+
+**This is a deliberate exception to the rule that killed `PortalPanels.tsx`, and it survives only
+because of how it is labelled.** The difference is that nothing in it pretends to be real: every
+value is a visible placeholder (`Your Business`, `Your customer`, `Your first service`), the browser
+chrome carries a **PREVIEW** badge, and the caption under the frame opens with "Sample content."
+`PortalPanels` failed all three — it invented people and presented them as a working inbox.
+
+The **structure** is real and must stay that way: the tabs, the editor's field list, the New /
+Contacted / Won lead statuses and the weekly-hours rows all mirror what the platform ships
+(`NGF-Systems-app/lib/portal-capabilities.ts`). Do not add a panel for something the portal cannot
+do — that would be the claims audit all over again, just drawn instead of written.
+
+The page is indexable and in the sitemap via `EXTRA_ROUTES` in `lib/nav.ts`, which exists because
+`ROUTES` was `'/'` plus `NAV` and this page is deliberately not a nav destination.
+
+### No revision cap, and no "small on purpose" (2026-11-12)
+
+Two of Nick's calls, both about what the site claims rather than how it looks.
+
+**The mockup revision cap is gone.** "3 rounds of changes are included" appeared on the home
+process strip, `/contact`'s what-happens-next list, the `/pricing` FAQ and the one-time track's
+terms, all reading from `TERMS.freeMockupRevisionRounds`. The constant is deleted too, so nobody
+re-derives the claim from it. **This changes only what the WEBSITE says** — `HANDOFF.md` and
+`NGF-Systems-app/lib/pricing.ts` may still carry the figure, and the signed contract is what
+governs. Check there before telling a client the mockup stage is uncapped.
+
+**NGF is no longer described as small on purpose.** `/about` led with "A one-person web company",
+"It is deliberately small" and a section headed "Small on purpose". Nick is planning to hire, so
+framing it as permanent and intentional would date badly. What he explicitly wanted kept is the
+substance — you talk to the person who builds your site, no account manager in the middle — so that
+is now the headline rather than a consequence of being small. The honest expectation-setting stayed
+too, reframed from "we are not right for a company that needs twelve people" to "we take on fewer
+projects at a time than an agency does". Stating that NGF is run by Nick is still fine; it is a
+fact. **Do not re-add smallness as a selling point.**
+
+### No client counts on the site (2026-11-11)
+
+At Nick's instruction the site does not state how many clients or industries NGF has. The home page,
+`/work` and `/about` each derived a number from `CLIENTS` in `lib/clients.ts`; those are gone and the
+`industries` derivation with them. **Do not re-add a count** — name the clients, do not tally them.
+
+### Verified / not verified
+
+Verified: `next build` (16 static pages), `tsc --noEmit`, `npm run doctor` (30 passed, 0 failures),
+and headless Chromium at 1440px and 390px — the nav clip path really does go from 3 subpaths at the
+top to 1 when scrolled, with no console errors on any page.
+
+Not verified: a real browser on a real device, the lensing on non-Chromium, the portal editor
+pointed at the new markup, and any live form submission.
