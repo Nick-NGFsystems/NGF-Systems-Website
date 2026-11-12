@@ -853,35 +853,35 @@ baseline declaration with the lensing as an override, not as a query.
 **The nav must never overlap the graphite panel.** Light glass at 80% over `#16181C` composites to an
 opaque grey and the links stop being readable. The hero starts below the nav for that reason.
 
-### The morphing nav (`components/layout/Navbar.tsx`)
+### The nav bar (`components/layout/Navbar.tsx`)
 
-Three pills — wordmark / links / actions — that fuse into one bar as the page scrolls and pull apart
-at the top. Each gap is its own **damped spring** integrated per frame, deliberately tuned apart
-(stiffness 240 and 196) so the pills do not move in lockstep. Velocity feeds the liquid: the neck
-sloshes off the centre line in the direction of travel and its control points reach further the
-faster it moves.
+Three glass pills — wordmark / links / actions — at a fixed gap.
+
+**They do not react to scroll, and must not be made to.** An earlier version fused them into one
+bar as the page scrolled and pulled them apart at the top, with a tangential-neck union, damped
+springs on the two gaps and velocity-driven slosh. Nick's call (2026-11-12) was that the nav should
+hold still while you read — the liquid was only ever wanted for when the window changes size.
+Delaying the fuse had already been tried once and only moved the problem, so the scroll handler was
+deleted rather than tuned, and the neck/union geometry with it. **Do not add a scroll listener
+here.**
+
+What still animates is **width**. The pills are measured from their own content, so the display face
+landing after first paint, or a link added to `lib/nav.ts`, changes how wide they are — and a resize
+can too, once the content inside them reflows. Each pill's width is a damped spring, so the bar
+flows to its new size with momentum instead of snapping. Measured: a width change runs
+1044 → 1092 → 1138 → 1157 → 1166 → **1168** → 1167 → 1166, i.e. it overshoots and settles.
 
 Things that will bite whoever edits this:
 
 - **Pill widths are MEASURED, never hard-coded.** `lib/nav.ts` is the one table of destinations, and
-  a fixed 322px links pill overflowed into the next pill the moment it held five items. The
-  measuring pass runs in `useLayoutEffect`, i.e. before paint, and re-runs on resize and once the
-  display font loads.
-- **The middle pill is the anchor** and never moves. Centring the whole group makes it drift by half
-  the difference between the two gaps whenever the springs are out of step.
-- **The union is one outline**, not three stroked pills — stroking them separately leaves cap arcs
-  showing through the middle of a merged bar.
-- Neck half-height falls to **zero** at the threshold and the waist closes faster than the attach
-  does. An earlier version left it at 0.17r, so the thread vanished while still 4.8px thick: a pop,
-  not a break.
-- `prefers-reduced-motion` snaps to the target instead of springing.
-- **`START` is a dead zone and it is load-bearing.** The morph is
-  `(scrollY - START) / RANGE`, smoothstepped. With `START = 0` and
-  `RANGE = 180` — the original — a neck formed by about 48px of scroll and the
-  bar was fused by 140px, so the split state nobody had seen yet was gone on
-  the first notch of the wheel. `START = 180, RANGE = 420` puts the first
-  thread near 290px and full fusion near 600px. Measured in headless Chromium:
-  the clip path holds 3 subpaths through 290px, where it used to break at 48px.
+  a fixed 322px links pill overflowed into the next one the moment it held five items. The measuring
+  pass runs in `useLayoutEffect`, i.e. before paint, and re-runs on resize and once the display font
+  loads.
+- `shown` is what is on screen, `want` is what the content measures. The spring closes the gap
+  between them. `first` makes the very first measurement land instantly rather than springing out of
+  the fallback widths, and `reduced()` does the same for anyone who asked the OS to cut motion.
+- **The outline is still one path**, one subpath per pill, rather than three stroked divs — the rim
+  is a single gradient that has to run across the whole group.
 
 ### Mobile: bring the elements to the thumb
 

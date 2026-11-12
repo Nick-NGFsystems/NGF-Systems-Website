@@ -52,23 +52,27 @@ const STAGGER = [
 const delayFor = (i: number) => STAGGER[MENU.length - 1 - i] ?? ''
 
 /* ── Geometry ─────────────────────────────────────────────────────────────
-   Three glass pills — wordmark / links / actions — that fuse into one bar as
-   the page scrolls and pull apart again at the top.
+   Three glass pills — wordmark / links / actions — sitting at a fixed gap.
 
-   The union is built as a SINGLE outline so the rim can be stroked in one
-   pass; stroking each pill separately leaves cap arcs showing straight
-   through the middle of a merged bar.
+   THEY DO NOT REACT TO SCROLL. An earlier version fused them into one bar as
+   the page scrolled and pulled them apart again at the top; Nick's call was
+   that the nav should hold still while you read. Tuning when the fuse began
+   only moved the problem, so the scroll handler is gone rather than delayed.
+   Do not reintroduce one.
 
-   A neck attaches TANGENTIALLY to the cap it leaves: at neck half-height h on
-   a cap of radius r the attach point sits sqrt(r^2 - h^2) along the cap, so
-   the curve grows out of the circle instead of being pasted onto it. h falls
-   to zero as the gap reaches the threshold, and the waist closes faster than
-   the attach does, so the thread thins and lets go rather than popping out of
-   existence at a fixed width.                                              */
+   What is still animated is WIDTH. The pills are measured from their own
+   content, so a link added to lib/nav.ts, or the display face landing after
+   first paint, changes how wide they are — and a resize can too, once the
+   content inside them reflows. Those changes run through a damped spring per
+   pill so the bar flows to its new size instead of snapping. A spring carries
+   velocity, so it arrives with momentum and settles; an exponential ease can
+   only decelerate into place, which reads as sliding rather than flowing.
+
+   The outline is still drawn as one path per pill rather than three stroked
+   divs, because the rim gradient has to run across the whole group.        */
 
 const H = 56
 const R = 28
-const CY = 28
 /* Pill widths are MEASURED from the rendered content, never hard-coded.
    lib/nav.ts is the one table of destinations, so a link added there used to
    overflow a fixed 322px pill and spill into the next one. The measuring pass
@@ -76,19 +80,8 @@ const CY = 28
    visible reflow. */
 const PAD = [48, 56, 18] as const // breathing room added to each measured group
 const FALLBACK = [168, 400, 292] as const // SSR and the first paint
-const TH = 26 // gap at which a neck still forms
-const STIFF = [240, 196] as const // right gap softer, so the two do not move in lockstep
-const REST = 31 // apart, at the top of the page
-const FUSED = 3 // together, once scrolled
-/* START is a dead zone: nothing moves until the page has really been
-   scrolled. Without it the morph began on the first wheel notch — a neck
-   formed by about 48px and the bar was fused by 140px, so the split state
-   nobody had seen yet was gone "as soon as I scroll down even a little".
-   RANGE then spreads the rest over most of a screen. Together they put the
-   first thread around 290px and full fusion around 600px, which is past the
-   hero rather than inside the first flick of the wheel. */
-const START = 180 // px of scroll before the morph begins at all
-const RANGE = 420 // px of scroll over which it then morphs
+const STIFF = [240, 212, 196] as const // tuned apart so the three do not move in lockstep
+const GAP = 31 // the fixed space between pills. Never animated.
 const ZETA = 0.72 // damping ratio: 1 is a dead stop, lower overshoots
 
 interface Pill {
@@ -96,115 +89,45 @@ interface Pill {
   w: number
 }
 
-interface Neck {
-  ax: number
-  bx: number
-  h: number
-  p: number
-  k: number
-  wob: number
-}
-
-/** The middle pill is the anchor and never moves; the outer two converge on
- *  it. Centring the whole group instead makes the middle drift by half the
- *  difference between the two gaps whenever the springs are out of step. */
-function layout(gL: number, gR: number, w: readonly number[]): Pill[] {
-  // The middle pill is the anchor and never moves; the outer two converge on
-  // it. Centring the whole group instead makes the middle drift by half the
-  // difference between the two gaps whenever the springs are out of step.
-  // Deriving the anchor from REST also keeps the union centred at every gap.
-  const anchor = w[0] + REST
+/** Laid out left to right at a fixed gap. The group is centred by the
+ *  flex parent, so nothing here has to know the viewport width. */
+function layout(w: readonly number[]): Pill[] {
   return [
-    { x: anchor - gL - w[0], w: w[0] },
-    { x: anchor, w: w[1] },
-    { x: anchor + w[1] + gR, w: w[2] },
+    { x: 0, w: w[0] },
+    { x: w[0] + GAP, w: w[1] },
+    { x: w[0] + GAP + w[1] + GAP, w: w[2] },
   ]
 }
 
-/** Full width of the bar when the pills are at rest. */
-const spanOf = (w: readonly number[]) => w[0] + w[1] + w[2] + 2 * REST
-
-function neck(a: Pill, b: Pill, vel: number): Neck | null {
-  const g = b.x - (a.x + a.w)
-  if (g >= TH) return null
-  const t = 1 - Math.max(g, 0) / TH
-  const h = R * 0.9 * Math.pow(t, 0.62)
-  if (h < 0.35) return null
-  const dx = Math.sqrt(Math.max(R * R - h * h, 0))
-  let ax = a.x + a.w - R + dx
-  let bx = b.x + R - dx
-  if (bx < ax) {
-    const m = (ax + bx) / 2
-    ax = m
-    bx = m
-  }
-  const speed = Math.abs(vel)
-  return {
-    ax,
-    bx,
-    h,
-    p: 0.14 + 0.78 * t,
-    k: Math.max(g * 0.44, 2.5) * (1 + Math.min(speed * 0.0035, 0.55)),
-    wob: Math.max(-3.2, Math.min(3.2, vel * 0.018)),
-  }
-}
+/** Full width of the group. */
+const spanOf = (w: readonly number[]) => w[0] + w[1] + w[2] + 2 * GAP
 
 const n = (v: number) => Math.round(v * 100) / 100
 
-function outline(pills: Pill[], vels: readonly number[]): string {
-  const links = [neck(pills[0], pills[1], vels[0]), neck(pills[1], pills[2], vels[1])]
-  const groups: number[][] = []
-  let cur = [0]
-  for (let i = 0; i < 2; i++) {
-    if (links[i]) cur.push(i + 1)
-    else {
-      groups.push(cur)
-      cur = [i + 1]
-    }
-  }
-  groups.push(cur)
-
-  let d = ''
-  for (const gp of groups) {
-    const first = pills[gp[0]]
-    const last = pills[gp[gp.length - 1]]
-    d += ` M ${n(first.x + R)} 0`
-    for (let j = 0; j < gp.length; j++) {
-      const p = pills[gp[j]]
-      d += ` L ${n(p.x + p.w - R)} 0`
-      if (j < gp.length - 1) {
-        const k = links[gp[j]]!
-        const cy = CY + k.wob
-        d += ` A ${R} ${R} 0 0 1 ${n(k.ax)} ${n(cy - k.h)}`
-        d += ` C ${n(k.ax + k.k)} ${n(cy - k.h * k.p)} ${n(k.bx - k.k)} ${n(cy - k.h * k.p)} ${n(k.bx)} ${n(cy - k.h)}`
-        d += ` A ${R} ${R} 0 0 1 ${n(pills[gp[j + 1]].x + R)} 0`
-      }
-    }
-    d += ` A ${R} ${R} 0 0 1 ${n(last.x + last.w - R)} ${H}`
-    for (let m = gp.length - 1; m >= 0; m--) {
-      const q = pills[gp[m]]
-      d += ` L ${n(q.x + R)} ${H}`
-      if (m > 0) {
-        const k = links[gp[m - 1]]!
-        const cy = CY + k.wob
-        const pv = pills[gp[m - 1]]
-        d += ` A ${R} ${R} 0 0 1 ${n(k.bx)} ${n(cy + k.h)}`
-        d += ` C ${n(k.bx - k.k)} ${n(cy + k.h * k.p)} ${n(k.ax + k.k)} ${n(cy + k.h * k.p)} ${n(k.ax)} ${n(cy + k.h)}`
-        d += ` A ${R} ${R} 0 0 1 ${n(pv.x + pv.w - R)} ${H}`
-      }
-    }
-    d += ` A ${R} ${R} 0 0 1 ${n(first.x + R)} 0 Z`
-  }
-  return d.trim()
+/** One subpath per pill. Three stroked divs would be simpler, but the rim is
+ *  a single gradient running across the whole group, which needs one path. */
+function outline(pills: Pill[]): string {
+  return pills
+    .map(
+      (p) =>
+        `M ${n(p.x + R)} 0 L ${n(p.x + p.w - R)} 0` +
+        ` A ${R} ${R} 0 0 1 ${n(p.x + p.w - R)} ${H}` +
+        ` L ${n(p.x + R)} ${H}` +
+        ` A ${R} ${R} 0 0 1 ${n(p.x + R)} 0 Z`,
+    )
+    .join(' ')
 }
 
 const NAV_LINK = 'text-[14.5px] text-muted transition-colors hover:text-head'
 
+const reduced = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 export default function Navbar() {
-  const [widths, setWidths] = useState<readonly number[]>(FALLBACK)
   const [shape, setShape] = useState(() => {
-    const p = layout(REST, REST, FALLBACK)
-    return { d: outline(p, [0, 0]), pills: p }
+    const p = layout(FALLBACK)
+    return { d: outline(p), pills: p }
   })
   const [open, setOpen] = useState(false)
 
@@ -225,44 +148,42 @@ export default function Navbar() {
 
   const group = useRef<Array<HTMLElement | null>>([null, null, null])
 
-  const widthRef = useRef<readonly number[]>(FALLBACK)
-  const gaps = useRef<[number, number]>([REST, REST])
-  const vels = useRef<[number, number]>([0, 0])
-  const target = useRef(REST)
+  /* `shown` is what is on screen and springs toward `want`, which is what
+     the content actually measures. */
+  const shown = useRef<number[]>([...FALLBACK])
+  const want = useRef<number[]>([...FALLBACK])
+  const vels = useRef<number[]>([0, 0, 0])
   const raf = useRef(0)
   const last = useRef(0)
+  const first = useRef(true)
 
   const paint = useCallback(() => {
-    const p = layout(gaps.current[0], gaps.current[1], widthRef.current)
-    setShape({ d: outline(p, vels.current), pills: p })
+    const p = layout(shown.current)
+    setShape({ d: outline(p), pills: p })
   }, [])
 
-  /* Each gap is its own damped spring, integrated per frame. A spring carries
-     velocity, so it arrives with momentum and settles — an exponential ease
-     can only decelerate into place, which reads as sliding, not flowing. */
+  /* Each pill's width is its own damped spring, integrated per frame. This
+     is the ONLY thing that animates the bar — there is no scroll input. */
   const tick = useCallback(
     (now: number) => {
       const dt = last.current ? Math.min((now - last.current) / 1000, 1 / 30) : 1 / 60
       last.current = now
       let moving = false
 
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 3; i++) {
         const k = STIFF[i]
         const c = 2 * Math.sqrt(k) * ZETA
-        const a = -k * (gaps.current[i] - target.current) - c * vels.current[i]
+        const a = -k * (shown.current[i] - want.current[i]) - c * vels.current[i]
         vels.current[i] += a * dt
-        gaps.current[i] += vels.current[i] * dt
-        if (
-          Math.abs(vels.current[i]) > 0.06 ||
-          Math.abs(gaps.current[i] - target.current) > 0.06
-        ) {
+        shown.current[i] += vels.current[i] * dt
+        if (Math.abs(vels.current[i]) > 0.06 || Math.abs(shown.current[i] - want.current[i]) > 0.06) {
           moving = true
         }
       }
 
       if (!moving) {
-        gaps.current = [target.current, target.current]
-        vels.current = [0, 0]
+        shown.current = [...want.current]
+        vels.current = [0, 0, 0]
         raf.current = 0
         last.current = 0
         paint()
@@ -282,34 +203,15 @@ export default function Navbar() {
       const w = group.current.map((el, i) =>
         el ? Math.ceil(el.getBoundingClientRect().width) + PAD[i] : FALLBACK[i],
       )
-      if (w.some((v, i) => Math.abs(v - widthRef.current[i]) > 0.5)) {
-        widthRef.current = w
-        setWidths(w)
-        const p = layout(gaps.current[0], gaps.current[1], w)
-        setShape({ d: outline(p, vels.current), pills: p })
-      }
-    }
-    measure()
-    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
-    // The display face changes the measurements, so remeasure once it lands.
-    if (fonts && fonts.status !== 'loaded') fonts.ready.then(measure).catch(() => {})
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [])
+      if (w.every((v, i) => Math.abs(v - want.current[i]) <= 0.5)) return
+      want.current = w
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    const onScroll = () => {
-      const y = window.scrollY || document.documentElement.scrollTop || 0
-      let pr = Math.max(0, Math.min(1, (y - START) / RANGE))
-      pr = pr * pr * (3 - 2 * pr) // smoothstep, so it eases in and out
-      target.current = REST + (FUSED - REST) * pr
-
-      if (reduced) {
-        gaps.current = [target.current, target.current]
-        vels.current = [0, 0]
+      // First measurement, or someone who asked the OS to cut motion: land on
+      // it. Otherwise let the springs carry it, which is the whole point.
+      if (first.current || reduced()) {
+        first.current = false
+        shown.current = [...w]
+        vels.current = [0, 0, 0]
         paint()
         return
       }
@@ -318,11 +220,13 @@ export default function Navbar() {
         raf.current = requestAnimationFrame(tick)
       }
     }
-
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
+    measure()
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
+    // The display face changes the measurements, so remeasure once it lands.
+    if (fonts && fonts.status !== 'loaded') fonts.ready.then(measure).catch(() => {})
+    window.addEventListener('resize', measure)
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', measure)
       if (raf.current) cancelAnimationFrame(raf.current)
     }
   }, [paint, tick])
@@ -338,7 +242,7 @@ export default function Navbar() {
   }, [open])
 
   const [wordmark, links, actions] = shape.pills
-  const span = spanOf(widths)
+  const span = spanOf(shape.pills.map((p) => p.w))
 
   return (
     <>
