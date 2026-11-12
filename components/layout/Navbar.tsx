@@ -207,7 +207,21 @@ export default function Navbar() {
     return { d: outline(p, [0, 0]), pills: p }
   })
   const [open, setOpen] = useState(false)
+
+  /* The active-page marking is applied AFTER mount, never during the server
+     render. `usePathname()` is reliable in the browser but not in whatever
+     context an ISR regeneration runs in: the build-time prerender of every
+     page marked the right row, and then — once the home page revalidated
+     under traffic — the regenerated HTML came back with no row marked at all,
+     while pages that had not regenerated yet still looked fine. React 18 does
+     not repair attribute mismatches on hydration, so that wrong HTML stuck.
+     Deferring to `mounted` makes the server output consistently unmarked and
+     lets the client decide, which cannot drift. Nothing flashes, because the
+     sheet is closed and invisible until it is tapped. */
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const pathname = usePathname()
+  const here = mounted ? pathname : null
 
   const group = useRef<Array<HTMLElement | null>>([null, null, null])
 
@@ -473,7 +487,7 @@ export default function Navbar() {
               className="glass glass-pill flex flex-col gap-0.5 rounded-[26px] p-2"
             >
               {MENU.map((item, i) => {
-                const active = !item.external && pathname === item.href
+                const active = !item.external && here === item.href
                 const inner = (
                   <>
                     <span

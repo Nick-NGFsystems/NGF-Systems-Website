@@ -926,6 +926,17 @@ Three things in `Navbar.tsx` will bite whoever edits the sheet:
   end of `MENU` so the bottom row moves first and the sheet unrolls up out of the button. The rows
   render in plain reading order now; an earlier version reversed the array AND used
   `flex-col-reverse`, a double negative that only existed to make the stagger run bottom-up.
+- **The active-page marking is applied after mount, and must stay that way.** The first version
+  compared `usePathname()` to each row's href during render. Every page's build-time prerender
+  marked the right row, it was verified on production right after the promote, and then it rotted:
+  an hour later the home page — which had revalidated under traffic — served HTML with no row
+  marked, while pages that had not regenerated yet still looked correct. `usePathname()` is
+  reliable in the browser but not in whatever context an ISR regeneration renders in, and React 18
+  does not repair attribute mismatches on hydration, so the wrong HTML stuck even after the client
+  knew better. `const here = mounted ? pathname : null` makes the server output consistently
+  unmarked and lets the client decide. Nothing flashes, because the sheet is closed and invisible
+  until it is tapped. **Do not "optimise" this back into the render pass** — it will pass every
+  local check and then decay in production an hour after you ship it.
 
 ### No sticky column in `PortalShowcase` (2026-11-11)
 
