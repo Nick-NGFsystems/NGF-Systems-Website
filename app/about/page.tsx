@@ -10,14 +10,14 @@ import { CONTACT } from '@/lib/nav'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'NGF Systems is a one-person web company in Hudsonville, Michigan. You talk to the person who builds and maintains your site — not an account manager.',
+    'You talk to the people who build and maintain your site — not an account manager relaying messages. NGF Systems builds, hosts and looks after websites for small businesses in West Michigan.',
   alternates: { canonical: '/about' },
 }
 
 const PRINCIPLES = [
   {
-    title: 'You talk to the person who builds it',
-    body: 'There is no account manager relaying your message to a developer who never hears your business explained in your own words. The person who answers the phone is the person writing the code.',
+    title: 'You talk to the people who build it',
+    body: 'There is no account manager relaying your message to a developer who never hears your business explained in your own words. Whoever answers the phone is whoever is writing the code.',
   },
   {
     title: 'You can see the work before you pay',
@@ -39,32 +39,32 @@ export default function AboutPage() {
     <>
       <PageHeader
         eyebrow="About"
-        title="A one-person web company in West Michigan"
-        subtitle="NGF Systems builds, hosts and maintains websites for small businesses. It is deliberately small, which is the reason the work looks the way it does."
+        title="You talk to the people who build your site"
+        subtitle="NGF Systems builds, hosts and maintains websites for small businesses in West Michigan. No account manager in the middle, and no handing your business off to someone who has never heard you explain it."
       />
 
       <Section bleed>
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-20">
           <div>
-            <SectionHeading eyebrow="Who you are working with" title="Small on purpose" />
+            <SectionHeading eyebrow="Who you are working with" title="Nothing is lost in a handoff" />
             <div className="mt-8 flex flex-col gap-5 text-[16px] leading-relaxed text-muted">
               <p>
                 NGF Systems is run by Nick, out of {CONTACT.location}. Every site on the work page
-                was designed, built, launched and is still maintained by the same person you will be
-                emailing.
+                was designed, built, launched and is still maintained here — and the person who
+                answers your email is the person doing that work.
               </p>
               <p>
-                That is a real constraint and it is worth being honest about it: we take on fewer
-                projects than an agency, and we are not the right choice for a company that needs a
-                team of twelve on site next week. What it buys you is that nothing is lost in a
-                handoff, nobody has to be brought up to speed on your business, and a small change
-                does not have to travel through three people to get made.
+                It is worth being straight about what that means. We take on fewer projects at a
+                time than an agency does, because each one gets proper attention rather than being
+                passed down a chain. What you get for it is that nothing is lost in a handoff,
+                nobody has to be brought up to speed on your business, and a small change does not
+                have to travel through three people to get made.
               </p>
               <p>
                 The other half of the answer is the platform. Rather than build every client a
                 bespoke system from nothing, NGF runs its own software — the portal your site is
-                managed through. That is what makes it possible for one person to look after{' '}
-                a portfolio of live client sites without any of them being neglected.
+                managed through. That is what makes it possible to look after a portfolio of live
+                client sites without any of them being neglected.
               </p>
             </div>
           </div>

@@ -5,7 +5,6 @@ import Section from '@/components/ui/Section'
 import ContactForm from '@/components/sections/ContactForm'
 import Icon from '@/components/ui/Icon'
 import { CONTACT, PORTAL_URL } from '@/lib/nav'
-import { TERMS } from '@/lib/pricing'
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -66,7 +65,7 @@ export default function ContactPage() {
                 {[
                   'We reply within one business day.',
                   'A short call about what your business does.',
-                  `A real mockup of your site, with ${TERMS.freeMockupRevisionRounds} rounds of changes included.`,
+                  'A real mockup of your site, built from that call.',
                   'You decide. If it is not right, you owe nothing.',
                 ].map((line, index) => (
                   <li key={line} className="flex gap-3">

@@ -1,6 +1,5 @@
 import Section from '@/components/ui/Section'
 import SectionHeading from '@/components/ui/SectionHeading'
-import { TERMS } from '@/lib/pricing'
 
 /**
  * How a project actually runs. This is the most common anxiety a small-business
@@ -17,7 +16,8 @@ const STEPS = [
   },
   {
     title: 'We build you a mockup',
-    body: `You see a real design of your actual site before you have paid anything. ${TERMS.freeMockupRevisionRounds} rounds of changes are included.`,
+    body:
+      'You see a real design of your actual site before you have paid anything. Tell us what to change and we change it.',
   },
   {
     title: 'You approve, then we build',

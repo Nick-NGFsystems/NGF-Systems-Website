@@ -30,8 +30,15 @@
  * without the other, or the website and the signed contract disagree:
  *   TRACKS.monthly.baseCents, TRACKS.oneTime.baseCents, TERMS.hostingCents,
  *   TERMS.maintenanceRateCents, TERMS.lateFeePctPerMonth, TERMS.termDiscounts,
- *   TERMS.freeMockupRevisionRounds, TERMS.mockupAcceptanceDays,
+ *   TERMS.mockupAcceptanceDays,
  *   TERMS.reactivationFeeCents
+ *
+ * REMOVED 2026-11-12 — `freeMockupRevisionRounds` and every "3 rounds of
+ * changes included" line that read from it. Nick's call: the site should not
+ * advertise a revision cap. NOTE this only changes what the WEBSITE says —
+ * HANDOFF.md and NGF-Systems-app/lib/pricing.ts may still carry the figure,
+ * and the signed contract is the thing that governs. Check there before
+ * telling a client the mockup stage is uncapped.
  *
  * UNCONFIRMED — anything Nick has not set is `null`, and renders as "Quoted"
  * rather than a number. This is not squeamishness: a build of this file with
@@ -116,7 +123,6 @@ export const TRACKS: readonly Track[] = [
       'Due in full within 14 days of mockup approval',
       'Hosting is billed separately and can be cancelled any time',
       'You keep the site whether or not you stay hosted with us',
-      'Up to 3 rounds of mockup revisions included',
     ],
   },
 ]
@@ -329,8 +335,6 @@ export const TERMS = {
   maintenanceMinimumMinutes: 15,
   /** Overdue invoices, per month. */
   lateFeePctPerMonth: 1.5,
-  /** Rounds of mockup revisions before revisions bill at the maintenance rate. */
-  freeMockupRevisionRounds: 3,
   /** Silence after a mockup is sent counts as acceptance after this many days. */
   mockupAcceptanceDays: 14,
   /** Business days to transfer the GitHub repository on a one-time build. */

@@ -40,7 +40,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Do I really not pay for the mockup?',
-    a: `No. We build a real design of your actual site first, with ${TERMS.freeMockupRevisionRounds} rounds of revisions included. If you do not want to go ahead after seeing it, you owe nothing and we part on good terms.`,
+    a: 'No. We build a real design of your actual site first. If you do not want to go ahead after seeing it, you owe nothing and we part on good terms.',
   },
   {
     q: 'Can I add booking or a store later?',

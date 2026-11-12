@@ -1012,6 +1012,26 @@ do — that would be the claims audit all over again, just drawn instead of writ
 The page is indexable and in the sitemap via `EXTRA_ROUTES` in `lib/nav.ts`, which exists because
 `ROUTES` was `'/'` plus `NAV` and this page is deliberately not a nav destination.
 
+### No revision cap, and no "small on purpose" (2026-11-12)
+
+Two of Nick's calls, both about what the site claims rather than how it looks.
+
+**The mockup revision cap is gone.** "3 rounds of changes are included" appeared on the home
+process strip, `/contact`'s what-happens-next list, the `/pricing` FAQ and the one-time track's
+terms, all reading from `TERMS.freeMockupRevisionRounds`. The constant is deleted too, so nobody
+re-derives the claim from it. **This changes only what the WEBSITE says** — `HANDOFF.md` and
+`NGF-Systems-app/lib/pricing.ts` may still carry the figure, and the signed contract is what
+governs. Check there before telling a client the mockup stage is uncapped.
+
+**NGF is no longer described as small on purpose.** `/about` led with "A one-person web company",
+"It is deliberately small" and a section headed "Small on purpose". Nick is planning to hire, so
+framing it as permanent and intentional would date badly. What he explicitly wanted kept is the
+substance — you talk to the person who builds your site, no account manager in the middle — so that
+is now the headline rather than a consequence of being small. The honest expectation-setting stayed
+too, reframed from "we are not right for a company that needs twelve people" to "we take on fewer
+projects at a time than an agency does". Stating that NGF is run by Nick is still fine; it is a
+fact. **Do not re-add smallness as a selling point.**
+
 ### No client counts on the site (2026-11-11)
 
 At Nick's instruction the site does not state how many clients or industries NGF has. The home page,
