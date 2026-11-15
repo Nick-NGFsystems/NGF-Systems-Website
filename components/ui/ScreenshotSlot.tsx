@@ -1,13 +1,26 @@
 import { SHOTS, type ShotKey } from '@/lib/shots'
 
 /**
- * A screenshot, or a visibly-marked slot where one belongs.
+ * A screenshot, or — IN DEVELOPMENT ONLY — a visibly-marked slot where one
+ * belongs.
  *
- * The design rests on four real screenshots of the portal. Until they exist
+ * The design rests on four real screenshots of the portal. Until one exists
  * this renders a labelled placeholder that says what is missing and at what
  * size — NOT a drawn imitation of the product. The build this replaced hand-
  * drew a fake leads inbox with invented customer names in it, which was both
  * less convincing than a real screenshot and a small lie about the product.
+ *
+ * **That placeholder is a note to whoever is building the site, and it must
+ * never reach a visitor.** It did: from the 2026-11-11 redesign until
+ * 2026-11-15 the live home page carried a panel reading "SCREENSHOT NEEDED —
+ * The leads inbox with THREE OR FOUR enquiries in it … 1270×620 · set it in
+ * lib/shots.ts", under a heading selling the leads inbox. A marked gap is
+ * honest in a dev server and is an unfinished-looking internal TODO on a
+ * marketing page. So a missing shot renders NOTHING in production, and
+ * `npm run doctor` reports the gap instead — see lib/shots.ts SHOTS_MISSING.
+ *
+ * A caller that must not leave an empty frame behind should ask `hasShot()`
+ * first; `WhatYouGet` does, and drops its whole picture column.
  *
  * To fill one: drop the file in /public/shots and set its `src` in
  * lib/shots.ts. Nothing else changes.
@@ -45,6 +58,9 @@ export default function ScreenshotSlot({
       />
     )
   }
+
+  // The marker below is a build note. Never ship it to a visitor.
+  if (process.env.NODE_ENV === 'production') return null
 
   const dark = tone === 'dark'
 

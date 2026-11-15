@@ -1032,6 +1032,47 @@ too, reframed from "we are not right for a company that needs twelve people" to 
 projects at a time than an agency does". Stating that NGF is run by Nick is still fine; it is a
 fact. **Do not re-add smallness as a selling point.**
 
+### Two things that were live and wrong, fixed 2026-11-15
+
+Both shipped in the 2026-11-11 redesign, both were visible to every visitor for four days, and
+neither was caught by a build, a typecheck or the doctor. They are worth reading as a pair: the
+checks we had all passed, because nothing we had looked at the *pictures* or at what the page says
+when something is absent.
+
+**1. The hero screenshot published a real person's mobile and email.** `editor.webp` was captured
+from a live client site (a drone-spraying business). Legible at full size: the owner's mobile in the
+site nav, again in the hero call button, again in the contact panel, and his work email in the row
+below it. That was on the home page hero — the largest image on the site.
+
+Those four regions are **blurred in the file** now, hard enough not to be recoverable, rather than
+painted over: a blur reads as redacted, a clean overwrite reads as invented content, and this is a
+screenshot of a real product. `AREA COVERED` and `FLEET` are left alone — business facts, not
+personal data. The business is still identifiable from its branding and copy; **whether NGF may
+feature a client's site at all is Nick's call, not a privacy fault**, and it is still open.
+
+The rule this leaves: **zoom into every panel of a capture before committing it, not just the part
+the screenshot is about.** The contact details were not in the subject of the shot, they were in the
+background of it. `lib/shots.ts` says so at the top, and says to capture from Test Client.
+
+**2. A build note was being shown to customers.** `ScreenshotSlot` renders a marked placeholder when
+a shot is missing — "SCREENSHOT NEEDED · The leads inbox with THREE OR FOUR enquiries in it … 1270×620
+· set it in lib/shots.ts". That is right in a dev server and is an internal TODO on a marketing page,
+and it sat on the home page under a heading selling the leads inbox.
+
+The marker is now **development-only**; in production a missing shot renders `null`. The cost of
+hiding it is that the live site can no longer tell you a picture is missing, so two things make up
+for that:
+
+- `npm run doctor` has a **Product screenshots** rule that warns with the list of missing keys. That
+  is now the only thing that announces a gap — do not delete it.
+- A caller that would otherwise draw a bordered, shadowed box around nothing asks `hasShot()` first.
+  `WhatYouGet` does: without the picture it drops the whole column and renders as a single `max-w-2xl`
+  text block, which looks deliberate rather than broken.
+
+`leads` is still the missing one. It needs a Test Client inbox with three or four enquiries at
+different statuses — the single capture taken so far read "No submissions yet · All 0", directly under
+"Every enquiry, in one place you own".
+
 ### No client counts on the site (2026-11-11)
 
 At Nick's instruction the site does not state how many clients or industries NGF has. The home page,

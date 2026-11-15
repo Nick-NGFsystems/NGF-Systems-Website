@@ -2,6 +2,7 @@ import Section from '@/components/ui/Section'
 import SectionHeading from '@/components/ui/SectionHeading'
 import { Tick } from '@/components/ui/FeatureItem'
 import ScreenshotSlot from '@/components/ui/ScreenshotSlot'
+import { hasShot } from '@/lib/shots'
 import type { NgfSiteContent } from '@/lib/ngf'
 
 /**
@@ -16,6 +17,14 @@ import type { NgfSiteContent } from '@/lib/ngf'
  * It used to show a HAND-DRAWN imitation of that inbox, with invented
  * customer names in it. A real screenshot is both more convincing and not a
  * small lie about the product, so this is a ScreenshotSlot — see lib/shots.ts.
+ *
+ * The picture column is CONDITIONAL. A missing shot renders nothing in
+ * production, so an unconditional frame would leave a bordered, shadowed empty
+ * box sitting next to the copy. Without the picture the section is simply one
+ * column of text, which is honest and looks deliberate. `leads` is the shot
+ * that is still missing; it needs a Test Client inbox with three or four
+ * enquiries at different statuses, because the one capture taken so far read
+ * "No submissions yet · All 0" and argued against the heading above it.
  */
 export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
   const title = ngf?.services?.title || 'Every enquiry, in one place you own.'
@@ -23,9 +32,17 @@ export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
     ngf?.services?.subtitle ||
     'Contact forms on your site do not vanish into a personal inbox. They arrive in your portal with a status on each one, and in your email the moment they are sent.'
 
+  const showShot = hasShot('leads')
+
   return (
     <Section id="what-you-get">
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
+      <div
+        className={
+          showShot
+            ? 'grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20'
+            : 'max-w-2xl'
+        }
+      >
         <div>
           <SectionHeading
             eyebrow="What you get"
@@ -47,11 +64,13 @@ export default function WhatYouGet({ ngf }: { ngf?: NgfSiteContent }) {
           </ul>
         </div>
 
-        <div className="overflow-hidden rounded-[18px] shadow-[inset_0_0_0_1px_rgba(16,24,40,.08),0_12px_30px_-14px_rgba(16,24,40,.18)]">
-          <div className="h-[300px] sm:h-[360px]">
-            <ScreenshotSlot shot="leads" />
+        {showShot && (
+          <div className="overflow-hidden rounded-[18px] shadow-[inset_0_0_0_1px_rgba(16,24,40,.08),0_12px_30px_-14px_rgba(16,24,40,.18)]">
+            <div className="h-[300px] sm:h-[360px]">
+              <ScreenshotSlot shot="leads" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </Section>
   )

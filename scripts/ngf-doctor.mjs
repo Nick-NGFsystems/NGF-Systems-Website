@@ -764,6 +764,47 @@ if (siteUrlDocumented) {
   warn('NEXT_PUBLIC_SITE_URL documented', 'Not mentioned in .env.local.example — it MUST match client_configs.site_url exactly or the site renders only fallbacks.')
 }
 
+// ── 10. Product screenshots ──────────────────────────────────────────────────
+// A missing screenshot renders NOTHING in production (components/ui/Screenshot-
+// Slot.tsx), so nobody looking at the live site can tell one is absent. That is
+// deliberate — the alternative shipped an internal "SCREENSHOT NEEDED … set it
+// in lib/shots.ts" panel to visitors on the home page for four days. The cost
+// of hiding it is that this check is now the ONLY thing that announces the gap.
+{
+  const shots = read('lib/shots.ts')
+  if (!shots) {
+    ok('Product screenshots', 'No lib/shots.ts — not an NGF marketing site.')
+  } else {
+    // Each entry is `key: { ... src: <value> ... }`; read the src literal.
+    const missing = []
+    const present = []
+    for (const m of shots.matchAll(/^\s{2}(\w+):\s*\{([\s\S]*?)^\s{2}\},/gm)) {
+      const [, key, body] = m
+      const src = body.match(/^\s*src:\s*(null|'([^']*)')/m)
+      if (!src) continue
+      if (src[1] === 'null') missing.push(key)
+      else present.push([key, src[2]])
+    }
+
+    if (missing.length) {
+      warn(
+        'Product screenshots captured',
+        `${missing.length} still missing (${missing.join(', ')}). Production renders nothing in their place, ` +
+          `so the live site will not show you this — only here. Capture from the Test Client account and set ` +
+          `src in lib/shots.ts.`,
+      )
+    } else {
+      ok('Product screenshots captured', `${present.length} in place.`)
+    }
+
+    // A src that points at a file nobody shipped renders a broken image.
+    const absent = present.filter(([, src]) => !has(join('public', src)))
+    absent.length
+      ? fail('Screenshot files exist', `${absent.map(([k, s2]) => `${k} -> ${s2}`).join(', ')} — set in lib/shots.ts but not in public/.`)
+      : ok('Screenshot files exist')
+  }
+}
+
 // ── Report ───────────────────────────────────────────────────────────────────
 const COLOR = { PASS: '\x1b[32m', WARN: '\x1b[33m', FAIL: '\x1b[31m', reset: '\x1b[0m' }
 const ICON = { PASS: '✓', WARN: '!', FAIL: '✕' }
