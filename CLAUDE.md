@@ -16,6 +16,31 @@ When in doubt, refer back to this file before writing any code.
 - When Nick says "wrap up", bring `NOW.md` up to date, commit and push.
 - "Push" means the branch you are working on. While `NOW.md` says production runs something other than `main`, never push to or merge into `main`: a build from `main` would roll the live site back.
 
+## Client facts
+
+- **Not a client site.** This is NGF Systems' own marketing site, https://www.ngfsystems.com (Vercel project `ngf-systems`). The portal and admin are a different repo (`NGF-Systems-app`, app.ngfsystems.com).
+- **The live site is not `main`.** Production runs PR #4's branch; see `NOW.md`. Ask Nick which branch to start from and which to target your PR at until PR #4 is merged.
+- **Most of this file is an old, generic NGF rules doc** (Clerk, Prisma, `git push origin main`). Ignore its push-to-`main` steps. For the real state of the site read CLAUDE.md on PR #4's branch (sections "SITE REBUILD", "CLAIMS AUDIT", "REDESIGN — 2026-11-11").
+- **The site may only claim what the platform really does.** PR #4 ran a claims audit and removed promises it could not back. Keep new copy to the same standard; prices Nick has not signed off stay "quoted".
+- **No real client data in screenshots.** A hero screenshot showed a real client's phone and email for four days (fixed 2026-11-15). Blur any personal detail before adding an image.
+- **`lib/ngf.ts` is a legacy fork.** Don't run `sync-ngf` here yet; see the "KNOWN GAP" section at the end of this file.
+
+## Working here as a teammate
+
+Same rules as the section of this name in `ngf-client-starter`'s CLAUDE.md. In short:
+
+- **Always a branch.** A `claude/<short-name>` branch. Never commit or push to `main`; here a build of `main` would also roll the live site back (see above).
+- **PR, then preview.** Push your branch, open a PR, check its Vercel preview. Say what you checked and what you could not.
+- **Nick merges.** Don't merge, promote a preview, or run `vercel --prod`.
+- **No real secrets** (env values, keys, tokens) in code, `NOW.md` or a PR.
+- **No real emails while testing.** The contact form sends real email. Don't submit it to test, live or on a preview; ask Nick.
+- **`NOW.md`:** see "Now — read first" above. Say "wrap up" at the end.
+- **Work items** are Project steps in the NGF app. Take the step; hand it back with a "where it's at" note.
+
+NGF client id: (Nick to fill in)
+
+Once `client_brief` is available in the `ngf-systems` MCP: at the start of a session, if that MCP is connected, call `client_brief` with this id for the client's people, open steps and requests.
+
 ---
 
 ## THE TWO-AI WORKFLOW
