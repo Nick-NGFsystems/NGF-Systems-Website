@@ -226,7 +226,7 @@ export default function PricingTables() {
         <h3 className="mt-3 text-[22px] font-semibold tracking-tight text-head">
           What anything else costs
         </h3>
-        <dl className="mt-6 divide-y divide-line border-y border-line">
+        <dl className="mt-6 max-w-3xl divide-y divide-line border-y border-line">
           {afterLaunch.map(({ label, note, price }) => (
             <div key={label} className="flex items-baseline justify-between gap-6 py-4">
               <dt>
