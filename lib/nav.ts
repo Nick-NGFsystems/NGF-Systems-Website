@@ -35,8 +35,8 @@ export const ROUTES = ['/', ...NAV.map((n) => n.href), ...EXTRA_ROUTES] as const
 
 export const CONTACT = {
   email: 'nick@ngfsystems.com',
-  phone: '+1 (906) 448-9989',
-  phoneHref: 'tel:+19064489989',
+  phone: '+1 (616) 313-3295',
+  phoneHref: 'tel:+16163133295',
   location: 'Hudsonville, Michigan',
   serviceArea: 'West Michigan and remote',
 } as const
