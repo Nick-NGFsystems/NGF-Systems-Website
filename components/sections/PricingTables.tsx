@@ -39,32 +39,54 @@ export default function PricingTables() {
   const bothMonthly = quote('monthly', ['booking', 'store'])
   const bothSetup = setupQuote(['booking', 'store'])
 
+  // Each row: what it is, what it costs, and the one condition worth knowing.
+  // The price sits in its own column so the eye can run straight down it.
   const afterLaunch = [
     {
       label: 'Changes beyond your included time',
-      value: `${usd(TERMS.maintenanceRateCents)}/hour in ${TERMS.maintenanceMinimumMinutes}-minute steps, estimated before we start`,
+      note: `Billed in ${TERMS.maintenanceMinimumMinutes}-minute steps, estimated before we start`,
+      price: `${usd(TERMS.maintenanceRateCents)}/hour`,
     },
     {
       label: 'Hosting for a site you own',
-      value: `${usd(TERMS.hostingCents)}/month, cancel any time`,
+      note: 'Hosting and SSL, cancel any time',
+      price: `${usd(TERMS.hostingCents)}/month`,
     },
     {
       label: 'Care for a site you own',
-      value: `${usd(TERMS.careCents)}/month, hosting plus ${hours(TERMS.careIncludedMinutes)} of changes`,
+      note: `Hosting plus ${hours(TERMS.careIncludedMinutes)} of changes a month`,
+      price: `${usd(TERMS.careCents)}/month`,
     },
     {
       label: 'Custom development',
-      value: `From ${usd(TERMS.customMinimumCents)}, quoted per job`,
+      note: 'Quoted in writing for each job',
+      price: `From ${usd(TERMS.customMinimumCents)}`,
     },
     {
       label: 'Buying your monthly site outright',
-      value: `After ${TERMS.buyoutAfterMonths} months, for ${TERMS.buyoutMonthsOfFee} months of your plan fee`,
+      note: `Available after ${TERMS.buyoutAfterMonths} months on a plan`,
+      price: `${TERMS.buyoutMonthsOfFee} months of fees`,
     },
     {
       label: 'Your monthly price',
-      value: `Locked for ${TERMS.priceLockMonths} months from launch`,
+      note: 'From the day your site launches',
+      price: `Locked ${TERMS.priceLockMonths} months`,
     },
   ]
+
+  const notes = isMonthly
+    ? [
+        'Setup is paid once and covers the build and your first month.',
+        'First year all in is the setup plus eleven monthly payments.',
+        bothMonthly !== null && bothSetup !== null
+          ? `Need booking and a store? ${usd(bothMonthly)}/month, with setup from ${usd(bothSetup)}.`
+          : null,
+      ]
+    : [
+        'You own the code from day one and can host it anywhere.',
+        'First year all in is the build plus twelve months of hosting with us.',
+        'Anything not listed is quoted in writing before work starts.',
+      ]
 
   return (
     <div>
@@ -112,10 +134,22 @@ export default function PricingTables() {
                 </span>
                 <span className="text-[16px] text-muted">{active.basePer}</span>
               </p>
-              <p className="mt-2 text-[14px] leading-relaxed text-muted lg:min-h-[44px]">
-                {isMonthly && f.setupCents !== null
-                  ? `Plus ${f.setupFrom ? 'from ' : ''}${usd(f.setupCents)} setup, which covers the build and your first month`
-                  : `Plus hosting at ${usd(TERMS.hostingCents)}/month, or ${usd(TERMS.careCents)}/month with ${hours(TERMS.careIncludedMinutes)} of changes`}
+              <p className="mt-1.5 text-[14.5px] text-muted">
+                {isMonthly && f.setupCents !== null ? (
+                  <>
+                    +{' '}
+                    <span className="font-medium text-head">
+                      {f.setupFrom ? 'from ' : ''}
+                      {usd(f.setupCents)}
+                    </span>{' '}
+                    one-time setup
+                  </>
+                ) : (
+                  <>
+                    + hosting from{' '}
+                    <span className="font-medium text-head">{usd(TERMS.hostingCents)}/month</span>
+                  </>
+                )}
               </p>
 
               <dl className="mt-6 space-y-3 border-y border-line py-5 text-[14.5px]">
@@ -162,25 +196,25 @@ export default function PricingTables() {
         })}
       </ul>
 
-      <p className="mt-6 max-w-3xl text-[14.5px] leading-relaxed text-muted">
-        {isMonthly
-          ? `First year all in is the setup plus eleven monthly payments.${
-              bothMonthly !== null && bothSetup !== null
-                ? ` Need booking and a store? That is ${usd(bothMonthly)}/month with from ${usd(bothSetup)} setup.`
-                : ''
-            }`
-          : 'First year all in is the build plus twelve months of hosting with us. You are free to host it anywhere else.'}{' '}
-        Anything else is quoted in writing before any work starts.
-      </p>
+      <ul className="mt-6 grid gap-x-8 gap-y-2 text-[14px] leading-relaxed text-muted lg:grid-cols-3">
+        {notes
+          .filter((n): n is string => n !== null)
+          .map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+      </ul>
 
       {/* ── Every plan includes ───────────────────────────────────────────── */}
       <div className="mt-20">
         <p className={EYEBROW}>Every plan includes</p>
-        <ul className="mt-6 grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-6 grid gap-x-12 gap-y-6 md:grid-cols-2">
           {ALWAYS_INCLUDED.map((item) => (
-            <li key={item.title}>
-              <p className="text-[15.5px] font-semibold text-head">{item.title}</p>
-              <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">{item.detail}</p>
+            <li key={item.title} className="flex items-start gap-3">
+              <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-sand" />
+              <div>
+                <p className="text-[15.5px] font-semibold text-head">{item.title}</p>
+                <p className="mt-1 text-[14.5px] leading-relaxed text-muted">{item.detail}</p>
+              </div>
             </li>
           ))}
         </ul>
@@ -192,14 +226,14 @@ export default function PricingTables() {
         <h3 className="mt-3 text-[22px] font-semibold tracking-tight text-head">
           What anything else costs
         </h3>
-        <dl className="mt-6 max-w-3xl divide-y divide-line border-y border-line">
-          {afterLaunch.map(({ label, value }) => (
-            <div
-              key={label}
-              className="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8"
-            >
-              <dt className="text-[15px] text-head">{label}</dt>
-              <dd className="text-[15px] text-muted sm:text-right">{value}</dd>
+        <dl className="mt-6 divide-y divide-line border-y border-line">
+          {afterLaunch.map(({ label, note, price }) => (
+            <div key={label} className="flex items-baseline justify-between gap-6 py-4">
+              <dt>
+                <span className="block text-[15px] font-medium text-head">{label}</span>
+                <span className="mt-0.5 block text-[14px] text-muted">{note}</span>
+              </dt>
+              <dd className="shrink-0 text-right text-[15.5px] font-semibold text-head">{price}</dd>
             </div>
           ))}
         </dl>
