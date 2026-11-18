@@ -56,7 +56,7 @@ export default async function HomePage() {
           title={ngf?.pricing?.title || 'Priced by what your site does. Never by page count.'}
           subtitle={
             ngf?.pricing?.subtitle ||
-            'Pick how you want to pay, then add only the things your business actually needs. No page allowances, and no tier you have to buy for one feature.'
+            'Three plans, set by whether your site just needs to be found, takes bookings, or sells products. Pay monthly, or pay once and own it.'
           }
           ngfSection="Pricing"
           ngfTitleField="pricing.title"
@@ -68,11 +68,15 @@ export default async function HomePage() {
             <Card key={t.key} className="p-6">
               <h3 className="text-[16.5px] font-semibold text-head">{t.name}</h3>
               <p className="mt-4 flex items-baseline gap-1.5">
+                <span className="text-[15px] text-muted">From</span>
                 <span className="text-[38px] font-semibold tracking-tight text-head">
                   {usd(t.baseCents)}
                 </span>
                 <span className="text-[16px] text-muted">{t.basePer}</span>
               </p>
+              {t.setupCents !== null && (
+                <p className="mt-1.5 text-[14px] text-muted">Plus {usd(t.setupCents)} setup</p>
+              )}
               <p className="mt-3 text-[14.5px] leading-relaxed text-muted">{t.tagline}</p>
             </Card>
           ))}
