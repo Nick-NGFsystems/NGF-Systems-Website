@@ -12,11 +12,27 @@ const FIELD =
 
 const LABEL = 'text-[14.5px] font-medium text-head/85'
 
+// Enquiries go straight to the NGF platform's public form endpoint, the same
+// one every client site uses. It saves the enquiry first (it shows under
+// Admin → Clients → Form submissions), then emails it, and it brings the spam
+// guards: a honeypot, per-IP limits and a per-site flood cap. Posting from the
+// browser, not through a route here, is what lets the per-IP limit see the
+// sender's real address.
+const LEADS_ENDPOINT = 'https://app.ngfsystems.com/api/public/leads'
+
+// The platform finds NGF's own record by this domain (its site_url).
+const SITE_DOMAIN = (process.env.NEXT_PUBLIC_SITE_URL || 'https://ngfsystems.com')
+  .replace(/^https?:\/\//, '')
+  .replace(/^www\./, '')
+  .replace(/\/.*$/, '')
+
 export default function ContactForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [business, setBusiness] = useState('')
   const [intent, setIntent] = useState('')
+  // Honeypot: hidden from people, filled in by bots. Never shown or announced.
+  const [gotcha, setGotcha] = useState('')
   const [state, setState] = useState<FormState>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -45,14 +61,24 @@ export default function ContactForm() {
     setErrorMsg('')
 
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(LEADS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, business, intent }),
+        body: JSON.stringify({
+          domain: SITE_DOMAIN,
+          formType: 'contact',
+          payload: {
+            name: name.trim(),
+            email: email.trim(),
+            business: business.trim(),
+            intent,
+            _gotcha: gotcha,
+          },
+        }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
-      if (data.success) {
+      if (res.ok && data.ok) {
         setState('success')
       } else {
         setErrorMsg('Something went wrong. Please try again, or email nick@ngfsystems.com directly.')
@@ -81,7 +107,7 @@ export default function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-line bg-panel p-6 sm:p-8"
+      className="relative rounded-xl border border-line bg-panel p-6 sm:p-8"
       noValidate
     >
       {intent && (
@@ -133,6 +159,19 @@ export default function ContactForm() {
             className={FIELD}
           />
         </div>
+      </div>
+
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor="contact-website">Leave this empty</label>
+        <input
+          id="contact-website"
+          name="_gotcha"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={gotcha}
+          onChange={(e) => setGotcha(e.target.value)}
+        />
       </div>
 
       <div className="mt-5 flex flex-col gap-1.5">
