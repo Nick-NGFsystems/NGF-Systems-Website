@@ -1,55 +1,39 @@
 /**
  * NGF's public price list, in one place.
  *
- * ── Why this file replaced the old tiers ────────────────────────────────────
+ * ── How the pricing is shaped ───────────────────────────────────────────────
  *
- * The previous pricing sold three tiers on PAGE COUNT ("3 pages", "4–7 pages",
- * "8–10 pages"). That never matched how the work is actually done: a 3-page
- * site with online booking is far more build and far more support than a
- * 9-page brochure. It also forced a bad conversation — "that's your eighth
- * page, you're on Premium now" — and it made a barber who needs bookings pay
- * for a storefront he will never switch on.
+ * The axis is WHAT THE SITE DOES, never page count. A three-page site that
+ * takes bookings is more build and more support than a nine-page brochure.
+ * So there are three plans, one per shape of business that actually enquires
+ * (just the website, website + booking, website + store), and each plan is
+ * the base plus the platform modules it switches on. Every priced module
+ * names the `client_configs` column that delivers it (see
+ * NGF-Systems-app/lib/portal-capabilities.ts), so nothing can be sold that
+ * the platform cannot actually do.
  *
- * So the axis here is WHAT THE SITE DOES, not how big it is. Every priced
- * module below is a real capability in the NGF platform, and each names the
- * `client_configs` column that switches it on (see
- * NGF-Systems-app/lib/portal-capabilities.ts). That means a quote is built
- * the same way the client's account is: tick the capabilities they need.
- * Nothing here can be sold that the platform cannot actually deliver.
+ * Each plan can be paid two ways, the two contract shapes from HANDOFF.md:
+ * Track A (monthly, NGF owns and licenses the site) and Track B (one-time,
+ * the client owns the code). The page shows one track at a time.
  *
- * ── Two payment tracks, unchanged ───────────────────────────────────────────
+ * ── Source of truth ─────────────────────────────────────────────────────────
  *
- * Track A (monthly) and Track B (one-time) are the real, existing contract
- * shapes from HANDOFF.md. They are orthogonal to the modules: a client picks
- * a track AND the capabilities they need.
+ * 2026-11-18 — Nick set new prices (pricing strategy doc, "NGF Systems
+ * pricing strategy"). Every figure below is his. Before this reaches
+ * production, NGF-Systems-app/lib/pricing.ts and HANDOFF.md must carry the
+ * same figures, because they prefill the Contract tab: if they disagree, the
+ * website and the signed contract disagree. Figures the app must match:
+ *   TRACKS.*.baseCents, TRACKS.monthly.setupCents, TRACKS.*.includedMinutes,
+ *   MODULES.*.monthlyCents / oneTimeCents / setupCents / extraIncludedMinutes,
+ *   every value in TERMS.
  *
- * ── Source of truth, and what still needs sign-off ──────────────────────────
+ * Earlier history: a build with invented figures reached production on
+ * 2026-09-23. Only figures Nick has set are ever rendered as prices. Anything
+ * he has not set is `null`, must be listed in UNCONFIRMED_PRICING, and must
+ * not be part of a plan (planFigures throws rather than invent a number).
  *
- * CANONICAL — these figures match NGF-Systems-app/lib/pricing.ts, which is
- * generated from HANDOFF.md and prefills the Contract tab. Do not change one
- * without the other, or the website and the signed contract disagree:
- *   TRACKS.monthly.baseCents, TRACKS.oneTime.baseCents, TERMS.hostingCents,
- *   TERMS.maintenanceRateCents, TERMS.lateFeePctPerMonth, TERMS.termDiscounts,
- *   TERMS.mockupAcceptanceDays,
- *   TERMS.reactivationFeeCents
- *
- * REMOVED 2026-11-12 — `freeMockupRevisionRounds` and every "3 rounds of
- * changes included" line that read from it. Nick's call: the site should not
- * advertise a revision cap. NOTE this only changes what the WEBSITE says —
- * HANDOFF.md and NGF-Systems-app/lib/pricing.ts may still carry the figure,
- * and the signed contract is the thing that governs. Check there before
- * telling a client the mockup stage is uncapped.
- *
- * UNCONFIRMED — anything Nick has not set is `null`, and renders as "Quoted"
- * rather than a number. This is not squeamishness: a build of this file with
- * invented figures reached production on 2026-09-23 and published a $150 setup
- * fee and +$50/+$75 module prices on ngfsystems.com, any of which a prospect
- * could have held him to. Only figures that match HANDOFF.md — the document
- * contracts are signed from — are ever rendered as prices.
- *
- * To publish a real number: set the cents value here AND remove its line from
- * `UNCONFIRMED_PRICING` AND clear `unconfirmed` on the module. All three, so
- * the sign-off gate below stays honest.
+ * The website does not advertise a revision cap on the mockup (Nick,
+ * 2026-11-12). The signed contract governs what is actually agreed.
  *
  * Money in CENTS. Pure: no React, no env, no network — importable anywhere.
  */
@@ -64,6 +48,12 @@ export function usd(cents: number): string {
     : `$${dollars.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+/** `60` → `"1 hour"`, `150` → `"2.5 hours"`. */
+export function hours(minutes: number): string {
+  const h = minutes / 60
+  return `${h.toLocaleString('en-US')} ${h === 1 ? 'hour' : 'hours'}`
+}
+
 // ── The two payment tracks ───────────────────────────────────────────────────
 
 export type TrackKey = 'monthly' | 'oneTime'
@@ -72,58 +62,51 @@ export interface Track {
   key: TrackKey
   /** Plain, sentence-case name. The same words the contract uses. */
   name: string
+  /** The words on the toggle that switches the page to this track. */
+  toggleLabel: string
   /** One line: who this is for. */
   tagline: string
-  /** The headline number and what it recurs on. */
+  /** The base price of the plain Website plan, and what it recurs on. */
   baseCents: number
   basePer: string
+  /** True when the base is a starting point ("From $2,500"), not a fixed fee. */
+  priceFrom: boolean
   /** The up-front number due before launch, if any. */
   setupCents: number | null
   setupNote: string | null
+  /** Our time included every month for changes. Zero on a one-time build. */
+  includedMinutes: number
   /** Who owns the code at the end of it. The real difference between tracks. */
   ownership: string
-  /** How post-launch changes are handled on this track. */
-  changes: string
-  /** Three to five facts a buyer needs before choosing. */
-  terms: string[]
 }
 
 export const TRACKS: readonly Track[] = [
   {
     key: 'monthly',
     name: 'Monthly plan',
-    tagline: 'We build it, host it, and keep it running. You pay monthly and can stop any time.',
-    baseCents: 10_000, // CANONICAL — HANDOFF "$100/mo"
+    toggleLabel: 'Pay monthly',
+    tagline: 'We build it, host it and keep it running. You pay monthly and can stop any time.',
+    baseCents: 14_900,
     basePer: '/month',
-    // PROPOSED figures are not published. A setup fee is real, but the amount
-    // is Nick's to set — see UNCONFIRMED_PRICING. Null renders as "quoted with
-    // your mockup" rather than a number a prospect could hold him to.
-    setupCents: null,
-    setupNote: 'setup fee quoted with your mockup',
+    priceFrom: false,
+    setupCents: 75_000,
+    setupNote: 'one-time setup, which covers the build and your first month',
+    includedMinutes: 60,
     ownership: 'NGF owns the site and licenses it to you while your plan is active.',
-    changes: 'Ordinary content changes are included — submit them from your portal.',
-    terms: [
-      'Hosting, SSL and domain setup included',
-      'No contract term — cancel any time',
-      'Setup covers the build and your first month',
-      'Reactivation after a lapse is $200',
-    ],
   },
   {
     key: 'oneTime',
     name: 'One-time build',
+    toggleLabel: 'Pay once and own it',
     tagline: 'Pay once and own the code outright. We hand over the repository.',
-    baseCents: 60_000, // CANONICAL — HANDOFF "$600"
+    baseCents: 250_000,
     basePer: 'one-time',
+    priceFrom: true,
     setupCents: null,
     setupNote: null,
-    ownership: 'You own the code. We transfer the GitHub repository within 3 business days of your request.',
-    changes: 'Changes after launch are billed at $80/hour, in 15-minute increments.',
-    terms: [
-      'Due in full within 14 days of mockup approval',
-      'Hosting is billed separately and can be cancelled any time',
-      'You keep the site whether or not you stay hosted with us',
-    ],
+    includedMinutes: 0,
+    ownership:
+      'You own the code. We transfer the GitHub repository within 3 business days of your request.',
   },
 ]
 
@@ -185,9 +168,9 @@ export const ALWAYS_INCLUDED: readonly IncludedItem[] = [
 // ── Modules: priced by what the site does ────────────────────────────────────
 
 /**
- * Each module is one capability in the client's portal. `capabilityKey` and
- * `configColumn` tie it to NGF-Systems-app/lib/portal-capabilities.ts, so a
- * module cannot be sold without the switch that delivers it existing.
+ * Each module is one capability in the client's portal. `configColumn` ties it
+ * to NGF-Systems-app/lib/portal-capabilities.ts, so a module cannot be sold
+ * without the switch that delivers it existing.
  */
 export interface Module {
   key: string
@@ -200,11 +183,17 @@ export interface Module {
   configColumn: string
   /** Added to the monthly plan's recurring fee. Null means quoted. */
   monthlyCents: number | null
+  /** Added to the monthly plan's setup fee. Null means quoted. */
+  setupCents: number | null
   /** Added to a one-time build's price. Null means quoted. */
   oneTimeCents: number | null
+  /** Extra time included each month on the monthly plan. */
+  extraIncludedMinutes: number
+  /** True when the module's setup and one-time figures are a starting point. */
+  priceFrom: boolean
   /** True while Nick has not set this number. */
   unconfirmed: boolean
-  /** Who this is actually for — used for the worked examples. */
+  /** Who this is actually for. */
   bestFor: string
 }
 
@@ -222,9 +211,12 @@ export const MODULES: readonly Module[] = [
       'Every appointment in your portal, with cancel and reschedule',
     ],
     configColumn: 'feature_booking',
-    monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
-    oneTimeCents: null,
-    unconfirmed: true,
+    monthlyCents: 10_000,
+    setupCents: 50_000,
+    oneTimeCents: 200_000,
+    extraIncludedMinutes: 60,
+    priceFrom: false,
+    unconfirmed: false,
     bestFor: 'Barbers, detailers, tint shops, trades, consultants',
   },
   {
@@ -238,9 +230,14 @@ export const MODULES: readonly Module[] = [
       'A confirmation email to the buyer and a notification to you on every paid order',
     ],
     configColumn: 'page_orders',
-    monthlyCents: null, // Nick to set — see UNCONFIRMED_PRICING
-    oneTimeCents: null,
-    unconfirmed: true,
+    monthlyCents: 25_000,
+    // A starting point: setup and the one-time price grow with the size of the
+    // catalogue being loaded. The monthly fee does not.
+    setupCents: 125_000,
+    oneTimeCents: 400_000,
+    extraIncludedMinutes: 120,
+    priceFrom: true,
+    unconfirmed: false,
     bestFor: 'Retail, makers, jewellery, anyone shipping a physical product',
   },
   {
@@ -254,13 +251,15 @@ export const MODULES: readonly Module[] = [
       'Can run against a database of your own, which stays yours',
     ],
     // Deliberately not a capability: there is no switch for this in
-    // client_configs, because it is bespoke work rather than a system that
-    // is turned on. It is listed as a module so buyers know it is available,
-    // and it is quote-only by definition.
+    // client_configs, because it is bespoke work rather than a system that is
+    // turned on. Quote-only by definition, with a published minimum in TERMS.
     configColumn: '—',
     monthlyCents: null,
+    setupCents: null,
     oneTimeCents: null,
-    unconfirmed: true,
+    extraIncludedMinutes: 0,
+    priceFrom: true,
+    unconfirmed: false,
     bestFor: 'Businesses with a workflow no off-the-shelf system fits',
   },
 ]
@@ -284,55 +283,153 @@ export function quote(trackKey: TrackKey, moduleKeys: string[]): number | null {
   return total
 }
 
-// ── Worked examples ──────────────────────────────────────────────────────────
-
-/**
- * Base-plus-modules is honest but it asks the buyer to do arithmetic, which
- * loses people. These are the three shapes most enquiries actually are, drawn
- * from live client accounts, so the page can show the sum already done.
- */
-export interface Example {
-  label: string
-  /** The kind of business, not a named client. */
-  who: string
-  moduleKeys: string[]
-  /** Why this business needs exactly these modules. */
-  rationale: string
+/** The monthly plan's setup fee for the base + modules. Null when quote-only. */
+export function setupQuote(moduleKeys: string[]): number | null {
+  const base = track('monthly').setupCents
+  if (base === null) return null
+  let total = base
+  for (const key of moduleKeys) {
+    const add = moduleByKey(key).setupCents
+    if (add === null) return null
+    total += add
+  }
+  return total
 }
 
-export const EXAMPLES: readonly Example[] = [
+// ── Plans ────────────────────────────────────────────────────────────────────
+
+/**
+ * Base-plus-modules is honest but asks the buyer to do arithmetic, which loses
+ * people. These are the three shapes nearly every enquiry is, with the sum
+ * already done. The page shows them side by side.
+ */
+export interface Plan {
+  key: string
+  name: string
+  /** The kind of business, in one short line. */
+  who: string
+  moduleKeys: string[]
+  /** Three short lines on what this plan does. Each true of the platform. */
+  highlights: string[]
+  /** Business days to answer a change request, on the monthly plan. */
+  replyBusinessDays: number
+  /** The enquiry the plan's button preselects. Must be in CONTACT_INTENTS. */
+  intent: string
+}
+
+export const PLANS: readonly Plan[] = [
   {
-    label: 'Just the website',
-    who: 'An IT consultancy that needs to look credible and be contacted',
+    key: 'website',
+    name: 'Website',
+    who: 'For businesses that need to look credible and get the phone to ring',
     moduleKeys: [],
-    rationale:
-      'No bookings, no products. The site has to explain the service, rank locally, and get the phone to ring.',
+    highlights: [
+      'A site designed for your business, fast on a phone',
+      'Edit any text or photo yourself from your portal',
+      'Every enquiry in one inbox and in your email',
+    ],
+    replyBusinessDays: 2,
+    intent: 'Free mockup',
   },
   {
-    label: 'Website + booking',
-    who: 'A window tint shop taking appointments all week',
+    key: 'booking',
+    name: 'Website + booking',
+    who: 'For businesses that run on appointments',
     moduleKeys: ['booking'],
-    rationale:
-      'Every hour spent on the phone arranging a slot is an hour not spent installing. Customers book themselves.',
+    highlights: [
+      'Everything in Website',
+      'Customers book, cancel and reschedule themselves',
+      'Confirmations by email or text, every booking in your portal',
+    ],
+    replyBusinessDays: 1,
+    intent: 'Online booking',
   },
   {
-    label: 'Website + store',
-    who: 'A jewellery brand shipping orders direct',
+    key: 'store',
+    name: 'Website + store',
+    who: 'For businesses that ship products',
     moduleKeys: ['store'],
-    rationale:
-      'Selling from their own site instead of a marketplace, and keeping the customer relationship and the margin.',
+    highlights: [
+      'Everything in Website',
+      'Sell from your own site and keep the margin',
+      'Orders, shipping rates, sales tax and returns in your portal',
+    ],
+    replyBusinessDays: 1,
+    intent: 'Online store',
   },
 ]
 
+export interface PlanFigures {
+  /** The headline price on this track. */
+  priceCents: number
+  /** Monthly track only: the up-front setup fee. */
+  setupCents: number | null
+  /** Monthly track only: our time included each month. */
+  includedMinutes: number
+  /** True when the headline price is a starting point. */
+  priceFrom: boolean
+  /** True when the setup (and so the first year) is a starting point. */
+  setupFrom: boolean
+  /**
+   * What the first twelve months cost, all in. Monthly: setup plus eleven
+   * monthly fees, since setup covers the first month. One-time: the build
+   * plus twelve months of hosting.
+   */
+  firstYearCents: number
+}
+
+export function planFigures(trackKey: TrackKey, plan: Plan): PlanFigures {
+  const t = track(trackKey)
+  const modules = plan.moduleKeys.map(moduleByKey)
+  const priceCents = quote(trackKey, plan.moduleKeys)
+  if (priceCents === null) throw new Error(`Plan ${plan.key} has a quote-only module`)
+  const anyFrom = modules.some((m) => m.priceFrom)
+
+  if (trackKey === 'monthly') {
+    const setupCents = setupQuote(plan.moduleKeys)
+    if (setupCents === null) throw new Error(`Plan ${plan.key} has a quote-only setup`)
+    return {
+      priceCents,
+      setupCents,
+      includedMinutes:
+        t.includedMinutes + modules.reduce((sum, m) => sum + m.extraIncludedMinutes, 0),
+      // The monthly fee is fixed. Only a store's setup grows with its catalogue.
+      priceFrom: t.priceFrom,
+      setupFrom: anyFrom,
+      firstYearCents: setupCents + priceCents * 11,
+    }
+  }
+
+  return {
+    priceCents,
+    setupCents: null,
+    includedMinutes: 0,
+    priceFrom: t.priceFrom || anyFrom,
+    setupFrom: t.priceFrom || anyFrom,
+    firstYearCents: priceCents + TERMS.hostingCents * 12,
+  }
+}
+
 // ── Standing terms ───────────────────────────────────────────────────────────
 
-/** CANONICAL — every figure here matches the app's lib/pricing.ts. */
+/** Every figure here must match the app's lib/pricing.ts before deploy. */
 export const TERMS = {
-  /** Hosting on the one-time track. Included in the fee on the monthly track. */
-  hostingCents: 2_000,
-  /** Post-launch work on the one-time track, and beyond included changes on monthly. */
-  maintenanceRateCents: 8_000,
+  /** Hosting only, for a site the client owns. Included on the monthly plan. */
+  hostingCents: 3_500,
+  /** Hosting plus included time, for a site the client owns. */
+  careCents: 9_900,
+  careIncludedMinutes: 60,
+  /** Work beyond included time, and all post-launch work on an owned site. */
+  maintenanceRateCents: 9_500,
   maintenanceMinimumMinutes: 15,
+  /** The smallest custom development job. */
+  customMinimumCents: 150_000,
+  /** Monthly plan prices are fixed for this long from launch. */
+  priceLockMonths: 24,
+  /** After this many months on a monthly plan the client may buy the site… */
+  buyoutAfterMonths: 12,
+  /** …for this many months of their plan fee. */
+  buyoutMonthsOfFee: 6,
   /** Overdue invoices, per month. */
   lateFeePctPerMonth: 1.5,
   /** Silence after a mockup is sent counts as acceptance after this many days. */
@@ -341,28 +438,17 @@ export const TERMS = {
   repoTransferBusinessDays: 3,
   /** To restart a monthly site suspended for non-payment. */
   reactivationFeeCents: 20_000,
-  /** Optional, only when a client asks for a term commitment. */
-  termDiscounts: [
-    { months: 12, discountPct: 0 },
-    { months: 24, discountPct: 10 },
-    { months: 36, discountPct: 20 },
-  ],
 } as const
 
 // ── Sign-off gate ────────────────────────────────────────────────────────────
 
 /**
- * Every number on this site that Nick has not confirmed. `npm run doctor`
- * reads this, so an unconfirmed figure cannot quietly become a published
- * price. Setting a real number means deleting its entry here AND clearing
- * `unconfirmed` on the module.
+ * Every number on this site that Nick has not confirmed. Empty since
+ * 2026-11-18, when he set the full price list. To leave a figure unpublished,
+ * set it to `null`, add a line here, set `unconfirmed` on the module, and keep
+ * that module out of PLANS.
  */
-export const UNCONFIRMED_PRICING: readonly string[] = [
-  'TRACKS.monthly.setupCents — the monthly setup fee. The app has no figure.',
-  'MODULES.booking.monthlyCents / oneTimeCents — online booking',
-  'MODULES.store.monthlyCents / oneTimeCents — online store',
-  'MODULES.custom — custom development, quote-only by nature',
-]
+export const UNCONFIRMED_PRICING: readonly string[] = []
 
 export const HAS_UNCONFIRMED_PRICING = UNCONFIRMED_PRICING.length > 0
 
