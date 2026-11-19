@@ -729,18 +729,16 @@ the editor. Current annotated fields: `hero.headline`, `hero.subheadline`, `serv
 Only the home page and the footer are annotated. The portal scraper reads the home page only
 (editor audit P1.1), so annotating the five new pages would not surface them in the editor anyway.
 
-### Three bugs fixed in `app/api/contact/route.ts`
+### Contact form (changed 2026-11-18)
 
-1. `new Resend(...)` ran at module scope and threw during `next build` whenever `RESEND_API_KEY` was
-   absent — the build failed outright rather than the contact form degrading.
-2. The lead was relayed to `/api/leads/ingest` only AFTER the email succeeded, so a Resend outage
-   lost the enquiry with no record anywhere. It is now persisted first. This is exactly the failure
-   `ngf-doctor`'s "Lead capture reaches the portal" rule exists to catch — the rule passed only
-   because it pattern-matches the string, not the ordering.
-3. Form fields were interpolated into the notification email unescaped.
-
-The endpoint now also validates the email shape, caps field lengths, and whitelists `?intent=`
-against `CONTACT_INTENTS` server-side as well as in the browser.
+`components/sections/ContactForm.tsx` posts straight from the browser to
+`https://app.ngfsystems.com/api/public/leads`, the same endpoint every client site uses, with
+`domain` from `NEXT_PUBLIC_SITE_URL` and a hidden `_gotcha` honeypot. The platform saves the
+enquiry first, then emails it (reply-to is the sender), and it brings the spam guards: honeypot,
+5 a minute and 10 per 10 minutes per IP, and a per-site flood cap. Enquiries show under
+Admin → Clients → **Form submissions**; they no longer become LEAD client rows.
+`app/api/contact/route.ts` and the `/api/leads/ingest` relay are gone, so this project no longer
+needs `RESEND_API_KEY` or `LEADS_API_SECRET`.
 
 ### Known gaps from this rebuild
 
