@@ -93,16 +93,15 @@ export default function PricingTables() {
       {/* ── How you pay ───────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div
-          role="tablist"
+          role="group"
           aria-label="Payment option"
           className="inline-flex w-fit gap-1 rounded-xl border border-line bg-panel p-1"
         >
           {TRACKS.map((t) => (
             <button
               key={t.key}
-              role="tab"
               type="button"
-              aria-selected={trackKey === t.key}
+              aria-pressed={trackKey === t.key}
               onClick={() => setTrackKey(t.key)}
               className={`rounded-lg px-5 py-2.5 text-[14.5px] font-semibold transition-colors ${
                 trackKey === t.key ? 'bg-accent text-white' : 'text-muted hover:text-head'
@@ -116,13 +115,13 @@ export default function PricingTables() {
       </div>
 
       {/* ── The three plans ───────────────────────────────────────────────── */}
-      <ul role="tabpanel" className="mt-10 grid gap-5 lg:grid-cols-3">
+      <ul className="mt-10 grid gap-5 lg:grid-cols-3">
         {PLANS.map((plan) => {
           const f = planFigures(trackKey, plan)
           const intent = plan.key === 'website' && !isMonthly ? 'One-time build' : plan.intent
           return (
             <Card as="li" key={plan.key} className="flex flex-col p-7">
-              <h3 className="text-[19px] font-semibold text-head">{plan.name}</h3>
+              <h2 className="text-[19px] font-semibold text-head">{plan.name}</h2>
               <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted lg:min-h-[46px]">
                 {plan.who}
               </p>
@@ -223,9 +222,9 @@ export default function PricingTables() {
       {/* ── After launch ──────────────────────────────────────────────────── */}
       <div className="mt-20">
         <p className={EYEBROW}>After launch</p>
-        <h3 className="mt-3 text-[22px] font-semibold tracking-tight text-head">
+        <h2 className="mt-3 text-[22px] font-semibold tracking-tight text-head">
           What anything else costs
-        </h3>
+        </h2>
         <dl className="mt-6 max-w-3xl divide-y divide-line border-y border-line">
           {afterLaunch.map(({ label, note, price }) => (
             <div key={label} className="flex items-baseline justify-between gap-6 py-4">

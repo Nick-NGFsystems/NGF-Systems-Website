@@ -162,9 +162,9 @@ export default function ContactForm() {
       </div>
 
       <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-        <label htmlFor="contact-website">Leave this empty</label>
+        <label htmlFor="contact-gotcha">Leave this empty</label>
         <input
-          id="contact-website"
+          id="contact-gotcha"
           name="_gotcha"
           type="text"
           tabIndex={-1}

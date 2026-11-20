@@ -199,9 +199,7 @@ if (!revPath) {
   const mailing = API_ROUTES.filter((f) => looksLikeLead(f.src) && !/revalidate|\bngf-lead\b/.test(f.path))
   const relayed = mailing.filter((f) => REACHES.test(f.src))
   const orphaned = mailing.filter((f) => !REACHES.test(f.src))
-  // A browser form that posts to /api/public/leads itself (as ngfsystems.com's
-  // ContactForm does) is the same shape as <LeadForm>: no site route at all.
-  const usesLeadForm = FILES.some((f) => /<LeadForm[\s/>]/.test(f.src) || /api\/public\/leads/.test(f.src))
+  const usesLeadForm = FILES.some((f) => /<LeadForm[\s/>]/.test(f.src))
 
   if (orphaned.length) {
     fail(
