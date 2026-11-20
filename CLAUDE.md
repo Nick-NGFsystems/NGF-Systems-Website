@@ -740,11 +740,17 @@ Admin → Clients → **Form submissions**; they no longer become LEAD client ro
 `app/api/contact/route.ts` and the `/api/leads/ingest` relay are gone, so this project no longer
 needs `RESEND_API_KEY` or `LEADS_API_SECRET`.
 
+This form is hand-rolled, which NGF-STANDARDS "Lead capture" does not allow: a site uses the
+canonical `<LeadForm>` or a route calling `relayLeadToNgf()`. `scripts/ngf-doctor.mjs` is a
+canonical file and must not be edited here to accept it, so the doctor warns "No form route and no
+<LeadForm> found" until the form moves to `<LeadForm>` (or the starter's doctor learns this shape).
+That warning is expected; enquiries do still reach the central store.
+
 ### Known gaps from this rebuild
 
 | Area | Status | Notes |
 |---|---|---|
-| Module prices | ⚠️ Unset, render as "Quoted" | See `UNCONFIRMED_PRICING` in `lib/pricing.ts`. Nothing is published until Nick sets them. |
+| Prices vs. the contract | ⚠️ Out of step | Nick set the full price list on 2026-11-18 (PR #7), so `UNCONFIRMED_PRICING` is empty. `NGF-Systems-app/lib/pricing.ts` (checked 2026-11-20) still carries $100/mo, $600, $20 hosting and $80/hour, and it prefills the Contract tab: until the app and HANDOFF.md match `lib/pricing.ts`, the website and a new contract disagree. |
 | Portfolio screenshots | ⚠️ Not captured | `ClientWork.image` is wired and the grid renders without it. Drop JPEGs at `public/work/<slug>.jpg` and set `image` in `lib/clients.ts`. Capture was blocked in the build sandbox, not in code. |
 | Browser verification | ⚠️ Local only | Verified with `next build`, `npm run doctor` (0 failures) and headless screenshots at 1440px and 390px, light and dark. Not opened in a real browser, and the portal editor was never pointed at it. |
 | Full CSP | ⚠️ Partial | `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` added. `default-src`/`object-src`/`base-uri`/`form-action` deliberately left out — this page loads Google Fonts and gtag, and a wrong `default-src` breaks them silently. Needs a browser to verify. |
